@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@RestControllerAdvice// class de handler nhung exception
 public class ValidationHandler {
-
+    // dinh nghia cho no chay moi khi gap 1 cai exception nao do
+    //MethodArgumentNotValidException.class: la loi khi nhap sai
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)// dau vao sai, front-end check lai
     public ResponseEntity handleValidation(MethodArgumentNotValidException exception){
@@ -29,6 +30,6 @@ public class ValidationHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleValidation(Exception exception){
-        return new ResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
     }
 }
