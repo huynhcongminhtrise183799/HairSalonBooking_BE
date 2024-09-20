@@ -26,14 +26,14 @@ public class Account {
     int gender;
     String phone;
     String image;
-    String googleID;
-    String googleName;
+    String googleid;
+    String googlename;
     boolean isDelete = false;
 
-    long RoleID;
+    long roleid;
     @Column(nullable = true)
-    Long SalonID;
+    Long salonid;
     @Column(nullable = true)
-    Long LevelID;
+    Long levelid;
 
 }
