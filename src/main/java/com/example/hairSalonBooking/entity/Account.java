@@ -15,22 +15,25 @@ import java.time.LocalDate;
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long AccountID;
+    long accountid;
     @Column(unique = true)
-    String userName;
+    String username;
     String password;
     @Column(unique = true)
     String email;
-    String fullName;
-    LocalDate Dob;
+    String fullname;
+    LocalDate dob;
     int gender;
     String phone;
     String image;
     String googleID;
     String googleName;
     boolean isDelete = false;
+
     long RoleID;
-    long SalonID;
-    long LevelID;
+    @Column(nullable = true)
+    Long SalonID;
+    @Column(nullable = true)
+    Long LevelID;
 
 }
