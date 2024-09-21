@@ -1,4 +1,4 @@
-package com.example.hairSalonBooking.model;
+package com.example.hairSalonBooking.model.request;
 
 import lombok.Data;
 

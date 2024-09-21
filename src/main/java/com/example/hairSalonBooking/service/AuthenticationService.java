@@ -4,11 +4,10 @@ package com.example.hairSalonBooking.service;
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.exception.DuplicateEntity;
 import com.example.hairSalonBooking.exception.EntityNotFoundException;
-import com.example.hairSalonBooking.model.AccountResponse;
-import com.example.hairSalonBooking.model.LoginRequest;
-import com.example.hairSalonBooking.model.RegisterRequest;
+import com.example.hairSalonBooking.model.response.AccountResponse;
+import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.repository.AccountRepository;
-import jakarta.validation.ConstraintViolationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,10 +37,13 @@ public class AuthenticationService implements UserDetailsService {
     AuthenticationManager authenticationManager;
 
     public AccountResponse register(RegisterRequest registerRequest) {
+        if(!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+            throw new IllegalArgumentException(" Confirm passwords do not match");
+        }
         Account account = modelMapper.map(registerRequest, Account.class);
         try{
-            String originPassword = account.getPassword(); // goi
-            account.setPassword(passwordEncoder.encode(originPassword));// dinh dang
+            String originPassword = account.getPassword();// goi
+            account.setPassword(passwordEncoder.encode(originPassword));// dinh dan
             Account newAccount = accountRepository.save(account);
             return modelMapper.map(newAccount, AccountResponse.class);
         }catch(Exception e) {

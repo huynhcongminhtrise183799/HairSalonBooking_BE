@@ -3,9 +3,9 @@ package com.example.hairSalonBooking.controller;
 
 
 import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.model.AccountResponse;
-import com.example.hairSalonBooking.model.LoginRequest;
-import com.example.hairSalonBooking.model.RegisterRequest;
+import com.example.hairSalonBooking.model.response.AccountResponse;
+import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
