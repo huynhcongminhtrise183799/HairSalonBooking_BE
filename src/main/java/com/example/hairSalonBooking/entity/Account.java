@@ -66,6 +66,7 @@ public class Account implements UserDetails {
     LocalDate dob;
     int gender;
     @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
+    @Column(unique = true)
     String phone;
     String image;
     String googleid;
