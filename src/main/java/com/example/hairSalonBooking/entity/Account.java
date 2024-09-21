@@ -3,6 +3,7 @@ package com.example.hairSalonBooking.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -64,15 +65,19 @@ public class Account implements UserDetails {
     String fullname;
     LocalDate dob;
     int gender;
+    @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
+    @Column(unique = true)
     String phone;
     String image;
     String googleid;
     String googlename;
     boolean isDelete = false;
+
     long roleid;
     @Column(nullable = true)
-    long salonid;
+    Long salonid;
     @Column(nullable = true)
-    long levelid;
+    Long levelid;
+
 
 }
