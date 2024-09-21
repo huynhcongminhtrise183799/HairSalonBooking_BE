@@ -38,6 +38,9 @@ public class AuthenticationService implements UserDetailsService {
 
     public AccountResponse register(RegisterRequest registerRequest) {
         Account account = modelMapper.map(registerRequest, Account.class);
+        if(!registerRequest.getConfirmpassword().equals(registerRequest.getPassword())){
+            throw new RuntimeException("Password not match");
+        }
         try{
             String originPassword = account.getPassword(); // goi
             account.setPassword(passwordEncoder.encode(originPassword));// dinh dang
@@ -49,7 +52,7 @@ public class AuthenticationService implements UserDetailsService {
             }else if(e.getMessage().contains(account.getEmail())) {
                 throw new DuplicateEntity("Duplicate email!");
             }else {
-                throw new DuplicateEntity("Duplicate phone!");
+                throw new DuplicateEntity("Duplicate phone");
             }
         }
     }
