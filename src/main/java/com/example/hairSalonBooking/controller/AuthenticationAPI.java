@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api") // giảm bớt đường dẫn
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthenticationAPI {
 
 

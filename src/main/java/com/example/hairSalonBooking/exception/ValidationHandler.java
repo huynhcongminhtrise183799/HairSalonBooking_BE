@@ -1,5 +1,6 @@
 package com.example.hairSalonBooking.exception;
 
+import com.example.hairSalonBooking.model.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -31,5 +32,13 @@ public class ValidationHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleValidation(Exception exception){
         return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse> handleAppException(AppException exception){
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse response = new ApiResponse();
+        response.setCode(errorCode.getCode());
+        response.setMessage(errorCode.getMessage());
+        return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
     }
 }
