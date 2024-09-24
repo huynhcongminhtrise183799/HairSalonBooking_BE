@@ -1,38 +1,35 @@
 package com.example.hairSalonBooking.exception;
 
-
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice // đánh dấu đây là 1 class để bắt lỗi
+@RestControllerAdvice// class de handler nhung exception
 public class ValidationHandler {
-
-    // Canh bắt lỗi cho mình
-    //MethodArgumentNotValidExeption => lỗi do thư viện gây ra
-
-    // nếu gặp lỗi hàm này sẽ => run
+    // dinh nghia cho no chay moi khi gap 1 cai exception nao do
+    //MethodArgumentNotValidException.class: la loi khi nhap sai
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity   handlerValidation(MethodArgumentNotValidException exception) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)// dau vao sai, front-end check lai
+    public ResponseEntity handleValidation(MethodArgumentNotValidException exception){
+        String message = "";
 
-        String message ="";
+        // cu moi thuoc tinh loi => xu li
 
-        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
-            //công tin nhắn vào lỗi
-            message += fieldError.getDefaultMessage()+"\n";
+        for(FieldError fieldError : exception.getBindingResult().getFieldErrors()){
+            // fielError: Name, studentcode,..
+            System.out.println(fieldError);
+            message += fieldError.getField() + ": " + fieldError.getDefaultMessage();
+
         }
-        // trả về cho người dùng biết
         return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
-        // dù in ra vẫn báo lỗi 400 vì nó vẫn chưa hoàn thiện
-
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity   handlerValidation(Exception exception) {
-        return new ResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity handleValidation(Exception exception){
+        return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
     }
 }
