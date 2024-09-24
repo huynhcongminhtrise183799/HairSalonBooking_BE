@@ -4,11 +4,10 @@ package com.example.hairSalonBooking.service;
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.exception.DuplicateEntity;
 import com.example.hairSalonBooking.exception.EntityNotFoundException;
-import com.example.hairSalonBooking.model.AccountResponse;
-import com.example.hairSalonBooking.model.LoginRequest;
-import com.example.hairSalonBooking.model.RegisterRequest;
+import com.example.hairSalonBooking.model.response.AccountResponse;
+import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.repository.AccountRepository;
-import jakarta.validation.ConstraintViolationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +38,9 @@ public class AuthenticationService implements UserDetailsService {
 
     public AccountResponse register(RegisterRequest registerRequest) {
         Account account = modelMapper.map(registerRequest, Account.class);
+        if(!registerRequest.getConfirmpassword().equals(registerRequest.getPassword())){
+            throw new RuntimeException("Password not match");
+        }
         try{
             String originPassword = account.getPassword(); // goi
             account.setPassword(passwordEncoder.encode(originPassword));// dinh dang
@@ -50,7 +52,7 @@ public class AuthenticationService implements UserDetailsService {
             }else if(e.getMessage().contains(account.getEmail())) {
                 throw new DuplicateEntity("Duplicate email!");
             }else {
-                throw new DuplicateEntity("Duplicate phone!");
+                throw new DuplicateEntity("Duplicate phone");
             }
         }
     }

@@ -1,6 +1,5 @@
-package com.example.hairSalonBooking.model.response;
+package com.example.hairSalonBooking.model.request;
 
-import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,11 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateCustomerResponse {
-    String fullName;
-
-    @Email(message = "Email not valid")
-    String email;
-
-    String phone;
+public class ChangePasswordRequest {
+    String password;
+    String repassword;
 }
