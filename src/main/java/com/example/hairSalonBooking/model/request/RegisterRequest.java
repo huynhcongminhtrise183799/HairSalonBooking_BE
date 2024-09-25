@@ -1,4 +1,4 @@
-package com.example.hairSalonBooking.model;
+package com.example.hairSalonBooking.model.request;
 
 
 import jakarta.persistence.Column;
@@ -14,13 +14,14 @@ public class RegisterRequest {
     @Column(unique = true)
     String Username;
 
-    @Email(message = "Invalid email")
+    @Email(message = "INVALID_EMAIL")
     String email;
 
-    @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
+    @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b", message = "INVALID_PHONE")
     String phone;
 
-    @Size(min = 6, message = "Password must be at least 6 character!")
+    @Size(min = 6, message = "PASSWORD_SIZE_INVALID")
     String password;
+    String ConfirmPassword;
 }
 
