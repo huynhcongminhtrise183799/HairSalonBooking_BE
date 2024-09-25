@@ -17,31 +17,44 @@ public class ValidationHandler {
     //MethodArgumentNotValidExeption => lỗi do thư viện gây ra
 
     // nếu gặp lỗi hàm này sẽ => run
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity handlerValidation(MethodArgumentNotValidException exception) {
-
-        String message ="";
-
-        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
-            //công tin nhắn vào lỗi
-            message += fieldError.getDefaultMessage()+"\n";
-        }
-        // trả về cho người dùng biết
-        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
-        // dù in ra vẫn báo lỗi 400 vì nó vẫn chưa hoàn thiện
-
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity   handlerValidation(MethodArgumentNotValidException exception) {
+//
+//        String message ="";
+//
+//        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
+//            //công tin nhắn vào lỗi
+//            message += fieldError.getDefaultMessage()+"\n";
+//        }
+//        // trả về cho người dùng biết
+//        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+//        // dù in ra vẫn báo lỗi 400 vì nó vẫn chưa hoàn thiện
+//
+//    }
+    @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse> handleRuntimeException(Exception exception) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(999);
+        apiResponse.setMessage(exception.getMessage());
+        return  ResponseEntity.badRequest().body(apiResponse);
     }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity   handlerValidation(Exception exception) {
-        return new ResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-    @ExceptionHandler(AppException.class)
-    public ResponseEntity<ApiResponse> handleAppException(AppException exception){
+    @ExceptionHandler(value = AppException.class)
+    ResponseEntity<ApiResponse > handlingAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse response = new ApiResponse();
-        response.setCode(errorCode.getCode());
-        response.setMessage(errorCode.getMessage());
-        return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(exception.getMessage());
+        return  ResponseEntity.badRequest().body(apiResponse);
     }
+
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    ResponseEntity<ApiResponse> handleEntity(MethodArgumentNotValidException exception){
+        String enumkey = exception.getFieldError().getDefaultMessage();
+        ErrorCode errorCode = ErrorCode.valueOf(enumkey);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+        return  ResponseEntity.badRequest().body(apiResponse);
+    }
+
 }
