@@ -35,4 +35,5 @@ public class ValidationHandler {
     public ResponseEntity   handlerValidation(Exception exception) {
         return new ResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
 }
