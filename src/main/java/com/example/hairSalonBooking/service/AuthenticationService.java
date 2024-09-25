@@ -94,20 +94,29 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-    public AccountResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+   public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+        Account account; // Declare account here to make it accessible later
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()));
+            // Authenticate the username and password
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()
+                    )
+            );
 
-            // => tai khoan co ton tai
-            Account account = (Account) authentication.getPrincipal();
-
-            return modelMapper.map(account, AccountResponse.class);
+            // Get the authenticated account from the authentication object
+            account = (Account) authentication.getPrincipal();
 
         } catch (Exception e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
+        var token = generateToken(loginRequest.getUsername());
+        AuthenticationResponse response = modelMapper.map(account, AuthenticationResponse.class);
+        response.setToken(token);
+        response.setSuccess(true);
+
+        return response;
     }
 
     //tạo token
