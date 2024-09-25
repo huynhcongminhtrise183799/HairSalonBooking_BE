@@ -9,5 +9,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     //ORM  : object realationship mapping
 
     Account findAccountByUsername(String username);
-
+    Account findAccountByEmail(String email);
 }
