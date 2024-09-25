@@ -1,5 +1,6 @@
 package com.example.hairSalonBooking.model.response;
 
+
 import lombok.Data;
 
 @Data
