@@ -13,21 +13,38 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ValidationHandler {
     // dinh nghia cho no chay moi khi gap 1 cai exception nao do
     //MethodArgumentNotValidException.class: la loi khi nhap sai
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)// dau vao sai, front-end check lai
-    public ResponseEntity handleValidation(MethodArgumentNotValidException exception){
-        String message = "";
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    ResponseEntity<ApiResponse> handleEntity(MethodArgumentNotValidException exception) {
+        String enumKey = exception.getFieldError().getDefaultMessage();
 
-        // cu moi thuoc tinh loi => xu li
+        ErrorCode errorCode = ErrorCode.INVALID_KEY;
+        try {
+            errorCode = ErrorCode.valueOf(enumKey);
 
-        for(FieldError fieldError : exception.getBindingResult().getFieldErrors()){
-            // fielError: Name, studentcode,..
-            System.out.println(fieldError);
-            message += fieldError.getField() + ": " + fieldError.getDefaultMessage();
+        } catch (IllegalArgumentException e) {
 
         }
-        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
     }
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)// dau vao sai, front-end check lai
+//    public ResponseEntity handleValidation(MethodArgumentNotValidException exception){
+//        String message = "";
+//
+//        // cu moi thuoc tinh loi => xu li
+//
+//        for(FieldError fieldError : exception.getBindingResult().getFieldErrors()){
+//            // fielError: Name, studentcode,..
+//            System.out.println(fieldError);
+//            message += fieldError.getField() + ": " + fieldError.getDefaultMessage();
+//
+//        }
+//        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+//    }
+
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleValidation(Exception exception){
