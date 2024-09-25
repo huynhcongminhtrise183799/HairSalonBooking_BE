@@ -10,18 +10,21 @@ import lombok.Data;
 
 @Data
 public class RegisterRequest {
-    @NotBlank(message = "Username can not be blank!")
-    @Column(unique = true)
-    String Username;
+    @NotBlank(message = "INVALID_USERNAME")
+    String username;
 
     @Email(message = "INVALID_EMAIL")
     String email;
+
+    String fullname;
 
     @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b", message = "INVALID_PHONE")
     String phone;
 
     @Size(min = 6, message = "PASSWORD_SIZE_INVALID")
     String password;
-    String ConfirmPassword;
+
+    String confirmpassword;
+
 }
 
