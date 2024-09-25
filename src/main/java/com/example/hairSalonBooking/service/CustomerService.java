@@ -1,6 +1,8 @@
 package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.exception.AppException;
+import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.exception.NotFoundException;
 import com.example.hairSalonBooking.model.request.UpdateCustomerRequest;
 import com.example.hairSalonBooking.model.response.UpdateCustomerResponse;
@@ -19,7 +21,7 @@ public class CustomerService {
     public UpdateCustomerRequest updateCustomer(UpdateCustomerRequest request, long AccountId){
         Account account = customerRepository.findAccountByAccountid(AccountId);
         if(account == null){
-            throw new NotFoundException("Account not found");
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
         }
         account.setFullname(request.getFullName());
         account.setPhone(request.getPhone());
