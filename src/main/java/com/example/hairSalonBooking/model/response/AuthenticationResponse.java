@@ -1,10 +1,5 @@
 package com.example.hairSalonBooking.model.response;
 
-
-
-import lombok.Data;
-
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,9 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
-public class AccountResponse {
-    long AccountId;
-    String username;
-    String phone;
+public class AuthenticationResponse {
+    String token;
+    boolean success;
 }

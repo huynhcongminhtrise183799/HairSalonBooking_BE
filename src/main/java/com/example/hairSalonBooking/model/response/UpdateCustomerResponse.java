@@ -7,6 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+
+import java.time.LocalDate;
+
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,5 +22,7 @@ public class UpdateCustomerResponse {
     String email;
 
     String phone;
-    String dob;
+
+    LocalDate dob;
+
 }
