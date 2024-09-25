@@ -2,8 +2,8 @@ package com.example.hairSalonBooking.service;
 
 
 import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.exception.DuplicateEntity;
-import com.example.hairSalonBooking.exception.EntityNotFoundException;
+import com.example.hairSalonBooking.exception.AppException;
+import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
@@ -48,11 +48,11 @@ public class AuthenticationService implements UserDetailsService {
             return modelMapper.map(newAccount, AccountResponse.class);
         }catch(Exception e) {
             if(e.getMessage().contains(account.getUsername())) {
-                throw new DuplicateEntity("Duplicate Username!");
+                throw new AppException(ErrorCode.USERNAME_EXISTED);
             }else if(e.getMessage().contains(account.getEmail())) {
-                throw new DuplicateEntity("Duplicate email!");
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }else {
-                throw new DuplicateEntity("Duplicate phone");
+                throw new AppException(ErrorCode.Phone_EXISTED);
             }
         }
     }
@@ -70,7 +70,7 @@ public class AuthenticationService implements UserDetailsService {
             return modelMapper.map(account, AccountResponse.class);
 
         }catch(Exception e) {
-            throw new EntityNotFoundException("Invalid username or password!");
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 
