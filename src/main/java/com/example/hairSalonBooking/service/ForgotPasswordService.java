@@ -48,7 +48,7 @@ public class ForgotPasswordService {
                 .expirationTime(new Date(System.currentTimeMillis() + 70 * 1000))
                 .account(account)
                 .build();
-//        emailService.sendSimpleMessage(mailBody);
+        emailService.sendSimpleMessage(mailBody);
         forgotPasswordRepository.save(fp);
         ForgotPasswordResponse response = ForgotPasswordResponse.builder()
                 .message("Email sent verify")
