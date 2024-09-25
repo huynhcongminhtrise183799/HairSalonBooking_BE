@@ -73,7 +73,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public AccountResponse register(@Valid RegisterRequest registerRequest) {
-        if(!registerRequest.equals(registerRequest.getConfirmPassword())) {
+        if(!registerRequest.equals(registerRequest.getConfirmpassword())) {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
         Account account = modelMapper.map(registerRequest, Account.class);
@@ -84,7 +84,7 @@ public class AuthenticationService implements UserDetailsService {
             return modelMapper.map(newAccount, AccountResponse.class);
         } catch (Exception e) {
             if (e.getMessage().contains(account.getUsername())) {
-                throw new AppException(ErrorCode.USER_EXISTED);
+                throw new AppException(ErrorCode.USERNAME_EXISTED);
             } else if (e.getMessage().contains(account.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_EXISTED);
             } else {
@@ -136,7 +136,7 @@ public class AuthenticationService implements UserDetailsService {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
-             log.error("Can't create toke" , e);
+            log.error("Can't create toke" , e);
             throw new RuntimeException(e);
         }
     }

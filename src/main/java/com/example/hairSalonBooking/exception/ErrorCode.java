@@ -18,10 +18,12 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(1007,"Password or Username invalid"),
     ACCOUNT_Not_Found_Exception(1008,"Account not found"),
     INVALID_PHONE(1009,"Invalid phone number"),
-    INVALID_KEY (101, "Invalid message key"),
-    USER_EXISTED(104,"User already existed"),
-    EMAIL_EXISTED(105,"Email already existed"),
-    Phone_EXISTED(106,"Phone already existed")
+    INVALID_KEY (1010, "Invalid message key"),
+    USERNAME_EXISTED(1011,"Username already existed"),
+    EMAIL_EXISTED(1012,"Email already existed"),
+    Phone_EXISTED(1013,"Phone already existed"),
+    INVALID_USERNAME(1014,"Username can not be blank"),
+    INVALID_DOB(1015,"Date of birth is not valid")
 
     ;
     int code;

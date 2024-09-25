@@ -50,12 +50,7 @@ public class ValidationHandler {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handleEntity(MethodArgumentNotValidException exception){
         String enumkey = exception.getFieldError().getDefaultMessage();
-        ErrorCode errorCode = ErrorCode.INVALID_KEY;
-        try {
-            errorCode = ErrorCode.valueOf(enumkey);
-        }catch (IllegalArgumentException e){
-
-        }
+        ErrorCode errorCode = ErrorCode.valueOf(enumkey);
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
