@@ -2,12 +2,14 @@ package com.example.hairSalonBooking.service;
 
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 import com.nimbusds.jose.*;
@@ -73,13 +75,14 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public AccountResponse register(@Valid RegisterRequest registerRequest) {
-        if(!registerRequest.equals(registerRequest.getConfirmpassword())) {
+        if(!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
         Account account = modelMapper.map(registerRequest, Account.class);
         try {
             String originPassword = account.getPassword(); // goi
             account.setPassword(passwordEncoder.encode(originPassword));// dinh dang
+            account.setRole(Role.CUSTOMER);
             Account newAccount = accountRepository.save(account);
             return modelMapper.map(newAccount, AccountResponse.class);
         } catch (Exception e) {
@@ -94,20 +97,31 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-    public AccountResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+
+   public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+
+        Account account; // Declare account here to make it accessible later
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()));
+            // Authenticate the username and password
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()
+                    )
+            );
 
-            // => tai khoan co ton tai
-            Account account = (Account) authentication.getPrincipal();
-
-            return modelMapper.map(account, AccountResponse.class);
+            // Get the authenticated account from the authentication object
+            account = (Account) authentication.getPrincipal();
 
         } catch (Exception e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
+        var token = generateToken(loginRequest.getUsername());
+        AuthenticationResponse response = modelMapper.map(account, AuthenticationResponse.class);
+        response.setToken(token);
+        response.setSuccess(true);
+
+        return response;
     }
 
     //tạo token
