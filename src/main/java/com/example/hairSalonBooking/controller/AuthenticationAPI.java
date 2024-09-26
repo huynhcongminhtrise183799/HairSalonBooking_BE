@@ -49,7 +49,7 @@ public class AuthenticationAPI {
 
     @PostMapping("/login")
     public ResponseEntity login(@Valid @RequestBody LoginRequest loginRequest) {
-        AccountResponse newAccount = authenticationService.login(loginRequest);
+        AuthenticationResponse newAccount = authenticationService.login(loginRequest);
         return ResponseEntity.ok(newAccount);
     }
 

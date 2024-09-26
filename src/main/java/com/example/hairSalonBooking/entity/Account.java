@@ -1,5 +1,7 @@
 package com.example.hairSalonBooking.entity;
 
+import com.example.hairSalonBooking.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -72,12 +74,20 @@ public class Account implements UserDetails {
     String googleid;
     String googlename;
     boolean isDelete = false;
+    @Enumerated(EnumType.STRING)
+    Role role;
 
-    long roleid;
-    @Column(nullable = true)
-    Long salonid;
-    @Column(nullable = true)
-    Long levelid;
+    @ManyToOne
+    @JoinColumn(name = "salon_id")
+    SalonBranch salonBranch;
+
+    @ManyToOne
+    @JoinColumn(name = "level_id")
+    Level level;
+
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    List<Feedback> feedbacks;
 
 
 }
