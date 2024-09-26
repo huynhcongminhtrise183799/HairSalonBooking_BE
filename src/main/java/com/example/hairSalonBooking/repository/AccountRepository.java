@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.repository;
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.entity.Slot;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
@@ -11,5 +12,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Account findAccountByUsername(String username);
     Account findAccountByEmail(String email);
     Account findAccountByAccountid(Long accountid);
-    Account deleteAccountByAccountid(Long accountid);
 }
+

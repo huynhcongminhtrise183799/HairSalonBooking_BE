@@ -69,8 +69,7 @@ public class StylistService {
         updeStylist.setFullname(stylistRequest.getFullname());
         updeStylist.setPhone(stylistRequest.getPhone());
         updeStylist.setGender(stylistRequest.getGender());
-        updeStylist.setSalonid(stylistRequest.getSalonid());
-        updeStylist.setLevelid(stylistRequest.getLevelid());
+
 
 
         //Làm xong thì lưu xuống DataBase
