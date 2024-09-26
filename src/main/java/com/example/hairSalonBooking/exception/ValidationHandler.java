@@ -9,53 +9,52 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice// class de handler nhung exception
+@RestControllerAdvice // đánh dấu đây là 1 class để bắt lỗi
 public class ValidationHandler {
-    // dinh nghia cho no chay moi khi gap 1 cai exception nao do
-    //MethodArgumentNotValidException.class: la loi khi nhap sai
+
+    // Canh bắt lỗi cho mình
+    //MethodArgumentNotValidExeption => lỗi do thư viện gây ra
+
+    // nếu gặp lỗi hàm này sẽ => run
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity   handlerValidation(MethodArgumentNotValidException exception) {
+//
+//        String message ="";
+//
+//        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
+//            //công tin nhắn vào lỗi
+//            message += fieldError.getDefaultMessage()+"\n";
+//        }
+//        // trả về cho người dùng biết
+//        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+//        // dù in ra vẫn báo lỗi 400 vì nó vẫn chưa hoàn thiện
+//
+//    }
+    @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse> handleRuntimeException(Exception exception) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(999);
+        apiResponse.setMessage(exception.getMessage());
+        return  ResponseEntity.badRequest().body(apiResponse);
+    }
+    @ExceptionHandler(value = AppException.class)
+    ResponseEntity<ApiResponse > handlingAppException(AppException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(exception.getMessage());
+        return  ResponseEntity.badRequest().body(apiResponse);
+    }
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> handleEntity(MethodArgumentNotValidException exception) {
-        String enumKey = exception.getFieldError().getDefaultMessage();
-
-        ErrorCode errorCode = ErrorCode.INVALID_KEY;
-        try {
-            errorCode = ErrorCode.valueOf(enumKey);
-
-        } catch (IllegalArgumentException e) {
-
-        }
+    ResponseEntity<ApiResponse> handleEntity(MethodArgumentNotValidException exception){
+        String enumkey = exception.getFieldError().getDefaultMessage();
+        ErrorCode errorCode = ErrorCode.valueOf(enumkey);
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
-        return ResponseEntity.badRequest().body(apiResponse);
+        return  ResponseEntity.badRequest().body(apiResponse);
     }
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)// dau vao sai, front-end check lai
-//    public ResponseEntity handleValidation(MethodArgumentNotValidException exception){
-//        String message = "";
-//
-//        // cu moi thuoc tinh loi => xu li
-//
-//        for(FieldError fieldError : exception.getBindingResult().getFieldErrors()){
-//            // fielError: Name, studentcode,..
-//            System.out.println(fieldError);
-//            message += fieldError.getField() + ": " + fieldError.getDefaultMessage();
-//
-//        }
-//        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
-//    }
 
 
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity handleValidation(Exception exception){
-        return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
-    }
-    @ExceptionHandler(AppException.class)
-    public ResponseEntity<ApiResponse> handleAppException(AppException exception){
-        ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse response = new ApiResponse();
-        response.setCode(errorCode.getCode());
-        response.setMessage(errorCode.getMessage());
-        return new ResponseEntity(response,HttpStatus.BAD_REQUEST);
-    }
 }
