@@ -2,14 +2,12 @@ package com.example.hairSalonBooking.service;
 
 
 import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
+import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
-import com.example.hairSalonBooking.model.request.RegisterRequest;
-import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 import com.nimbusds.jose.*;
@@ -31,7 +29,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -55,9 +52,12 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     AuthenticationManager authenticationManager;
 
+
     @NonFinal
     @Value("${jwt.signer-key}")
-    private String SIGNER_KEY ;
+    private String SIGNER_KEY;
+
+    //            "iTx5DOgYrW3LEeEmnd9EG4cI5HxKKlhFUjYoytO3xDDMJN7xtPpgtDhrcTCUOrvk\n";
     public IntrospectResponse introspect(IntrospectRequest request)
             throws JOSEException, ParseException {
         var token = request.getToken();
@@ -72,31 +72,29 @@ public class AuthenticationService implements UserDetailsService {
                 .build();
     }
 
-
     public AccountResponse register(@Valid RegisterRequest registerRequest) {
-        if(!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
+        if(!registerRequest.equals(registerRequest.getConfirmpassword())) {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
         Account account = modelMapper.map(registerRequest, Account.class);
-        try{
+        try {
             String originPassword = account.getPassword(); // goi
-            account.setRole(Role.CUSTOMER);
             account.setPassword(passwordEncoder.encode(originPassword));// dinh dang
             Account newAccount = accountRepository.save(account);
             return modelMapper.map(newAccount, AccountResponse.class);
-        }catch(Exception e) {
-            if(e.getMessage().contains(account.getUsername())) {
+        } catch (Exception e) {
+            if (e.getMessage().contains(account.getUsername())) {
                 throw new AppException(ErrorCode.USERNAME_EXISTED);
-            }else if(e.getMessage().contains(account.getEmail())) {
+            } else if (e.getMessage().contains(account.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_EXISTED);
-            }else {
+            } else {
                 throw new AppException(ErrorCode.Phone_EXISTED);
             }
         }
     }
 
 
-    public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+   public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
         Account account; // Declare account here to make it accessible later
         try {
             // Authenticate the username and password
@@ -147,7 +145,7 @@ public class AuthenticationService implements UserDetailsService {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
-            log.error("Can't not create token", e);
+            log.error("Can't create toke" , e);
             throw new RuntimeException(e);
         }
     }
