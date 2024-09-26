@@ -2,6 +2,7 @@ package com.example.hairSalonBooking.service;
 
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
@@ -16,6 +17,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.validation.Valid;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -29,6 +31,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -69,13 +72,15 @@ public class AuthenticationService implements UserDetailsService {
                 .build();
     }
 
-    public AccountResponse register(RegisterRequest registerRequest) {
-        Account account = modelMapper.map(registerRequest, Account.class);
-        if(!registerRequest.getConfirmpassword().equals(registerRequest.getPassword())){
-            throw new RuntimeException("Password not match");
+
+    public AccountResponse register(@Valid RegisterRequest registerRequest) {
+        if(!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
+            throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
+        Account account = modelMapper.map(registerRequest, Account.class);
         try{
             String originPassword = account.getPassword(); // goi
+            account.setRole(Role.CUSTOMER);
             account.setPassword(passwordEncoder.encode(originPassword));// dinh dang
             Account newAccount = accountRepository.save(account);
             return modelMapper.map(newAccount, AccountResponse.class);

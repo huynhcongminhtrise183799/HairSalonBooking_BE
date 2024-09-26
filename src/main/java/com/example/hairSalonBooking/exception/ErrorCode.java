@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public enum ErrorCode {
+    EXCEPTION(999,"Error"),
     EMAIL_NOT_FOUND(1001,"Email is not correct"),
     INVALID_OTP(1002,"Invalid OTP"),
     PASSWORD_NOT_MATCH(1003,"Password not match"),
@@ -23,7 +24,8 @@ public enum ErrorCode {
     EMAIL_EXISTED(1012,"Email already existed"),
     Phone_EXISTED(1013,"Phone already existed"),
     INVALID_USERNAME(1014,"Username can not be blank"),
-    INVALID_DOB(1015,"Date of birth is not valid")
+    INVALID_DOB(1015,"Date of birth is not valid"),
+    STYLIST_NOT_FOUND(1016, " Stylist not found"),
 
     ;
     int code;

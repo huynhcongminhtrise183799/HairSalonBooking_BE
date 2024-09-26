@@ -1,5 +1,7 @@
 package com.example.hairSalonBooking.entity;
 
+import com.example.hairSalonBooking.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -57,23 +59,29 @@ public class Account implements UserDetails {
     @Column(unique = true)
     @NotBlank(message = "Code can not be blank!")
     String username;
-    @Size(min = 6, message = "Password must be at least 6 character!")
+//    @Size(min = 6, message = "Password must be at least 6 character!")
     String password;
     @Column(unique = true)
-    @Email(message = "Invalid email")
+//    @Email(message = "Invalid email")
     String email;
     String fullname;
     LocalDate dob;
-    int gender;
-    @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
+    String gender;
+//    @JsonIgnore // ẩn delete status không cho người dùng nhập
+    boolean isDeleted = false;
+//    @Pattern(regexp = "(84|0[35789])\\d{8}\\b")
     @Column(unique = true)
     String phone;
+
     String image;
     String googleid;
     String googlename;
     boolean isDelete = false;
 
-    long roleid;
+    @Enumerated(EnumType.STRING)
+    Role role;
+
+    Long roleid;
     @Column(nullable = true)
     Long salonid;
     @Column(nullable = true)
