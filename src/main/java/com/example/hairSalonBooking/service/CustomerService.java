@@ -4,8 +4,11 @@ import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.UpdateCustomerRequest;
+import com.example.hairSalonBooking.model.response.ProfileResponse;
 import com.example.hairSalonBooking.repository.CustomerRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,8 +16,8 @@ public class CustomerService {
 
     @Autowired
     CustomerRepository customerRepository;
-    //@Autowired
-    //ModelMapper modelMapper;
+    @Autowired
+    ModelMapper modelMapper;
     public UpdateCustomerRequest updateCustomer(UpdateCustomerRequest request, long AccountId){
         Account account = customerRepository.findAccountByAccountid(AccountId);
         if(account == null){
@@ -26,6 +29,6 @@ public class CustomerService {
         account.setEmail(request.getEmail());
         customerRepository.save(account);
         return request;
-
     }
+
 }
