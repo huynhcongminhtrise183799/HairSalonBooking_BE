@@ -1,5 +1,6 @@
 package com.example.hairSalonBooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -64,20 +65,29 @@ public class Account implements UserDetails {
     String email;
     String fullname;
     LocalDate dob;
-    int gender;
+    String gender;
     @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
     @Column(unique = true)
     String phone;
     String image;
     String googleid;
     String googlename;
-    boolean isDelete = false;
 
-    long roleid;
-    @Column(nullable = true)
-    Long salonid;
-    @Column(nullable = true)
-    Long levelid;
+    //    @JsonIgnore // ẩn delete status không cho người dùng nhập
+    boolean isDeleted = false;
+
+    @ManyToOne
+    @JoinColumn(name = "salon_id")
+    SalonBranch salonBranch;
+
+    @ManyToOne
+    @JoinColumn(name = "level_id")
+    Level level;
+
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    List<Feedback> feedbacks;
+
 
 
 }

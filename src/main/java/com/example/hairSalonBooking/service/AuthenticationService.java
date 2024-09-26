@@ -8,6 +8,7 @@ import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 import com.nimbusds.jose.*;
