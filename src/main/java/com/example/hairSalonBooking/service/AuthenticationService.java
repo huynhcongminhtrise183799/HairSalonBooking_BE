@@ -97,7 +97,9 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-    public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+
+   public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+
         Account account; // Declare account here to make it accessible later
         try {
             // Authenticate the username and password
