@@ -23,8 +23,9 @@ public enum ErrorCode {
     EMAIL_EXISTED(1012,"Email already existed"),
     Phone_EXISTED(1013,"Phone already existed"),
     INVALID_USERNAME(1014,"Username can not be blank"),
-    INVALID_DOB(1015,"Date of birth is not valid")
-
+    INVALID_DOB(1015,"Date of birth is not valid"),
+    SERVICE_NO_BLANK(1016, "SalonService name can not be blank"),
+    PRICE_NO_BLANK(1017, "Price can not be blank"),
     ;
     int code;
     String message;
