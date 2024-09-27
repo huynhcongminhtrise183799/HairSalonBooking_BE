@@ -9,8 +9,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AccountResponse {
-    long AccountId;
+    long accountid;
     String username;
     String phone;
+    String token;
 
 }

@@ -4,6 +4,7 @@ import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.exception.NotFoundException;
 import com.example.hairSalonBooking.model.request.UpdateCustomerRequest;
 import com.example.hairSalonBooking.model.response.UpdateCustomerResponse;
+import com.example.hairSalonBooking.repository.AccountRepository;
 import com.example.hairSalonBooking.repository.CustomerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,11 @@ public class CustomerService {
 
     @Autowired
     CustomerRepository customerRepository;
-    //@Autowired
-    //ModelMapper modelMapper;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+
     public UpdateCustomerRequest updateCustomer(UpdateCustomerRequest request, long AccountId){
         Account account = customerRepository.findAccountByAccountid(AccountId);
         if(account == null){
@@ -28,5 +32,9 @@ public class CustomerService {
         customerRepository.save(account);
         return request;
 
+    }
+    public Account getAccountById(long accountid) {
+
+        return customerRepository.findById(accountid).orElse(null);
     }
 }

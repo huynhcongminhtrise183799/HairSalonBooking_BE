@@ -12,24 +12,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ValidationHandler {
     // dinh nghia cho no chay moi khi gap 1 cai exception nao do
     //MethodArgumentNotValidException.class: la loi khi nhap sai
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)// dau vao sai, front-end check lai
-    public ResponseEntity handleValidation(MethodArgumentNotValidException exception){
-        String message = "";
 
-        // cu moi thuoc tinh loi => xu li
 
-        for(FieldError fieldError : exception.getBindingResult().getFieldErrors()){
-            // fielError: Name, studentcode,..
-            System.out.println(fieldError);
-            message += fieldError.getField() + ": " + fieldError.getDefaultMessage();
-
-        }
-        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(value = RuntimeException.class)
+    ResponseEntity<String> handlingRuntimeException(RuntimeException exception){
+        return ResponseEntity.badRequest().body(exception.getMessage());
+    }
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    ResponseEntity<String> handlingValidation(MethodArgumentNotValidException exception){
+        return ResponseEntity.badRequest().body(exception.getFieldErrors().get(0).getDefaultMessage());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity handleValidation(Exception exception){
-        return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
-    }
 }

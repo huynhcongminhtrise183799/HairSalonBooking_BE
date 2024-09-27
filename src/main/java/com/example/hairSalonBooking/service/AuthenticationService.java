@@ -1,16 +1,21 @@
 package com.example.hairSalonBooking.service;
 
 
+import com.example.hairSalonBooking.controller.AuthenticationAPI;
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.exception.DuplicateEntity;
 import com.example.hairSalonBooking.exception.EntityNotFoundException;
+import com.example.hairSalonBooking.model.request.ExchangeTokenRequest;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
+import com.example.hairSalonBooking.model.response.ExchangeTokenResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
+import com.example.hairSalonBooking.repository.CustomerRepository;
+import com.example.hairSalonBooking.repository.OutboundIdentityClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -20,6 +25,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +34,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -51,22 +58,52 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     AuthenticationManager authenticationManager;
 
-    @NonFinal
-    protected static final String SIGNER_KEY =
-            "iTx5DOgYrW3LEeEmnd9EG4cI5HxKKlhFUjYoytO3xDDMJN7xtPpgtDhrcTCUOrvk\n";
-    public IntrospectResponse introspect(IntrospectRequest request)
-            throws JOSEException, ParseException {
-        var token = request.getToken();
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY);
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        //kiem tra toke het han chua
-        Date expiration = signedJWT.getJWTClaimsSet().getExpirationTime();
-        var verified = signedJWT.verify(verifier);
+    OutboundIdentityClient outboundIdentityClient;
 
-        return IntrospectResponse.builder()
-                .valid(verified && expiration.after(new Date()))
-                .build();
-    }
+    @Autowired
+    CustomerRepository customerRepository;
+
+    @NonFinal
+    @Value("${outbound.identity.client-id}")
+    protected String CLIENT_ID;
+
+
+    @NonFinal
+    @Value("${outbound.identity.client-secret}")
+    protected String CLIENT_SECRET;
+
+
+    @NonFinal
+    @Value("${outbound.identity.redirect-uri}")
+    protected String REDIRECT_URI;
+
+
+    protected final String GRANT_TYPE = "authorization_code";
+
+    @Autowired
+    TokenService tokenService;
+
+
+
+
+//    private  static string
+//
+//
+//    public IntrospectResponse introspect(IntrospectRequest request)
+//            throws JOSEException, ParseException {
+//        var token = request.getToken();
+//        JWSVerifier verifier = new MACVerifier(SIGNER_KEY);
+//        SignedJWT signedJWT = SignedJWT.parse(token);
+//        //kiem tra toke het han chua
+//        Date expiration = signedJWT.getJWTClaimsSet().getExpirationTime();
+//        var verified = signedJWT.verify(verifier);
+//
+//        return IntrospectResponse.builder()
+//                .valid(verified && expiration.after(new Date()))
+//                .build();
+//    }
+
+
     public AccountResponse register(RegisterRequest registerRequest) {
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
             throw new IllegalArgumentException(" Confirm passwords do not match");
@@ -75,24 +112,26 @@ public class AuthenticationService implements UserDetailsService {
         if (!registerRequest.getConfirmpassword().equals(registerRequest.getPassword())) {
             throw new RuntimeException("Password not match");
         }
-        try {
+       // try {
+
             String originPassword = account.getPassword();// goi
             account.setPassword(passwordEncoder.encode(originPassword));// dinh dan
             Account newAccount = accountRepository.save(account);
             return modelMapper.map(newAccount, AccountResponse.class);
-        } catch (Exception e) {
-            if (e.getMessage().contains(account.getUsername())) {
-                throw new DuplicateEntity("Duplicate Username!");
-            } else if (e.getMessage().contains(account.getEmail())) {
-                throw new DuplicateEntity("Duplicate email!");
-            } else {
-                throw new DuplicateEntity("Duplicate phone");
-            }
-        }
+       // } catch (Exception e) {
+//            if (e.getMessage().contains(account.getUsername())) {
+//                throw new DuplicateEntity("Duplicate Username!");
+//            } else if (e.getMessage().contains(account.getEmail())) {
+//                throw new DuplicateEntity("Duplicate email!");
+//            } else {
+//                throw new DuplicateEntity("Duplicate phone");
+//            }
+     //       throw new DuplicateEntity("Duplicate Username!");
+     //   }
 
     }
 
-    public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+    public AccountResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
         Account account; // Declare account here to make it accessible later
         try {
             // Authenticate the username and password
@@ -105,58 +144,89 @@ public class AuthenticationService implements UserDetailsService {
 
             // Get the authenticated account from the authentication object
             account = (Account) authentication.getPrincipal();
+            AccountResponse accountResponse = modelMapper.map(account, AccountResponse.class);
+            accountResponse.setToken(tokenService.generateToken(account));
 
+            return accountResponse;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new EntityNotFoundException("Invalid username or password!");
         }
-        var token = generateToken(loginRequest.getUsername());
-        AuthenticationResponse response = modelMapper.map(account, AuthenticationResponse.class);
-        response.setToken(token);
-        response.setSuccess(true);
+//        var token = tokenService1.generateToken1(loginRequest.getUsername()));
+//        AuthenticationResponse response = modelMapper.map(account, AuthenticationResponse.class);
+//        response.setToken(token);
+//        response.setSuccess(true);
 
-        return response;
+//        return response;
     }
+
 
     //tạo token
-    private String generateToken(String username) {
-        // b1: tạo header có thuat toán sử dụng
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-        //b2: body noi dung gui di token có the username, user id
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(username)
-                //ten domain
-                .issuer("Fsalon.com")
-                // thoi gian ton tai
-                .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
-
-                ))
-                .claim("custumer claim", "Cus")
-                .build();
-        //b3 tao page load
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-        //tạo json web signature
-        //B4 ki generate theo kieu string
-        JWSObject jwsObject = new JWSObject(header, payload);
-        try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            log.error("Can't not create token", e);
-            throw new RuntimeException(e);
-        }
-    }
+//    private String generateToken(String username) {
+//        // b1: tạo header có thuat toán sử dụng
+//        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+//        //b2: body noi dung gui di token có the username, user id
+//        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+//                .subject(username)
+//                //ten domain
+//                .issuer("Fsalon.com")
+//                // thoi gian ton tai
+//                .issueTime(new Date())
+//                .expirationTime(new Date(
+//                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+//
+//                ))
+//                .claim("custumer claim", "Cus")
+//                .build();
+//        //b3 tao page load
+//        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+//        //tạo json web signature
+//        //B4 ki generate theo kieu string
+//        JWSObject jwsObject = new JWSObject(header, payload);
+//        try {
+//            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+//            return jwsObject.serialize();
+//        } catch (JOSEException e) {
+//            log.error("Can't not create token", e);
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     public List<Account> getAllAccount() {
         List<Account> accounts = accountRepository.findAll();
         return accounts;
     }
 
+    public AuthenticationResponse outboundAuthenticate(String code) {
+        var response = outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
+                .code(code)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .redirectUri(REDIRECT_URI)
+                .grantType(GRANT_TYPE)
+                .build());
+
+        log.info("TOKEN RESPONSE {}", response);
+
+        return AuthenticationResponse.builder()
+                .token(response.getAccessToken())
+                .build();
+    }
+
+    AuthenticationAPI authenticationAPI;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return accountRepository.findAccountByUsername(username);
     } // Định nghĩa cho mình biet cach lay Username
+
 }
+
+
+
+
+
+
+
+
 
