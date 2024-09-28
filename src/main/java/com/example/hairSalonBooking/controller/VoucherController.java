@@ -5,6 +5,7 @@ import com.example.hairSalonBooking.model.request.UpdateVoucherRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.VoucherResponse;
 import com.example.hairSalonBooking.service.VoucherService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/")
 @CrossOrigin("*")
+@SecurityRequirement(name = "api")
 public class VoucherController {
     @Autowired
     private VoucherService voucherService;
