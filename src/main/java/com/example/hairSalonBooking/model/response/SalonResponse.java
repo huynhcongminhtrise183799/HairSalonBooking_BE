@@ -4,11 +4,12 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationResponse {
-    String token;
-    //boolean success;
+@Builder
+public class SalonResponse {
+    String address;
+    String hotline;
+    boolean isDelete;
 }
