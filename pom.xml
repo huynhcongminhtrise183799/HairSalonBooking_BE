@@ -93,7 +93,6 @@
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
 		</dependency>
-<!--		&lt;!&ndash; https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api &ndash;&gt;-->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>

@@ -1,13 +1,12 @@
 package com.example.hairSalonBooking.exception;
 
-
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice // đánh dấu đây là 1 class để bắt lỗi
@@ -56,5 +55,6 @@ public class ValidationHandler {
         apiResponse.setMessage(errorCode.getMessage());
         return  ResponseEntity.badRequest().body(apiResponse);
     }
+
 
 }

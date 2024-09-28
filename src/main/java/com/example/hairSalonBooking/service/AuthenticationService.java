@@ -12,11 +12,7 @@ import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
+
 import jakarta.validation.Valid;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
@@ -99,9 +95,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-
    public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
-
         Account account; // Declare account here to make it accessible later
         try {
             // Authenticate the username and password
