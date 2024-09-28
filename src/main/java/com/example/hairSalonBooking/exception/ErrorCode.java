@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public enum ErrorCode {
+    EXCEPTION(999,"Error"),
     EMAIL_NOT_FOUND(1001,"Email is not correct"),
     INVALID_OTP(1002,"Invalid OTP"),
     PASSWORD_NOT_MATCH(1003,"Password not match"),
@@ -23,7 +24,25 @@ public enum ErrorCode {
     EMAIL_EXISTED(1012,"Email already existed"),
     Phone_EXISTED(1013,"Phone already existed"),
     INVALID_USERNAME(1014,"Username can not be blank"),
-    INVALID_DOB(1015,"Date of birth is not valid")
+    INVALID_DOB(1015,"Date of birth is not valid"),
+
+    INVALID_HOTLINE(1016,"Invalid salon hotline"),
+    INVALID_ADDRESS(1017,"Salon address can not be blank"),
+    HOTLINE_EXISTED(1018,"Salon hotline already existed"),
+    SALON_NOT_FOUND(1019,"Salon not found"),
+    INVALID_VOUCHER_QUANTITY(1020,"Voucher quantity must be greater than 0"),
+    INVALID_VOUCHER_DISCOUNT(1021,"Voucher discount must be greater than 0"),
+    INVALID_VOUCHER_CODE(1022,"Voucher code can not be blank"),
+    INVALID_VOUCHER_NAME(1022,"Voucher name can not be blank"),
+    DUPLICATE_VOUCHER_CODE(1023,"Voucher code already existed"),
+    VOUCHER_NOT_FOUND(1024,"Voucher not found"),
+
+
+
+    STYLIST_NOT_FOUND(1025, " Stylist not found"),
+
+    SLOT_NOT_FOUND(1026,"Slot not found"),
+    SLOT_ID_EXISTED(1027,"Slot id existed")
 
     ;
     int code;

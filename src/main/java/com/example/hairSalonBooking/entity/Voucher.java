@@ -1,12 +1,10 @@
 package com.example.hairSalonBooking.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -14,16 +12,15 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class SalonBranch {
+public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long salonid;
-    String address;
+    long voucherId;
     @Column(unique = true)
-    String hotline;
+    String code;
+    String name;
+    double discountAmount;
+    LocalDate expiryDate;
+    int quantity;
     boolean isDelete = false;
-    @OneToMany(mappedBy = "salonBranch")
-    @JsonIgnore
-    List<Account> accounts;
-
 }

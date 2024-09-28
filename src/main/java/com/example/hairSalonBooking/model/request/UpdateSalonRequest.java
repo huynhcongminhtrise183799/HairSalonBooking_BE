@@ -8,8 +8,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class MailBody {
-    String to;
-    String subject;
-    int otp;
+public class UpdateSalonRequest {
+    String address;
+    String hotline;
+    boolean isDelete = false;
 }

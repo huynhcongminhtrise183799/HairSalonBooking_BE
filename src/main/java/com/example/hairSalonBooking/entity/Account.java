@@ -66,17 +66,18 @@ public class Account implements UserDetails {
     String email;
     String fullname;
     LocalDate dob;
-    int gender;
+    String gender;
     @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
     @Column(unique = true)
     String phone;
     String image;
     String googleid;
     String googlename;
-    boolean isDelete = false;
+
+    //    @JsonIgnore // ẩn delete status không cho người dùng nhập
+    boolean isDeleted = false;
     @Enumerated(EnumType.STRING)
     Role role;
-
     @ManyToOne
     @JoinColumn(name = "salon_id")
     SalonBranch salonBranch;
@@ -88,6 +89,7 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     List<Feedback> feedbacks;
+
 
 
 }
