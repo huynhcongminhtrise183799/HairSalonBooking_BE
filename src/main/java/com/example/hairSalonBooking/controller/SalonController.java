@@ -5,6 +5,7 @@ import com.example.hairSalonBooking.model.request.UpdateSalonRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.SalonResponse;
 import com.example.hairSalonBooking.service.SalonBranchService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/")
 @CrossOrigin("*")
+@SecurityRequirement(name = "api")
 public class SalonController {
     @Autowired
     private SalonBranchService salonBranchService;
@@ -35,13 +37,18 @@ public class SalonController {
         response.setResult(salonBranchService.getAllSalonsActive());
         return response;
     }
-    @GetMapping("salon/{address}")
+    /*@GetMapping("salon/{address}")
     public ApiResponse<SalonResponse> getSalon(@PathVariable String address){
         ApiResponse response = new ApiResponse<>();
         response.setResult(salonBranchService.getSalon(address));
         return response;
+    }*/
+    @GetMapping("salon/{address}")
+    public ApiResponse<SalonResponse> getSalonByAddress(@PathVariable String address){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(salonBranchService.getSalonByAddress(address));
+        return response;
     }
-
     @PutMapping("/salon/{id}")
     public ApiResponse<SalonResponse> updateSalon(@PathVariable long id, @RequestBody UpdateSalonRequest request){
         ApiResponse response = new ApiResponse<>();

@@ -55,6 +55,10 @@ public class SalonBranchService {
         }
         return responses;
     }
+    public SalonBranch getSalonByAddress(String address){
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchByAddressIsDeleteFalse(address);
+        return salonBranch;
+    }
 
     public SalonResponse updateSalon(UpdateSalonRequest request, long id){
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonid(id);

@@ -4,6 +4,7 @@ import com.example.hairSalonBooking.model.request.UpdateCustomerRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.ProfileResponse;
 import com.example.hairSalonBooking.service.CustomerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/customer")
 @CrossOrigin("http://localhost:3000/")
+@SecurityRequirement(name = "api")
 public class CustomerController {
 
     @Autowired
