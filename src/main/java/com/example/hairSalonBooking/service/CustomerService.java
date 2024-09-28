@@ -8,6 +8,7 @@ import com.example.hairSalonBooking.model.response.ProfileResponse;
 import com.example.hairSalonBooking.repository.CustomerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +24,19 @@ public class CustomerService {
         if(account == null){
             throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
         }
-        account.setFullname(request.getFullName());
+        account.setFullname(request.getFullname());
         account.setPhone(request.getPhone());
         account.setDob(request.getDob());
         account.setEmail(request.getEmail());
         customerRepository.save(account);
         return request;
+    }
+
+    public ProfileResponse getProfile(){
+        var context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Account account =(Account) authentication.getPrincipal();
+        return modelMapper.map(account,ProfileResponse.class);
     }
 
 }

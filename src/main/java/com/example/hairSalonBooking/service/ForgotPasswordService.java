@@ -41,7 +41,7 @@ public class ForgotPasswordService {
         MailBody mailBody = MailBody.builder()
                 .to(email)
                 .subject("OTP for your forgot password request")
-                .text("OTP for your forgot password request: " + otp)
+                .otp(otp)
                 .build();
         ForgotPassword fp = ForgotPassword.builder()
                 .otp(otp)

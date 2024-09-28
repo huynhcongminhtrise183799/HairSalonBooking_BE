@@ -18,13 +18,12 @@ public class RegisterRequest {
 
     String fullname;
 
-    @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b", message = "INVALID_PHONE")
+    @Pattern(regexp = "(84|0[35789])\\d{8}\\b",message = "INVALID_PHONE")
     String phone;
 
-    @Size(min = 6, message = "PASSWORD_SIZE_INVALID")
+    @Size(min = 6, message ="PASSWORD_SIZE_INVALID")
     String password;
 
     String confirmpassword;
-
 }
 
