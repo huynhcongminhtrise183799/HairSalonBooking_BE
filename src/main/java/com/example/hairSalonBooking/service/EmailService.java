@@ -1,8 +1,10 @@
 package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.model.request.MailBody;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,7 +20,6 @@ public class EmailService {
     private TemplateEngine templateEngine;
     @Autowired
     private JavaMailSender javaMailSender;
-
 
     public void sendSimpleMessage(MailBody mailBody){
         try {

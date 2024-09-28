@@ -3,31 +3,29 @@ package com.example.hairSalonBooking.controller;
 
 
 import com.example.hairSalonBooking.entity.Account;
-
-
-
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
+import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
-import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
-
-import com.example.hairSalonBooking.model.response.AccountResponse;
-import com.example.hairSalonBooking.model.request.LoginRequest;
-import com.example.hairSalonBooking.model.request.RegisterRequest;
-
 import com.example.hairSalonBooking.service.AuthenticationService;
+
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
+
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-        import java.util.List;
+import java.text.ParseException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api") // giảm bớt đường dẫn
+
 
 @CrossOrigin("http://localhost:3000/")
 @SecurityRequirement(name = "api")
@@ -60,5 +58,8 @@ public class AuthenticationAPI {
         List<Account> accounts = authenticationService.getAllAccount();
         return ResponseEntity.ok(accounts);
     }
+
+
+
 
 }
