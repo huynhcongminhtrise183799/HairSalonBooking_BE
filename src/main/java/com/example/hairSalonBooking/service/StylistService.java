@@ -73,6 +73,7 @@ public List<StylistResponse> getAllStylist() {
     public StylistResponse updateStylist(long accountid, StylistRequest stylistRequest) {
         //tìm ra thằng stylist cần đc update thông qua ID
         Account updeStylist = accountRepository.findAccountByAccountid(accountid);
+        updeStylist.setRole(Role.STYLIST);
         if (updeStylist == null) {
             // Handle the case when the stylist is not found
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
@@ -95,6 +96,7 @@ public List<StylistResponse> getAllStylist() {
     public StylistResponse deleteStylist(long accountid) {
         // đầu tiên mình tìm thằng cần Delete qua ID
         Account updeStylist = accountRepository.findAccountByAccountid(accountid);
+        updeStylist.setRole(Role.STYLIST);
         if (updeStylist == null) {
             // Handle the case when the stylist is not found
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
