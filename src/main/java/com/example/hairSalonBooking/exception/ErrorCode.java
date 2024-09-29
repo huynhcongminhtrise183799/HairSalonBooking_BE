@@ -42,7 +42,9 @@ public enum ErrorCode {
     STYLIST_NOT_FOUND(1025, " Stylist not found"),
 
     SLOT_NOT_FOUND(1026,"Slot not found"),
-    SLOT_ID_EXISTED(1027,"Slot id existed")
+    SLOT_ID_EXISTED(1027,"Slot id existed"),
+    SERVICE_NO_BLANK(1028, "SalonService name can not be blank"),
+    PRICE_NO_BLANK(1029, "Price can not be blank"),
 
     ;
     int code;
