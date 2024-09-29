@@ -26,9 +26,9 @@ public class StylistResponse {
 
     String gender;
 
-    Long salonid;
+    String salon;
 
-    Long levelid;
+    String level;
     //    @JsonIgnore // ẩn delete status không cho người dùng nhập
     boolean isDeleted = false;
 

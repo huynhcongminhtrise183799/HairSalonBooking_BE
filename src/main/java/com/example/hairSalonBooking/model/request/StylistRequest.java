@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,6 +23,9 @@ public class StylistRequest {
     @Email(message = "INVALID_EMAIL")
     String email;
 
+    @Size(min = 6, message ="PASSWORD_SIZE_INVALID")
+    String password;
+
     String fullname;
 
     @Pattern(regexp = "(84|0[35789])\\d{8}\\b",message = "INVALID_PHONE")
@@ -29,8 +33,8 @@ public class StylistRequest {
 
     String gender;
 
-    Long salonid;
+    String salon;
 
-    Long levelid;
+    String level;
 
 }

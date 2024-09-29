@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,9 +29,10 @@ public class StylistService {
     @Autowired
     ModelMapper modelMapper;
 
-    public StylistResponse create(StylistRequest stylistRequest) {
+    public StylistResponse create(@RequestBody StylistRequest stylistRequest) {
         // Chuyển từ StylistRequest sang thực thể Account (hoặc Stylist)
         Account stylist = modelMapper.map(stylistRequest, Account.class);
+        stylist.setRole(Role.STYLIST);
         try{
             // Lưu vào database
             Account newStylist = accountRepository.save(stylist);
@@ -48,13 +50,25 @@ public class StylistService {
         }
     }
 
-    public List<StylistResponse> getAllStylist() {
-        List<Account> Stylists = accountRepository.findAll();
-        return Stylists.stream() // Chuyển đổi sang danh sách StylistResponse
-                .map(account -> modelMapper.map(account, StylistResponse.class))
-                .collect(Collectors.toList());// Thu thập kết quả vào danh sách
-    }
-
+//    public List<StylistResponse> getAllStylist() {
+//        List<Account> Stylists = accountRepository.findAll();
+//        return Stylists.stream() // Chuyển đổi sang danh sách StylistResponse
+//                .map(account -> modelMapper.map(account, StylistResponse.class))
+//                .collect(Collectors.toList());// Thu thập kết quả vào danh sách
+//    }
+//
+//public List<StylistResponse> getAllStylist() {
+//    List<Account> stylists = accountRepository.findByIsStylistTrue();
+//    return stylists.stream() // Chuyển đổi sang danh sách StylistResponse
+//            .map(account -> modelMapper.map(account, StylistResponse.class))
+//            .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
+//}
+public List<StylistResponse> getAllStylist() {
+    List<Account> stylists = accountRepository.findByRole(Role.STYLIST);
+    return stylists.stream() // Chuyển đổi sang danh sách StylistResponse
+            .map(account -> modelMapper.map(account, StylistResponse.class))
+            .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
+}
 
     public StylistResponse updateStylist(long accountid, StylistRequest stylistRequest) {
         //tìm ra thằng stylist cần đc update thông qua ID

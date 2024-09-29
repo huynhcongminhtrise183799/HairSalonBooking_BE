@@ -1,5 +1,6 @@
 package com.example.hairSalonBooking.entity;
 
+import com.example.hairSalonBooking.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -73,6 +74,8 @@ public class Account implements UserDetails {
     String googleid;
     String googlename;
 
+    @Enumerated(EnumType.STRING)
+    Role role;
     //    @JsonIgnore // ẩn delete status không cho người dùng nhập
     boolean isDeleted = false;
 
