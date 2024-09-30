@@ -59,15 +59,15 @@ public class Account implements UserDetails {
     @Column(unique = true)
     @NotBlank(message = "Code can not be blank!")
     String username;
-//    @Size(min = 6, message = "Password must be at least 6 character!")
+    @Size(min = 6, message = "Password must be at least 6 character!")
     String password;
     @Column(unique = true)
-//    @Email(message = "Invalid email")
+    @Email(message = "Invalid email")
     String email;
     String fullname;
     LocalDate dob;
-    int gender;
-//    @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
+    String gender;
+    @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})\\b")
     @Column(unique = true)
     String phone;
     String image;

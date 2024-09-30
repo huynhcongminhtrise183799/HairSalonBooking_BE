@@ -18,4 +18,6 @@ public class ProfileResponse {
     String email;
     LocalDate dob;
     String phone;
+    int gender;
+    String image;
 }

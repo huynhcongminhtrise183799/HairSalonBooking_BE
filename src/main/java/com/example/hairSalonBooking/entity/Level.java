@@ -19,7 +19,6 @@ public class Level {
     long levelid;
     String levelname;
     double salary;
-    double bonussalary;
     @OneToMany(mappedBy = "level")
     @JsonIgnore
     List<Account> accounts;

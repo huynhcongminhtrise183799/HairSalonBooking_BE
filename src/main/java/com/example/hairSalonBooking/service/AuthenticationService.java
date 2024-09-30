@@ -12,14 +12,11 @@ import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
+
 import jakarta.validation.Valid;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import ognl.Token;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,26 +50,27 @@ public class AuthenticationService implements UserDetailsService {
 
     @Autowired
     AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenService tokenService;
 
-
-    @NonFinal
-    @Value("${jwt.signer-key}")
-    private String SIGNER_KEY;
+//    @NonFinal
+//    @Value("${jwt.signer-key}")
+//    private String SIGNER_KEY;
 
     //            "iTx5DOgYrW3LEeEmnd9EG4cI5HxKKlhFUjYoytO3xDDMJN7xtPpgtDhrcTCUOrvk\n";
-    public IntrospectResponse introspect(IntrospectRequest request)
-            throws JOSEException, ParseException {
-        var token = request.getToken();
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY);
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        //kiem tra toke het han chua
-        Date expiration = signedJWT.getJWTClaimsSet().getExpirationTime();
-        var verified = signedJWT.verify(verifier);
-
-        return IntrospectResponse.builder()
-                .valid(verified && expiration.after(new Date()))
-                .build();
-    }
+//    public IntrospectResponse introspect(IntrospectRequest request)
+//            throws JOSEException, ParseException {
+//        var token = request.getToken();
+//        JWSVerifier verifier = new MACVerifier(SIGNER_KEY);
+//        SignedJWT signedJWT = SignedJWT.parse(token);
+//        //kiem tra toke het han chua
+//        Date expiration = signedJWT.getJWTClaimsSet().getExpirationTime();
+//        var verified = signedJWT.verify(verifier);
+//
+//        return IntrospectResponse.builder()
+//                .valid(verified && expiration.after(new Date()))
+//                .build();
+//    }
 
     public AccountResponse register(@Valid RegisterRequest registerRequest) {
         if(!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
@@ -97,9 +95,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-
    public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
-
         Account account; // Declare account here to make it accessible later
         try {
             // Authenticate the username and password
@@ -116,44 +112,44 @@ public class AuthenticationService implements UserDetailsService {
         } catch (Exception e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
-        var token = generateToken(loginRequest.getUsername());
+
         AuthenticationResponse response = modelMapper.map(account, AuthenticationResponse.class);
-        response.setToken(token);
-        response.setSuccess(true);
+        response.setToken(tokenService.generateToken(account));
+        //response.setSuccess(true);
 
         return response;
     }
 
     //tạo token
-    private String generateToken(String username) {
-        // b1: tạo header có thuat toán sử dụng
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-        //b2: body noi dung gui di token có the username, user id
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(username)
-                //ten domain
-                .issuer("Fsalon.com")
-                // thoi gian ton tai
-                .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
-
-                ))
-                .claim("custumer claim", "Cus")
-                .build();
-        //b3 tao page load
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-        //tạo json web signature
-        //B4 ki generate theo kieu string
-        JWSObject jwsObject = new JWSObject(header, payload);
-        try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            log.error("Can't create toke" , e);
-            throw new RuntimeException(e);
-        }
-    }
+//    private String generateToken(String username) {
+//        // b1: tạo header có thuat toán sử dụng
+//        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+//        //b2: body noi dung gui di token có the username, user id
+//        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+//                .subject(username)
+//                //ten domain
+//                .issuer("Fsalon.com")
+//                // thoi gian ton tai
+//                .issueTime(new Date())
+//                .expirationTime(new Date(
+//                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+//
+//                ))
+//                .claim("custumer claim", "Cus")
+//                .build();
+//        //b3 tao page load
+//        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+//        //tạo json web signature
+//        //B4 ki generate theo kieu string
+//        JWSObject jwsObject = new JWSObject(header, payload);
+//        try {
+//            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+//            return jwsObject.serialize();
+//        } catch (JOSEException e) {
+//            log.error("Can't create toke" , e);
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 
     public List<Account> getAllAccount() {

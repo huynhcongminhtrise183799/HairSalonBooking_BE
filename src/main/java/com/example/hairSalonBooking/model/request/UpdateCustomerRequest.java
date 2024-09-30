@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCustomerRequest {
-    String fullName;
+    String fullname;
 
     @Email(message = "INVALID_EMAIL")
     String email;
