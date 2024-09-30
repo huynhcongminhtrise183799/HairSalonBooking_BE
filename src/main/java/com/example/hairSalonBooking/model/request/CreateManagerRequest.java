@@ -1,7 +1,5 @@
 package com.example.hairSalonBooking.model.request;
 
-
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,26 +11,19 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class StylistRequest {
-
-
-    @NotBlank(message = "INVALID_USERNAME")
-    String username;
-    @Size(min = 6, message ="PASSWORD_SIZE_INVALID")
-    String password;
+public class CreateManagerRequest {
     @Email(message = "INVALID_EMAIL")
     String email;
-
-    String fullname;
-
-    @Pattern(regexp = "(84|0[35789])\\d{8}\\b",message = "INVALID_PHONE")
-    String phone;
+    @NotBlank(message = "INVALID_USERNAME")
+    String username;
+    @Size(min = 6, message = "PASSWORD_SIZE_INVALID")
+    String password;
+    String fullName;
     @PastOrPresent(message = "INVALID_DOB")
     LocalDate dob;
+    String salonAddress;
+    @Pattern(regexp = "(84|0[35789])\\d{8}\\b", message = "INVALID_PHONE")
+    String phone;
     String gender;
 
-    String salonAddress;
-
-    String levelName;
-    boolean isDelete = false;
 }
