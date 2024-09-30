@@ -23,5 +23,8 @@ public class SalonService {
     int price;
     String description;
     LocalTime duration;
+    @ManyToOne
+    @JoinColumn(name = "skill_id")
+    Skill skill;
 
 }
