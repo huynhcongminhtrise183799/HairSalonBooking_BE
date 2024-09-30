@@ -31,5 +31,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByRole(Role role);
 
+
+
+    List<Account> findByRoleAndIsDeletedFalse(Role role);
+
 }
 

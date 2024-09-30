@@ -35,6 +35,12 @@ public class StylistController {
         List<StylistResponse> Stylists = stylistService.getAllStylist();
         return ResponseEntity.ok(Stylists);
     }
+    
+    @GetMapping("/status")
+    public ResponseEntity getStylistByStatus() {        
+        List<StylistResponse> StylistStatus = stylistService.getStylistByStatus();
+        return ResponseEntity.ok(StylistStatus);
+    }
 
     @PutMapping("{accountid}") // Đảm bảo có dấu "/"
     public ResponseEntity<StylistResponse> updateStylist(

@@ -74,6 +74,12 @@ public class StylistService {
             .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
 }
 
+  public List<StylistResponse> getStylistByStatus() {
+        List<Account> StylistStatus = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
+        return StylistStatus.stream()
+                .map(account -> modelMapper.map(account, StylistResponse.class))
+                .collect(Collectors.toList());
+  }
 
     public StylistResponse updateStylist(long accountid, StylistRequest stylistRequest) {
         //tìm ra thằng stylist cần đc update thông qua ID
@@ -89,9 +95,9 @@ public class StylistService {
         updeStylist.setFullname(stylistRequest.getFullname());
         updeStylist.setPhone(stylistRequest.getPhone());
         updeStylist.setGender(stylistRequest.getGender());
+
         updeStylist.setDeleted(stylistRequest.isDelete());
-
-
+        updeStylist.setDeleted(false);
         //Làm xong thì lưu xuống DataBase
         Account updatedStylist = accountRepository.save(updeStylist);
         // trả về thôi
