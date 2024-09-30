@@ -34,5 +34,5 @@ public class StylistRequest {
     String salonAddress;
 
     String levelName;
-
+    boolean isDelete = false;
 }
