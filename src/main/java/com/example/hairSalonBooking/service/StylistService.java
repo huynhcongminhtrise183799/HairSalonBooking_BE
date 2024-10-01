@@ -13,6 +13,7 @@ import com.example.hairSalonBooking.repository.AccountRepository;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,11 +30,17 @@ public class StylistService {
     @Autowired
     ModelMapper modelMapper;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     public StylistResponse create(@RequestBody StylistRequest stylistRequest) {
         // Chuyển từ StylistRequest sang thực thể Account (hoặc Stylist)
         Account stylist = modelMapper.map(stylistRequest, Account.class);
         stylist.setRole(Role.STYLIST);
+
         try{
+            String originPassword = stylist.getPassword(); // goi
+            stylist.setPassword(passwordEncoder.encode(originPassword));// dinh dang
             // Lưu vào database
             Account newStylist = accountRepository.save(stylist);
 
@@ -70,6 +77,14 @@ public List<StylistResponse> getAllStylist() {
             .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
 }
 
+    public List<StylistResponse> getStylistByStatus() {
+        List<Account> StylistStatus = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
+        return StylistStatus.stream()
+                .map(account -> modelMapper.map(account, StylistResponse.class))
+                .collect(Collectors.toList());
+    }
+
+
     public StylistResponse updateStylist(long accountid, StylistRequest stylistRequest) {
         //tìm ra thằng stylist cần đc update thông qua ID
         Account updeStylist = accountRepository.findAccountByAccountid(accountid);
@@ -84,6 +99,7 @@ public List<StylistResponse> getAllStylist() {
         updeStylist.setFullname(stylistRequest.getFullname());
         updeStylist.setPhone(stylistRequest.getPhone());
         updeStylist.setGender(stylistRequest.getGender());
+        updeStylist.setDeleted(false);
 
 
 

@@ -27,7 +27,9 @@ public enum ErrorCode {
     INVALID_DOB(1015,"Date of birth is not valid"),
     STYLIST_NOT_FOUND(1016, " Stylist not found"),
     SLOT_NOT_FOUND(1017,"Slot not found"),
-    SLOT_ID_EXISTED(1018,"Slot id existed")
+    SLOT_ID_EXISTED(1018,"Slot id existed"),
+    TOKEN_EXCHANGE_FAILED(1019,"Token exchange failed"),
+    NAME_IMAGE_EXISTED(1030,"Name image already existed"),
     ;
     int code;
     String message;

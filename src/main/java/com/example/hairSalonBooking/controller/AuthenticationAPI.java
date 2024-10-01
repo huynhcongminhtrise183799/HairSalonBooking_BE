@@ -7,10 +7,12 @@ import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
+import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +29,16 @@ public class AuthenticationAPI {
 
     // DI :Dependency Injection
 
-
     @Autowired // mình sử dụng để gọi thằng service phục vụ
     AuthenticationService authenticationService;
+
+    @PostMapping("/outbound/authentication")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> outboundAuthenticate(
+            @RequestParam("code") String code
+    ){
+        var result = authenticationService.outboundAuthenticate(code);
+        return ResponseEntity.ok( ApiResponse.<AuthenticationResponse>builder().result(result).build());
+    }
 
 
 

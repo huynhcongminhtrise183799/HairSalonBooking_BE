@@ -28,6 +28,8 @@ public class StylistResponse {
 
     String salon;
 
+
+
     String level;
     //    @JsonIgnore // ẩn delete status không cho người dùng nhập
     boolean isDeleted = false;

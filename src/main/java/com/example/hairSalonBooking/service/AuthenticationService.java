@@ -4,6 +4,7 @@ package com.example.hairSalonBooking.service;
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
+import com.example.hairSalonBooking.model.request.ExchangeTokenRequest;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
@@ -11,6 +12,7 @@ import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
+import com.example.hairSalonBooking.repository.OutboundIdentityClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -54,6 +56,29 @@ public class AuthenticationService implements UserDetailsService {
     AuthenticationManager authenticationManager;
 
 
+    OutboundIdentityClient outboundIdentityClient;
+
+    @NonFinal
+    @Value("${outbound.identity.client-id}")
+    protected String CLIENT_ID;
+
+
+
+    @NonFinal
+    @Value("${outbound.identity.client-secret}")
+    protected String CLIENT_SECRET;
+
+
+
+    @NonFinal
+    @Value("${outbound.identity.redirect-uri}")
+    protected String REDIRECT_URI;
+
+
+
+    protected final String GRANT_TYPE="authorization_code";
+
+
     @NonFinal
     @Value("${jwt.signer-key}")
     private String SIGNER_KEY;
@@ -74,7 +99,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public AccountResponse register(@Valid RegisterRequest registerRequest) {
-        if(!registerRequest.equals(registerRequest.getConfirmpassword())) {
+        if(!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
         Account account = modelMapper.map(registerRequest, Account.class);
@@ -157,6 +182,27 @@ public class AuthenticationService implements UserDetailsService {
         return accounts;
     }
 
+
+    public AuthenticationResponse outboundAuthenticate(String code){
+        try {
+        var response = outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
+                .code(code)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .redirectUri(REDIRECT_URI)
+                .grantType(GRANT_TYPE)
+                .build());
+
+        log.info("TOKEN RESPONSE {}", response);
+
+        return AuthenticationResponse.builder()
+                .token(response.getAccessToken())
+                .build();
+    } catch (Exception e) {
+        log.error("Error during token exchange: ", e);
+        throw new AppException(ErrorCode.TOKEN_EXCHANGE_FAILED); // Xử lý lỗi tùy chỉnh
+    }
+}
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
