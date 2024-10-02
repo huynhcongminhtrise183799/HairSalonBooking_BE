@@ -1,10 +1,6 @@
 package com.example.hairSalonBooking.model.response;
 
-import com.example.hairSalonBooking.enums.Role;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
@@ -13,13 +9,15 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProfileResponse {
+@Builder
+public class StaffResponse {
     long accountid;
-    String fullname;
     String email;
+    String username;
+    String fullName;
     LocalDate dob;
+    String salonAddress;
     String phone;
-    int gender;
-    String image;
-    Role role;
+    String gender;
+    boolean isDelete;
 }
