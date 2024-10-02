@@ -26,16 +26,27 @@ public class ImageController {
 //        return ResponseEntity.status(HttpStatus.OK).body(uploadImage);
 //
 //    }
-@PostMapping("/upload")
-public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file,
-                                          @RequestParam("customer") String customerJson) throws IOException {
-    // Chuyển đổi chuỗi JSON thành đối tượng Customer
-    ObjectMapper objectMapper = new ObjectMapper();
-    Customer customer = objectMapper.readValue(customerJson, Customer.class);
+//@PostMapping("/upload")
+//public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file,
+//                                          @RequestParam("customer") String customerJson) throws IOException {
+//    // Chuyển đổi chuỗi JSON thành đối tượng Customer
+//    ObjectMapper objectMapper = new ObjectMapper();
+//    Customer customer = objectMapper.readValue(customerJson, Customer.class);
+//
+//    String uploadImage = imageService.uploadImage(file, customer);
+//    return ResponseEntity.status(HttpStatus.OK).body(uploadImage);
+//}
 
-    String uploadImage = imageService.uploadImage(file, customer);
-    return ResponseEntity.status(HttpStatus.OK).body(uploadImage);
-}
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file,
+                                              @RequestBody Customer customer) throws IOException {
+        // Chuyển đổi chuỗi JSON thành đối tượng Customer
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Customer customer = objectMapper.readValue(customerJson, Customer.class);
+
+        String uploadImage = imageService.uploadImage(file, customer);
+        return ResponseEntity.status(HttpStatus.OK).body(uploadImage);
+    }
     @GetMapping("/{fileName}")
     public ResponseEntity<?> downloadImage(@PathVariable String fileName) throws IOException {
         byte[] imageData= imageService.downloadImage(fileName);
