@@ -5,21 +5,15 @@ import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
-import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
-import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
-
 import jakarta.validation.Valid;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import ognl.Token;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,11 +22,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j

@@ -73,7 +73,7 @@ public class Account implements UserDetails {
     String image;
     String googleid;
     String googlename;
-    boolean isDelete = false;
+    boolean isDeleted = false;
     @Enumerated(EnumType.STRING)
     Role role;
 

@@ -21,6 +21,7 @@ public class SalonService {
     String serviceName;
     @Column(nullable = false)
     int price;
+    @Lob
     String description;
     LocalTime duration;
     @ManyToOne
