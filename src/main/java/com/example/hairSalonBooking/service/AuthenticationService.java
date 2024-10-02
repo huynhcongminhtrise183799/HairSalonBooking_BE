@@ -4,7 +4,7 @@ package com.example.hairSalonBooking.service;
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
-import com.example.hairSalonBooking.model.request.ExchangeTokenRequest;
+//import com.example.hairSalonBooking.model.request.ExchangeTokenRequest;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
