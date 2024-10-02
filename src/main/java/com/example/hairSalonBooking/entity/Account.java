@@ -89,7 +89,9 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     List<Feedback> feedbacks;
-
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    List<Collections> collections;
 
 
 }
