@@ -1,12 +1,14 @@
 package com.example.hairSalonBooking.model.request;
 
 
+import com.example.hairSalonBooking.entity.Skill;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -34,5 +36,7 @@ public class StylistRequest {
     String salonAddress;
 
     String levelName;
+
+    Set<Long> skillId;
 
 }

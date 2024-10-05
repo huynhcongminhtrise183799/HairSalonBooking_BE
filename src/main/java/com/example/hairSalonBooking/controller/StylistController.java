@@ -1,14 +1,12 @@
 package com.example.hairSalonBooking.controller;
 
 
-import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,4 +48,8 @@ public class StylistController {
         StylistResponse deleteStylist = stylistService.deleteStylist(accountid); // Gọi service
         return ResponseEntity.ok(deleteStylist); // Trả về StylistResponse
     }
+
+
+
+
 }

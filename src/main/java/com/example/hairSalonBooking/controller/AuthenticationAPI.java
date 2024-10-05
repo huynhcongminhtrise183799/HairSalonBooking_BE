@@ -25,8 +25,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api") // giảm bớt đường dẫn
-
-
 @CrossOrigin("http://localhost:3000/")
 @SecurityRequirement(name = "api")
 

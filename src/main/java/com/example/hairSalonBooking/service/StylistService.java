@@ -1,27 +1,20 @@
 package com.example.hairSalonBooking.service;
 
 
-import com.example.hairSalonBooking.controller.StylistController;
-import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.entity.Level;
-import com.example.hairSalonBooking.entity.SalonBranch;
+import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.StylistRequest;
-import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
-import com.example.hairSalonBooking.repository.AccountRepository;
+import com.example.hairSalonBooking.repository.*;
 
-import com.example.hairSalonBooking.repository.LevelRepository;
-import com.example.hairSalonBooking.repository.SalonBranchRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +33,10 @@ public class StylistService {
     private LevelRepository levelRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private SkillRepository skillRepository;
+    @Autowired
+    private ServiceRepository serviceRepository;
     public StylistResponse create(StylistRequest stylistRequest) {
         // Chuyển từ StylistRequest sang thực thể Account (hoặc Stylist)
         Account stylist = modelMapper.map(stylistRequest, Account.class);
@@ -50,7 +47,13 @@ public class StylistService {
             Level level  = levelRepository.findLevelByLevelname(stylistRequest.getLevelName());
             stylist.setLevel(level);
             stylist.setRole(Role.STYLIST);
+            Set<Skill> skills = new HashSet<>();
             // Lưu vào database
+            for(Long id : stylistRequest.getSkillId()){
+                Skill skill = skillRepository.findSkillBySkillId(id);
+                skills.add(skill);
+            }
+            stylist.setSkills(skills);
             Account newStylist = accountRepository.save(stylist);
 
             // Chuyển đổi để trả về response
@@ -107,5 +110,8 @@ public class StylistService {
         Account deleteStylist = accountRepository.save(updeStylist);
         return modelMapper.map(deleteStylist, StylistResponse.class);
     }
+
+
+
 
 }

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.time.LocalTime;
 import java.util.Set;
 
 @Data
@@ -14,16 +14,19 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Skill {
+public class Shift {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long skillId;
-    String skillName;
+    long shiftId;
+    LocalTime startTime;
+    LocalTime endTime;
+    int limitBooking;
 
-    @OneToMany(mappedBy = "skill")
+    @ManyToMany
+    @JoinTable(name = "specific_stylist_schedule",
+    joinColumns = @JoinColumn(name = "shift_id"),
+            inverseJoinColumns = @JoinColumn(name = "stylist_schedule_id")
+    )
     @JsonIgnore
-    List<SalonService> services;
-
-    @ManyToMany(mappedBy = "skills")
-    Set<Account> accounts;
+    Set<StylistSchedule> stylistSchedules;
 }

@@ -5,9 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.time.LocalDate;
 import java.util.Set;
-
 
 @Data
 @Builder
@@ -15,21 +14,20 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class SalonBranch {
+public class StylistSchedule {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long salonId;
-    String address;
-    @Column(unique = true)
-    String hotline;
-    boolean isDelete = false;
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    long stylistScheduleId;
+    LocalDate workingDay;
 
-    @OneToMany(mappedBy = "salonBranch")
-    @JsonIgnore
-    Set<Account> accounts;
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    Account account;
 
-    @OneToMany(mappedBy = "salonBranch")
+    @ManyToMany(mappedBy = "stylistSchedules")
+    Set<Shift> shifts;
+
+    @OneToMany(mappedBy = "stylistSchedule")
     @JsonIgnore
     Set<Booking> bookings;
-
 }

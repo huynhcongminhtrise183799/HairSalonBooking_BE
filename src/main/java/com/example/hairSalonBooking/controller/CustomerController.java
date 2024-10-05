@@ -21,12 +21,10 @@ public class CustomerController {
     CustomerService customerService;
 
     @PutMapping("/{AccountId}")
-    public ApiResponse<UpdateCustomerRequest> updateCustomer(
-            @RequestParam("image")MultipartFile file
-            , @PathVariable long AccountId,
-            @Valid @RequestPart("request") UpdateCustomerRequest request){
+    public ApiResponse<UpdateCustomerRequest> updateCustomer(@Valid @RequestBody UpdateCustomerRequest request,
+                                                             @PathVariable long AccountId){
         ApiResponse response = new ApiResponse();
-        response.setResult(customerService.updateCustomer(file,request,AccountId));
+        response.setResult(customerService.updateCustomer(request,AccountId));
         response.setMessage("Update successfully");
         return response;
     }

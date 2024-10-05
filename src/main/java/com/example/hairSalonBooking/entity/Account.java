@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -88,10 +89,29 @@ public class Account implements UserDetails {
 
     @OneToMany(mappedBy = "account")
     @JsonIgnore
-    List<Feedback> feedbacks;
+    Set<Feedback> feedbacks;
+
     @OneToMany(mappedBy = "account")
     @JsonIgnore
-    List<Collections> collections;
+    Set<Collections> collections;
 
+    @ManyToMany
+    @JoinTable(name = "specific_skill",
+    joinColumns = @JoinColumn(name = "account_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id")
+    )
+    @JsonIgnore
+    Set<Skill> skills;
 
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    Set<StylistSchedule> stylistSchedules;
+
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    Set<Booking> bookings;
+
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    Set<SalaryRecord> salaryRecords;
 }

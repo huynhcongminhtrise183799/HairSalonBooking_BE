@@ -23,7 +23,7 @@ public class StylistResponse {
     String fullname;
 
     String phone;
-
+    String image;
     String gender;
 
     String salonAddress;

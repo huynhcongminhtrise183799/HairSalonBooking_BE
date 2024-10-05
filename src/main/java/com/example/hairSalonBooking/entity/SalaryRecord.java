@@ -5,19 +5,20 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Kpi {
+public class SalaryRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long kipId;
-    String yearAndMonth;
-    double revenueGenerated;
-    double performanceScore;
+    long salaryRecordId;
+    double bonusSalary;
+    String monthAndYear;
+    double totalSalary;
+
     @ManyToOne
-    @JoinColumn(name = "level_id")
-    Level level;
+    @JoinColumn(name = "account_id")
+    Account account;
 }

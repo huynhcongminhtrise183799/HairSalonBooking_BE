@@ -15,11 +15,15 @@ import java.time.LocalDate;
 public class Feedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long feedbackid;
-    LocalDate feedbackday;
-    String context;
+    long feedbackId;
+    LocalDate day;
+    String content;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
+
+    @OneToOne
+    @JoinColumn(name = "booking_id")
+    Booking booking;
 }
