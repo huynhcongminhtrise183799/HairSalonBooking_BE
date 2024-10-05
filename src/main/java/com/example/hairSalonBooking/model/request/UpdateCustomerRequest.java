@@ -24,5 +24,6 @@ public class UpdateCustomerRequest {
     String phone;
     @PastOrPresent(message = "INVALID_DOB")
     LocalDate dob;
+    String image;
 
 }

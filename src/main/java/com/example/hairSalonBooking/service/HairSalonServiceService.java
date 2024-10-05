@@ -1,22 +1,22 @@
 package com.example.hairSalonBooking.service;
 
+import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.entity.Skill;
-import com.example.hairSalonBooking.exception.AppException;
-import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateServiceRequest;
+import com.example.hairSalonBooking.model.request.BookingStylits;
 import com.example.hairSalonBooking.model.request.ServiceUpdateRequest;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
+import com.example.hairSalonBooking.model.response.StylistForBooking;
+import com.example.hairSalonBooking.repository.AccountRepository;
 import com.example.hairSalonBooking.repository.ServiceRepository;
 import com.example.hairSalonBooking.repository.SkillRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalTime;
+import java.util.*;
 
 @Service
 public class HairSalonServiceService {
@@ -28,19 +28,30 @@ public class HairSalonServiceService {
     private ImagesService imagesService;
     @Autowired
     private SkillRepository skillRepository;
-    public SalonService createService(MultipartFile file, CreateServiceRequest createServiceRequest) {
-        try {
+    @Autowired
+    private AccountRepository accountRepository;
+    public SalonService createService(CreateServiceRequest createServiceRequest) {
+
             SalonService salonService = modelMapper.map(createServiceRequest, SalonService.class);
-            salonService.setImage(imagesService.uploadImage(file));
+
             Skill skill = skillRepository.findSkillBySkillName(createServiceRequest.getSkillName());
             salonService.setSkill(skill);
             return serviceRepository.save(salonService);
-        }catch (IOException e){
-            throw new AppException(ErrorCode.CAN_NOT_UPLOAD_IMAGE);
-        }
+
     }
-    public List<SalonService> getAllServices(){
-        return serviceRepository.findAll();
+    public List<ServiceResponse> getAllServices(){
+        List<SalonService> services = serviceRepository.findAll();
+        List<ServiceResponse> responses = new ArrayList<>();
+        for(SalonService service : services){
+            ServiceResponse serviceResponse = new ServiceResponse();
+            serviceResponse.setServiceName(service.getServiceName());
+            serviceResponse.setPrice(service.getPrice());
+            serviceResponse.setImage(service.getImage());
+            serviceResponse.setDuration(service.getDuration());
+            serviceResponse.setDescription(service.getDescription());
+            responses.add(serviceResponse);
+        }
+        return responses;
     }
     public List<SalonService> searchServiceByName(String serviceName) {
         return serviceRepository.findByServiceNameContainingIgnoreCase(serviceName);
@@ -63,5 +74,7 @@ public class HairSalonServiceService {
         service.setDuration(request.getDuration());
         return modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
     }
+
+
 
 }

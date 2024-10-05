@@ -24,8 +24,7 @@ public class CustomerService {
     ModelMapper modelMapper;
     @Autowired
     private ImagesService imagesService;
-    public UpdateCustomerRequest updateCustomer(MultipartFile file, UpdateCustomerRequest request, long AccountId){
-        try {
+    public UpdateCustomerRequest updateCustomer(UpdateCustomerRequest request, long AccountId){
             Account account = customerRepository.findAccountByAccountid(AccountId);
             if(account == null){
                 throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
@@ -34,12 +33,10 @@ public class CustomerService {
             account.setPhone(request.getPhone());
             account.setDob(request.getDob());
             account.setEmail(request.getEmail());
-            account.setImage(imagesService.uploadImage(file));
+            account.setImage(request.getImage());
             customerRepository.save(account);
             return request;
-        }catch (IOException e){
-            throw new AppException(ErrorCode.CAN_NOT_UPLOAD_IMAGE);
-        }
+
     }
 
     public ProfileResponse getProfile(){

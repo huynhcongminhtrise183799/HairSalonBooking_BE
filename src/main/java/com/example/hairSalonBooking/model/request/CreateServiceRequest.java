@@ -19,5 +19,6 @@ public class CreateServiceRequest {
     int price;
     String description;
     LocalTime duration;
+    String image;
     String skillName;
 }

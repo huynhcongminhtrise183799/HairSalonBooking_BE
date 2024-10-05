@@ -61,7 +61,7 @@ public class SalonBranchService {
     }
 
     public SalonResponse updateSalon(UpdateSalonRequest request, long id){
-        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonid(id);
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(id);
         if(salonBranch == null){
             throw new AppException(ErrorCode.SALON_NOT_FOUND);
         }
@@ -73,7 +73,7 @@ public class SalonBranchService {
     }
 
     public SalonResponse deleteSalon(long id){
-        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonid(id);
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(id);
         if(salonBranch == null){
             throw new AppException(ErrorCode.SALON_NOT_FOUND);
         }

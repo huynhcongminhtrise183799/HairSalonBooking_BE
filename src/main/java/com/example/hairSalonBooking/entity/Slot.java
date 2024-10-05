@@ -4,14 +4,12 @@ import com.example.hairSalonBooking.service.LocalTimeDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalTime;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -32,4 +30,7 @@ public class Slot {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     boolean deleted = false;
 
+    @OneToMany(mappedBy = "slot")
+    @JsonIgnore
+    Set<Booking> bookings;
 }

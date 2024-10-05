@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -21,8 +22,8 @@ public class Level {
     double salary;
     @OneToMany(mappedBy = "level")
     @JsonIgnore
-    List<Account> accounts;
+    Set<Account> accounts;
     @OneToMany(mappedBy = "level")
     @JsonIgnore
-    List<Kpi> kpis;
+    Set<Kpi> kpis;
 }
