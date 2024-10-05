@@ -2,6 +2,7 @@ package com.example.hairSalonBooking.controller;
 
 
 import com.example.hairSalonBooking.model.request.StylistRequest;
+import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,30 +24,31 @@ public class StylistController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<StylistResponse> createStylist(@Valid @RequestBody StylistRequest stylistRequest) {
-        StylistResponse newStylist = stylistService.create(stylistRequest);
-        return ResponseEntity.ok(newStylist);
+    public ApiResponse<StylistResponse> createStylist(@Valid @RequestBody StylistRequest stylistRequest) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.create(stylistRequest));
+        return response;
     }
 
     @GetMapping("/read")
-    public ResponseEntity getAllStylist() {
-        List<StylistResponse> Stylists = stylistService.getAllStylist();
-        return ResponseEntity.ok(Stylists);
+    List<StylistResponse> getAllStylist() {
+      return stylistService.getAllStylist();
     }
 
     @PutMapping("{accountid}") // Đảm bảo có dấu "/"
-    public ResponseEntity<StylistResponse> updateStylist(
+    public ApiResponse<StylistResponse> updateStylist(
             @PathVariable long accountid, // Sửa tên tham số thành stylistId
             @Valid @RequestBody StylistRequest stylistRequest) { // Sử dụng StylistRequest
-
-        StylistResponse updatedStylist = stylistService.updateStylist(accountid, stylistRequest); // Gọi service
-        return ResponseEntity.ok(updatedStylist); // Trả về StylistResponse
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.updateStylist(accountid, stylistRequest));
+        return response; // Trả về StylistResponse
     }
 
     @DeleteMapping("{accountid}")
-    public ResponseEntity<StylistResponse> deleteStylist(@PathVariable long accountid){ // Sửa tên tham số thành stylistId)
-        StylistResponse deleteStylist = stylistService.deleteStylist(accountid); // Gọi service
-        return ResponseEntity.ok(deleteStylist); // Trả về StylistResponse
+    public ApiResponse<StylistResponse> deleteStylist(@PathVariable long accountid){ // Sửa tên tham số thành stylistId)
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.deleteStylist(accountid));
+        return response;// Trả về StylistResponse
     }
 
 
