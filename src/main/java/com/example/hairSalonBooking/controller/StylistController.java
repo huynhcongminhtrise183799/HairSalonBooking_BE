@@ -2,6 +2,7 @@ package com.example.hairSalonBooking.controller;
 
 
 import com.example.hairSalonBooking.model.request.StylistRequest;
+import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,9 +30,11 @@ public class StylistController {
     }
 
     @GetMapping("/read")
-    public ResponseEntity getAllStylist() {
-        List<StylistResponse> Stylists = stylistService.getAllStylist();
-        return ResponseEntity.ok(Stylists);
+    public ApiResponse<StylistResponse> getAllStylist() {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(stylistService.getAllStylist());
+
+        return apiResponse;
     }
 
     @PutMapping("{accountid}") // Đảm bảo có dấu "/"

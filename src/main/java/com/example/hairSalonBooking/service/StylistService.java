@@ -70,7 +70,7 @@ public class StylistService {
     }
 
     public List<StylistResponse> getAllStylist() {
-        List<Account> Stylists = accountRepository.findAll();
+        List<Account> Stylists = accountRepository.findByRole(Role.STYLIST);
         return Stylists.stream() // Chuyển đổi sang danh sách StylistResponse
                 .map(account -> modelMapper.map(account, StylistResponse.class))
                 .collect(Collectors.toList());// Thu thập kết quả vào danh sách

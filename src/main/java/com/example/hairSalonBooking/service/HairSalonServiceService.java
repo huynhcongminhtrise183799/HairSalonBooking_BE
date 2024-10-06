@@ -5,6 +5,7 @@ import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.entity.Skill;
 import com.example.hairSalonBooking.model.request.CreateServiceRequest;
 import com.example.hairSalonBooking.model.request.BookingStylits;
+import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
 import com.example.hairSalonBooking.model.request.ServiceUpdateRequest;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
@@ -44,6 +45,7 @@ public class HairSalonServiceService {
         List<ServiceResponse> responses = new ArrayList<>();
         for(SalonService service : services){
             ServiceResponse serviceResponse = new ServiceResponse();
+            serviceResponse.setId(service.getServiceId());
             serviceResponse.setServiceName(service.getServiceName());
             serviceResponse.setPrice(service.getPrice());
             serviceResponse.setImage(service.getImage());
@@ -53,8 +55,20 @@ public class HairSalonServiceService {
         }
         return responses;
     }
-    public List<SalonService> searchServiceByName(String serviceName) {
-        return serviceRepository.findByServiceNameContainingIgnoreCase(serviceName);
+    public List<ServiceResponse> searchServiceByName(SearchServiceNameRequest serviceName) {
+        List<SalonService> services = serviceRepository.findByServiceNameContaining(serviceName.getName());
+        List<ServiceResponse> responses = new ArrayList<>();
+        for(SalonService service : services){
+            ServiceResponse response = new ServiceResponse();
+            response.setId(service.getServiceId());
+            response.setServiceName(service.getServiceName());
+            response.setDescription(service.getDescription());
+            response.setPrice(service.getPrice());
+            response.setImage(service.getImage());
+            response.setDuration(service.getDuration());
+            responses.add(response);
+        }
+        return responses;
     }
     public Optional<SalonService> searchServiceId(long serviceId) {
         return serviceRepository.findByServiceId(serviceId)

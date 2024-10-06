@@ -3,6 +3,7 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.model.request.CreateServiceRequest;
 import com.example.hairSalonBooking.model.request.BookingStylits;
+import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
 import com.example.hairSalonBooking.model.request.ServiceUpdateRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
@@ -42,8 +43,11 @@ public class ServiceController {
         return hairSalonServiceService.searchServiceId(serviceId);
     }
     @GetMapping("/searchByName")
-    List<SalonService> SearchServiceName(@RequestParam String serviceName) {
-        return hairSalonServiceService.searchServiceByName(serviceName);
+    ApiResponse<List<ServiceResponse>> SearchServiceName(@RequestBody SearchServiceNameRequest serviceName) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(hairSalonServiceService.searchServiceByName(serviceName));
+
+        return apiResponse;
     }
 
 

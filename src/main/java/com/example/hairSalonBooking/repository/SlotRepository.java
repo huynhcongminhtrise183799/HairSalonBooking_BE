@@ -11,7 +11,7 @@ import java.util.Set;
 public interface SlotRepository extends JpaRepository<Slot, Long> {
 
     Slot findSlotBySlotid(Long slotid);
-    @Query(value = "select * from slot where slot.slottime > ?1\n" +
+    @Query(value = "select * from slot where slot.slottime >= ?1\n" +
             "order by slottime asc",nativeQuery = true)
     List<Slot> getAllSlotCanBooking(LocalTime time);
 
