@@ -35,6 +35,12 @@ public class StylistController {
       return stylistService.getAllStylist();
     }
 
+      @GetMapping("/status")
+    public ResponseEntity getStylistByStatus() {
+        List<StylistResponse> StylistStatus = stylistService.getStylistByStatus();
+        return ResponseEntity.ok(StylistStatus);
+    }
+    
     @PutMapping("{accountid}") // Đảm bảo có dấu "/"
     public ApiResponse<StylistResponse> updateStylist(
             @PathVariable long accountid, // Sửa tên tham số thành stylistId
