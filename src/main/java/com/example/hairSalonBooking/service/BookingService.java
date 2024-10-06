@@ -4,17 +4,17 @@ import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
+import com.example.hairSalonBooking.model.response.ShiftResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.repository.*;
+import jdk.jfr.Frequency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.Collections;
 
 @Service
 public class BookingService {
@@ -34,6 +34,8 @@ public class BookingService {
     private VoucherRepository voucherRepository;
     @Autowired
     private StylistScheduleRepository stylistScheduleRepository;
+    @Autowired
+    private ShiftRepository shiftRepository;
     public Set<StylistForBooking> getStylistForBooking(BookingStylits bookingStylits){
         // tao 1 danh sach skills rong
         Set<Skill> skills = new HashSet<>();
@@ -77,21 +79,23 @@ public class BookingService {
         // lấy ra tất cả các slot có trong database
         List<Slot> allSlot = slotRepository.findAll();
         List<Slot> slotToRemove = new ArrayList<>();
-        // nếu stylist đó chưa có booking nào trong ngày
-        if(allBookingInDay.isEmpty()){
-            for (Slot slot : allSlot){
-                // duyệt qua từng slot xét xem coi thời gian thực có qua thời gian của slot đó chưa
-                LocalTime localTime = LocalTime.now();
-                LocalDate date = LocalDate.now();
-                if(date.isEqual(bookingSlots.getDate())){
-                    // nếu thời gian thực qua thời gian của slot đó r thì add slot đó vào 1 cái list slotToRemove
-                    if(localTime.isAfter(slot.getSlottime())){
-                        slotToRemove.add(slot);
-                    }
+        List<Shift> shifts = new ArrayList<>();
+        for (Slot slot : allSlot){
+            // duyệt qua từng slot xét xem coi thời gian thực có qua thời gian của slot đó chưa
+            LocalTime localTime = LocalTime.now();
+            LocalDate date = LocalDate.now();
+            if(date.isEqual(bookingSlots.getDate())){
+                // nếu thời gian thực qua thời gian của slot đó r thì add slot đó vào 1 cái list slotToRemove
+                if(localTime.isAfter(slot.getSlottime())){
+                    slotToRemove.add(slot);
                 }
             }
+        }
+        // nếu stylist đó chưa có booking nào trong ngày
+        if(allBookingInDay.isEmpty()){
             // xóa tất cả thằng có trong slotToRemove
             allSlot.removeAll(slotToRemove);
+            return allSlot;
         }
         // stylist đã có booking trong ngày
         // tính tổng thời gian để hoàn thành yêu cầu booking mới
@@ -131,6 +135,18 @@ public class BookingService {
             List<Slot> list = slotRepository.getSlotToRemove(time,totalTimeServiceNewBooking.getHour());
             slotToRemove.addAll(list);
             slotToRemove.add(slot);// 10 11
+            // tìm ra list ca làm mà cái booking đó thuộc về
+            List<Shift> shift = shiftRepository.getShiftForBooking(slot.getSlottime(),TimeFinishBooking,booking.getBookingId());
+            // add list vừa tìm đc vào list shifts
+            shifts.addAll(shift);
+        }
+        // tìm xem có ca làm nào đạt limitBooking chưa
+        List<Shift> shiftsReachedBookingLimit = shiftReachedBookingLimit(shifts);
+        for(Shift shift : shiftsReachedBookingLimit){
+            // Tìm ra đc các slots thuộc về ca làm đó
+            List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
+            // add list vừa tìm đc vào slotToRemove
+            slotToRemove.addAll(slots);
         }
         allSlot.removeAll(slotToRemove);
         return allSlot;
@@ -167,4 +183,17 @@ public class BookingService {
         }
         return totalTimeDuration;
     }
+
+    private List<Shift> shiftReachedBookingLimit(List<Shift> shifts){
+        List<Shift> list = new ArrayList<>();
+        Set<Shift> set = new HashSet<>(shifts);
+        for(Shift shift : set){
+            int count = Collections.frequency(shifts,shift);
+            if(count == 4){
+                list.add(shift);
+            }
+        }
+        return list;
+    }
+
 }
