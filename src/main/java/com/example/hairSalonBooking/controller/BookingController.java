@@ -29,13 +29,13 @@ public class BookingController {
     private HairSalonServiceService hairSalonServiceService;
     @Autowired
     private BookingService bookingService;
-    @GetMapping("/booking/stylists")
+    @PostMapping("/booking/stylists")
     public ApiResponse<Set<StylistForBooking>> getListService(@RequestBody BookingStylits bookingStylits){
         ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(bookingService.getListService(bookingStylits));
+        apiResponse.setResult(bookingService.getStylistForBooking(bookingStylits));
         return apiResponse;
     }
-    @GetMapping("/booking/slots")
+    @PostMapping("/booking/slots")
     public ApiResponse<List<Slot>> getListSlots(@RequestBody BookingSlots bookingSlots){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getListSlot(bookingSlots));
