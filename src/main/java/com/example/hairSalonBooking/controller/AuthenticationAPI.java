@@ -7,6 +7,7 @@ import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
+import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.service.AuthenticationService;
@@ -40,21 +41,25 @@ public class AuthenticationAPI {
 
 
     @PostMapping("/register")
-    public ResponseEntity register(@Valid @RequestBody RegisterRequest registerRequest) {
-        AccountResponse newAccount = authenticationService.register(registerRequest);
-        return ResponseEntity.ok(newAccount);
+    ApiResponse <AccountResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        var result = authenticationService.register(registerRequest);
+        return  ApiResponse.<AccountResponse>builder()
+                .result(result)
+                .build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@Valid @RequestBody LoginRequest loginRequest) {
-        AuthenticationResponse newAccount = authenticationService.login(loginRequest);
-        return ResponseEntity.ok(newAccount);
+    ApiResponse<AuthenticationResponse>login(@Valid @RequestBody LoginRequest loginRequest) {
+        var result = authenticationService.login(loginRequest);
+        return  ApiResponse.<AuthenticationResponse>builder()
+                .result(result)
+                .build();
     }
 
     @GetMapping("/account")
-    public ResponseEntity getAllAccount() {
-        List<Account> accounts = authenticationService.getAllAccount();
-        return ResponseEntity.ok(accounts);
+    List<Account>getAllAccount() {
+
+        return authenticationService.getAllAccount();
     }
 
 

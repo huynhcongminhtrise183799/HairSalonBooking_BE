@@ -1,12 +1,14 @@
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.entity.Booking;
+import com.example.hairSalonBooking.entity.Shift;
 import com.example.hairSalonBooking.entity.Slot;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.BookingResponse;
+import com.example.hairSalonBooking.model.response.ShiftResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.service.BookingService;
 import com.example.hairSalonBooking.service.HairSalonServiceService;

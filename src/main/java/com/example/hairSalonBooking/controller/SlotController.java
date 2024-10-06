@@ -5,6 +5,7 @@ import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.entity.Slot;
 //import com.example.hairSalonBooking.service.SlotService;
 import com.example.hairSalonBooking.model.response.ApiResponse;
+import com.example.hairSalonBooking.model.response.SalonResponse;
 import com.example.hairSalonBooking.service.SlotService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -26,28 +27,30 @@ public class SlotController {
     SlotService slotService;
 
     @PostMapping("/create")
-    public ResponseEntity createSlot(@Valid @RequestBody Slot slot) {
-        Slot newSlot = slotService.create(slot);
-        return ResponseEntity.ok(newSlot);
+    ApiResponse<SalonResponse> createSlot(@Valid @RequestBody Slot slot) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(slotService.create(slot));
+        return response; // Trả về apiResponse
     }
 
+
     @GetMapping("/read")
-    public ResponseEntity getAllSlot() {
-        List<Slot> slots = slotService.getAllSlot();
-        return ResponseEntity.ok(slots);
+    List<Slot> getAllSlot() {
+        return slotService.getAllSlot();
     }
 
     @PutMapping("{slotid}")
-    public ResponseEntity updateSlot(@PathVariable long slotid,@Valid @RequestBody Slot slot) {
-
-        Slot updateStudent = slotService.update(slotid, slot);
-        return ResponseEntity.ok(updateStudent);
+    ApiResponse <SalonResponse> updateSlot(@PathVariable long slotid,@Valid @RequestBody Slot slot) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(slotService.update(slotid,slot));
+        return response;
 
     }
     @DeleteMapping("{slotid}")
-    public ResponseEntity deleteSlot(@PathVariable long slotid ) {
-        Slot deleteStudent = slotService.delete(slotid);
-        return ResponseEntity.ok(deleteStudent);
+    ApiResponse <SalonResponse> deleteSlot(@PathVariable long slotid ) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(slotService.delete(slotid));
+        return response;
     }
 
     /*@GetMapping("/booking/{workingDate}/{stylistId}")
