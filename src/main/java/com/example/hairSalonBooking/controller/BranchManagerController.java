@@ -49,6 +49,7 @@ public class BranchManagerController {
         return response;
     }
 
+    // Hàm này để lấy tất cả booking của stylist theo Chi nhánh bạn chọn
     @GetMapping("/managers/stylist")
     public ApiResponse<List<BookingResponse>> getAllBookingsForStylistInBranch(@RequestParam Long branchId) {
         ApiResponse<List<BookingResponse>> response = new ApiResponse<>();
