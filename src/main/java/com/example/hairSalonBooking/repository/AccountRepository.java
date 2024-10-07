@@ -30,6 +30,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
 
     List<Account> findByRole(Role role);
+    List<Account> findAllByRole(Role role);
+
 
     @Query(value = "select ac.* from account ac\n" +
             "inner join specific_skill ss\n" +
@@ -48,7 +50,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "            inner join stylist_schedule ssch\n" +
             "            on ac.accountid = ssch.account_id\n" +
             "            where ss.service_id = ?1 and ssch.working_day = ?2 and ac.salon_id = ?3",nativeQuery = true)
-    List<Account> getStylistForBooking(long serviceId, LocalDate workingDay, long salonId);
+    List<Account> getStylistForBooking(long serviceId, LocalDate date, long salonId);
 
 
 

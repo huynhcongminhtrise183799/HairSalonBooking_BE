@@ -1,6 +1,8 @@
 package com.example.hairSalonBooking.repository;
 
+import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.entity.Booking;
+import com.example.hairSalonBooking.entity.SalonBranch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,5 +31,5 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
 
     @Query("SELECT b FROM Booking b WHERE b.account.accountid = :stylistId AND b.account.role = 'STYLIST' AND b.bookingDay = :today")
     List<Booking> findBookingsByStylistAndDate(@Param("stylistId") Long stylistId, @Param("today") LocalDate today);
-
+    List<Booking> findAllByAccountInAndSalonBranch(List<Account> stylists, SalonBranch branch);
 }

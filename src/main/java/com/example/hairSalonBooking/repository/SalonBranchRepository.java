@@ -1,10 +1,13 @@
 package com.example.hairSalonBooking.repository;
 
+import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.entity.SalonBranch;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface SalonBranchRepository extends JpaRepository<SalonBranch,Long> {

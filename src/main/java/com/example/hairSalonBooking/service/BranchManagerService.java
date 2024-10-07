@@ -1,22 +1,28 @@
 package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.entity.SalonBranch;
+import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateManagerRequest;
 import com.example.hairSalonBooking.model.request.UpdateManagerRequest;
+import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.ManagerResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
+import com.example.hairSalonBooking.repository.BookingRepository;
 import com.example.hairSalonBooking.repository.SalonBranchRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BranchManagerService {
@@ -28,6 +34,8 @@ public class BranchManagerService {
     private ModelMapper modelMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private BookingRepository bookingRepository;
 
     public ManagerResponse createManager(CreateManagerRequest request){
         Account account  = modelMapper.map(request,Account.class);
@@ -116,5 +124,30 @@ public class BranchManagerService {
                 .isDelete(account.isDeleted())
                 .build();
         return response;
+    }
+
+    public List<BookingResponse> getAllBookingsForStylistsInBranch(Long branchId) {
+        // Kiểm tra xem chi nhánh có tồn tại không
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Lấy tất cả các stylist trong chi nhánh
+        List<Account> stylists = accountRepository.findAllByRole(Role.STYLIST);
+
+        // Lấy danh sách booking của các stylist trong chi nhánh
+        List<Booking> bookings = bookingRepository.findAllByAccountInAndSalonBranch(stylists, branch);
+
+        // Chuyển đổi danh sách Booking thành BookingResponse
+        return bookings.stream()
+                .map(booking -> new BookingResponse(
+                        booking.getSalonBranch().getAddress(),
+                        booking.getAccount().getFullname(),
+                        booking.getBookingDay(),
+                        booking.getSlot().getSlottime(),
+                        booking.getServices().stream()
+                                .map(SalonService::getServiceName)
+                                .collect(Collectors.toSet())
+                ))
+                .collect(Collectors.toList());
     }
 }
