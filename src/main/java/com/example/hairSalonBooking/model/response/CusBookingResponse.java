@@ -1,6 +1,9 @@
 package com.example.hairSalonBooking.model.response;
 
 import com.example.hairSalonBooking.entity.SalonService;
+import com.example.hairSalonBooking.enums.BookingStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,10 +18,12 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookingResponse {
+public class CusBookingResponse {
     String salonName;
     String stylistName;
     LocalDate date;
     LocalTime time;
-    Set<SalonService> serviceName;
+    Set<SalonServiceCusResponse> serviceName;
+    @Enumerated(EnumType.STRING)
+    BookingStatus status;
 }

@@ -37,8 +37,11 @@ public class StylistService {
     private SkillRepository skillRepository;
     @Autowired
     private ServiceRepository serviceRepository;
+
+
+
     public StylistResponse create(StylistRequest stylistRequest) {
-        // Chuyển từ StylistRequest sang thực thể Account (hoặc Stylist)
+        // Chuyển từ StylistRequest sang thực thể Account
         Account stylist = modelMapper.map(stylistRequest, Account.class);
         try{
             stylist.setPassword(passwordEncoder.encode(stylistRequest.getPassword()));
@@ -70,16 +73,23 @@ public class StylistService {
     }
 
     public List<StylistResponse> getAllStylist() {
-        List<Account> Stylists = accountRepository.findAll();
-        return Stylists.stream() // Chuyển đổi sang danh sách StylistResponse
+        List<Account> stylists = accountRepository.findByRole(Role.STYLIST);
+        return stylists.stream() // Chuyển đổi sang danh sách StylistResponse
                 .map(account -> modelMapper.map(account, StylistResponse.class))
-                .collect(Collectors.toList());// Thu thập kết quả vào danh sách
+                .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
     }
 
+    public List<StylistResponse> getStylistByStatus() {
+        List<Account> StylistStatus = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
+        return StylistStatus.stream()
+                .map(account -> modelMapper.map(account, StylistResponse.class))
+                .collect(Collectors.toList());
+    }
 
     public StylistResponse updateStylist(long accountid, StylistRequest stylistRequest) {
         //tìm ra thằng stylist cần đc update thông qua ID
         Account updeStylist = accountRepository.findAccountByAccountid(accountid);
+        updeStylist.setRole(Role.STYLIST);
         if (updeStylist == null) {
             // Handle the case when the stylist is not found
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
@@ -102,6 +112,7 @@ public class StylistService {
     public StylistResponse deleteStylist(long accountid) {
         // đầu tiên mình tìm thằng cần Delete qua ID
         Account updeStylist = accountRepository.findAccountByAccountid(accountid);
+        updeStylist.setRole(Role.STYLIST);
         if (updeStylist == null) {
             // Handle the case when the stylist is not found
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
