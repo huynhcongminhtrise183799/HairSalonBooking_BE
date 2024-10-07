@@ -126,6 +126,7 @@ public class BranchManagerService {
         return response;
     }
 
+    // cái này để lấy tất cả các booking của stylist theo chi nhánh 
     public List<BookingResponse> getAllBookingsForStylistsInBranch(Long branchId) {
         // Kiểm tra xem chi nhánh có tồn tại không
         SalonBranch branch = salonBranchRepository.findById(branchId)
