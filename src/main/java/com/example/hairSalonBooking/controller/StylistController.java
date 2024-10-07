@@ -50,7 +50,11 @@ public class StylistController {
         response.setResult(stylistService.deleteStylist(accountid));
         return response;// Trả về StylistResponse
     }
-
+    @GetMapping("/status")
+    public ResponseEntity getStylistByStatus() {
+        List<StylistResponse> StylistStatus = stylistService.getStylistByStatus();
+        return ResponseEntity.ok(StylistStatus);
+    }
 
 
 

@@ -48,5 +48,24 @@ public class BookingController {
         apiResponse.setResult(bookingService.createNewBooking(request));
         return apiResponse;
     }
+    @GetMapping("/customer/{accountId}/pending")
+    public ApiResponse<List<Booking>> getPendingBookings(@PathVariable Long accountId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getBookingByStatusPendingByCustomer(accountId));
+        return apiResponse;
+    }
+    @GetMapping("/customer/{accountId}/in-progress")
+    public ApiResponse<List<Booking>> getInProcessBookings(@PathVariable Long accountId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getBookingByStatusIN_PROGRESSByCustomer(accountId));
+        return apiResponse;
+    }
+    @GetMapping("/customer/{accountId}/completed")
+    public ApiResponse<List<Booking>> getCompleteBookings(@PathVariable Long accountId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getBookingByStatusCompletedByCustomer(accountId));
+        return apiResponse;
+    }
+
 
 }
