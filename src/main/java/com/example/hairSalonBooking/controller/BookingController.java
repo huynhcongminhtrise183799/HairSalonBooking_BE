@@ -50,6 +50,18 @@ public class BookingController {
         apiResponse.setResult(bookingService.createNewBooking(request));
         return apiResponse;
     }
+    @PutMapping("/booking/{bookingId}")
+    public ApiResponse<Booking> updateBooking(@PathVariable long bookingId,@RequestBody BookingRequest request){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.updateBooking(bookingId,request));
+        return apiResponse;
+    }
+    @DeleteMapping("/booking/{bookingId}")
+    public ApiResponse createBooking(@PathVariable Long bookingId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.deleteBooking(bookingId));
+        return apiResponse;
+    }
     // lay ra theo trang thai
     @GetMapping("/customer/{accountId}/pending")
     public ApiResponse<List<Booking>> getPendingBookings(@PathVariable Long accountId){
@@ -70,11 +82,11 @@ public class BookingController {
         return apiResponse;
     }
     // controller checkin
-//    @PutMapping("/{bookingId}/checkin")
-//    public ApiResponse<Booking> checkIn(@PathVariable Long bookingId) {
-//         ApiResponse apiResponse = new ApiResponse<>();
-//         apiResponse.setResult(bookingService.checkIn(bookingId));
-//         return apiResponse;
-//    }
+    /*@PutMapping("/{bookingId}/checkin")
+    public ApiResponse<Booking> checkIn(@PathVariable Long bookingId) {
+         ApiResponse apiResponse = new ApiResponse<>();
+         apiResponse.setResult(bookingService.checkIn(bookingId));
+         return apiResponse;
+    }*/
 
 }
