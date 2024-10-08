@@ -1,11 +1,13 @@
 package com.example.hairSalonBooking.entity;
 
+import com.example.hairSalonBooking.enums.BookingStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 
 @Data
@@ -19,7 +21,6 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long bookingId;
     LocalDate bookingDay;
-
     @ManyToOne
     @JoinColumn(name = "salon_id")
     SalonBranch salonBranch;
@@ -40,13 +41,13 @@ public class Booking {
     @JoinColumn(name = "voucher_id")
     Voucher voucher;
 
-    int status;
+    @Enumerated(EnumType.STRING)
+    BookingStatus status;
 
     @ManyToMany
     @JoinTable(name = "booking_detail",
-    joinColumns = @JoinColumn(name = "booking_id"),
+            joinColumns = @JoinColumn(name = "booking_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
-
     )
     @JsonIgnore
     Set<SalonService> services;

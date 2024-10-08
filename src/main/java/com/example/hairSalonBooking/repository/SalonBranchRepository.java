@@ -18,4 +18,5 @@ public interface SalonBranchRepository extends JpaRepository<SalonBranch,Long> {
     @Query("select sb from SalonBranch sb where sb.address = ?1")
     @Transactional
     SalonBranch findSalonBranchByAddressIsDeleteFalse(String address);
+
 }

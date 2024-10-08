@@ -19,12 +19,11 @@ import java.time.LocalTime;
 public class ServiceResponse {
 
     long id;
-
     String serviceName;
     int price;
     String description;
     LocalTime duration;
-
     String image;
+    String skillName;
 
 }

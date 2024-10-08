@@ -38,9 +38,8 @@ public class ServiceController {
     private HairSalonServiceService  hairSalonServiceService;
 
     @PostMapping
-
-    ApiResponse<SalonService> createService(@Valid @RequestBody CreateServiceRequest Request) {
-        ApiResponse<SalonService> apiResponse = new ApiResponse<>();
+    ApiResponse<ServiceResponse> createService(@Valid @RequestBody CreateServiceRequest Request) {
+        ApiResponse<ServiceResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(hairSalonServiceService.createService(Request));
         return apiResponse;
     }
@@ -48,7 +47,7 @@ public class ServiceController {
     @GetMapping
     ApiResponse<List<ServiceResponse>> getAllServices() {
         ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(hairSalonServiceService.getAllServices());
+        apiResponse.setResult(hairSalonServiceService.getAllServicesActive());
         return apiResponse;
     }
 
@@ -64,13 +63,13 @@ public class ServiceController {
     }
 
 
-    @DeleteMapping("/delete")
-    String deleteUser(@RequestParam Long serviceId) {
+    @DeleteMapping("/delete/{serviceId}")
+    String deleteUser(@PathVariable long serviceId) {
         hairSalonServiceService.deleteService(serviceId);
         return "service deleted";
     }
-    @PutMapping("/update")
-    public ServiceResponse updateService(@RequestParam long serviceId, @RequestBody ServiceUpdateRequest request) {
+    @PutMapping("/update/{serviceId}")
+    public ServiceResponse updateService(@PathVariable long serviceId, @RequestBody ServiceUpdateRequest request) {
         return hairSalonServiceService.updateService(serviceId, request);
     }
 

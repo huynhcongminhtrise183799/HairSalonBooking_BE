@@ -2,6 +2,7 @@ package com.example.hairSalonBooking.controller;
 
 
 import com.example.hairSalonBooking.model.request.StylistRequest;
+import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.service.StylistService;
@@ -49,7 +50,7 @@ public class StylistController {
     @PutMapping("{accountid}") // Đảm bảo có dấu "/"
     public ApiResponse<StylistResponse> updateStylist(
             @PathVariable long accountid, // Sửa tên tham số thành stylistId
-            @Valid @RequestBody StylistRequest stylistRequest) { // Sử dụng StylistRequest
+            @Valid @RequestBody UpdateStylistRequest stylistRequest) { // Sử dụng UpdateStylistRequest
         ApiResponse response = new ApiResponse<>();
         response.setResult(stylistService.updateStylist(accountid, stylistRequest));
         return response; // Trả về StylistResponse
