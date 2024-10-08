@@ -19,6 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CusBookingResponse {
+    long bookingId;
     String salonName;
     String stylistName;
     LocalDate date;

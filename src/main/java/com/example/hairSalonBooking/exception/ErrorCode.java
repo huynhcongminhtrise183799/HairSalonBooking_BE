@@ -48,6 +48,7 @@ public enum ErrorCode {
     PRICE_NO_BLANK(1029, "Price can not be blank"),
 
     CAN_NOT_UPLOAD_IMAGE(1030,"Can't not upload image"),
+    BOOKING_NOT_FOUND(1031,"Booking not found")
     ;
     int code;
     String message;

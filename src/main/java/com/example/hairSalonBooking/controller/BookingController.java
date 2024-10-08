@@ -48,6 +48,7 @@ public class BookingController {
         apiResponse.setResult(bookingService.createNewBooking(request));
         return apiResponse;
     }
+    // lay ra theo trang thai
     @GetMapping("/customer/{accountId}/pending")
     public ApiResponse<List<Booking>> getPendingBookings(@PathVariable Long accountId){
         ApiResponse apiResponse = new ApiResponse<>();
@@ -66,6 +67,12 @@ public class BookingController {
         apiResponse.setResult(bookingService.getBookingByStatusCompletedByCustomer(accountId));
         return apiResponse;
     }
-
+    // controller checkin
+    @PutMapping("/{bookingId}/checkin")
+    public ApiResponse<Booking> checkIn(@PathVariable Long bookingId) {
+         ApiResponse apiResponse = new ApiResponse<>();
+         apiResponse.setResult(bookingService.checkIn(bookingId));
+         return apiResponse;
+    }
 
 }
