@@ -7,6 +7,7 @@ import com.example.hairSalonBooking.model.request.CreateServiceRequest;
 import com.example.hairSalonBooking.model.request.BookingStylits;
 import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
 import com.example.hairSalonBooking.model.request.ServiceUpdateRequest;
+import com.example.hairSalonBooking.model.response.SalonResponse;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.repository.AccountRepository;
@@ -31,17 +32,31 @@ public class HairSalonServiceService {
     private SkillRepository skillRepository;
     @Autowired
     private AccountRepository accountRepository;
-    public SalonService createService(CreateServiceRequest createServiceRequest) {
+    public ServiceResponse createService(CreateServiceRequest createServiceRequest) {
 
-        SalonService salonService = modelMapper.map(createServiceRequest, SalonService.class);
-
-        Skill skill = skillRepository.findSkillBySkillName(createServiceRequest.getSkillName());
+        //SalonService salonService = modelMapper.map(createServiceRequest, SalonService.class);
+        SalonService salonService = new SalonService();
+        salonService.setPrice(createServiceRequest.getPrice());
+        salonService.setDuration(createServiceRequest.getDuration());
+        salonService.setDescription(createServiceRequest.getDescription());
+        salonService.setImage(createServiceRequest.getImage());
+        salonService.setServiceName(createServiceRequest.getServiceName());
+        Skill skill = skillRepository.findSkillBySkillId(createServiceRequest.getSkillId());
         salonService.setSkill(skill);
-        return serviceRepository.save(salonService);
+        serviceRepository.save(salonService);
+        ServiceResponse response = new ServiceResponse();
+        response.setId(salonService.getServiceId());
+        response.setServiceName(salonService.getServiceName());
+        response.setDescription(salonService.getDescription());
+        response.setPrice(salonService.getPrice());
+        response.setDuration(salonService.getDuration());
+        response.setImage(salonService.getImage());
+        response.setSkillName(salonService.getSkill().getSkillName());
+        return response;
 
     }
-    public List<ServiceResponse> getAllServices(){
-        List<SalonService> services = serviceRepository.findAll();
+    public List<ServiceResponse> getAllServicesActive(){
+        List<SalonService> services = serviceRepository.findByIsDeleteFalse();
         List<ServiceResponse> responses = new ArrayList<>();
         for(SalonService service : services){
             ServiceResponse serviceResponse = new ServiceResponse();
@@ -77,7 +92,9 @@ public class HairSalonServiceService {
                 });
     }
     public void deleteService(long serviceId) {
-        serviceRepository.deleteById(serviceId);
+        SalonService salonService = serviceRepository.getServiceById(serviceId);
+        salonService.setDelete(true);
+        serviceRepository.save(salonService);
     }
     public ServiceResponse updateService(long ServiceId, ServiceUpdateRequest request){
         SalonService service = serviceRepository.findByServiceId(ServiceId)
@@ -86,6 +103,8 @@ public class HairSalonServiceService {
         service.setPrice(request.getPrice());
         service.setDescription(request.getDescription());
         service.setDuration(request.getDuration());
+        service.setImage(request.getImage());
+        service.setDelete(request.isDelelte());
         return modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
     }
 

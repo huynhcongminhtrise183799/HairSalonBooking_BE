@@ -23,11 +23,11 @@ public class Slot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long slotid;
 
-    @JsonDeserialize(using = LocalTimeDeserializer.class)
+    //    @JsonDeserialize(using = LocalTimeDeserializer.class)
     LocalTime slottime;
 
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+
     boolean deleted = false;
 
     @OneToMany(mappedBy = "slot")

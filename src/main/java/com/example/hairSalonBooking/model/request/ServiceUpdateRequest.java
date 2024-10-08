@@ -21,4 +21,6 @@ public class ServiceUpdateRequest {
     int price;
     String description;
     LocalTime duration;
+    String image;
+    boolean isDelelte = false;
 }
