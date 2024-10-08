@@ -33,11 +33,11 @@ public class HairSalonServiceService {
     private AccountRepository accountRepository;
     public SalonService createService(CreateServiceRequest createServiceRequest) {
 
-            SalonService salonService = modelMapper.map(createServiceRequest, SalonService.class);
+        SalonService salonService = modelMapper.map(createServiceRequest, SalonService.class);
 
-            Skill skill = skillRepository.findSkillBySkillName(createServiceRequest.getSkillName());
-            salonService.setSkill(skill);
-            return serviceRepository.save(salonService);
+        Skill skill = skillRepository.findSkillBySkillName(createServiceRequest.getSkillName());
+        salonService.setSkill(skill);
+        return serviceRepository.save(salonService);
 
     }
     public List<ServiceResponse> getAllServices(){
