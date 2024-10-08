@@ -1,5 +1,9 @@
 package com.example.hairSalonBooking.model.response;
 
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,10 +17,14 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ServiceResponse {
+
     long id;
+
     String serviceName;
     int price;
     String description;
     LocalTime duration;
+
     String image;
+
 }

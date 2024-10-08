@@ -8,12 +8,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalTime;
+
+import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.entity.SalonService;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
+
+
 import java.util.List;
 import java.util.Optional;
 
 public interface ServiceRepository extends JpaRepository<SalonService,Long> {
     Optional<SalonService> findByServiceName(String serviceName);
     Optional<SalonService> findByServiceId(long serviceId);
+
 
     List<SalonService> findByServiceNameContaining(String name);
     @Query(value = "select ss.* from salon_service ss\n" +
@@ -29,4 +39,8 @@ public interface ServiceRepository extends JpaRepository<SalonService,Long> {
     LocalTime  getTotalTime(long bookingId);
     @Query(value = "select * from salon_service s where s.service_id = ?1",nativeQuery = true)
     SalonService getServiceById(long id);
+
+    @Query("SELECT s FROM SalonService s WHERE LOWER(s.serviceName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<SalonService> findByServiceNameContainingIgnoreCase(@Param("keyword") String keyword);
+
 }

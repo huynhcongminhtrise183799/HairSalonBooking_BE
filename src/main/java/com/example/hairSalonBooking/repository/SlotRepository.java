@@ -24,7 +24,7 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
     List<Slot> getSlotToRemove(LocalTime time, int limit);
     @Query(value = "SELECT DISTINCT s.*\n" +
             "FROM slot s\n" +
-            "JOIN specific_stylist_schedule sss ON sss.shift_id = ?1  -- Thay số cụ thể ở đây\n" +
+            "JOIN specific_stylist_schedule sss ON sss.shift_id = ?1\n" +
             "JOIN shift sh ON sss.shift_id = sh.shift_id\n" +
             "WHERE s.slottime >= sh.start_time AND s.slottime < sh.end_time;",nativeQuery = true)
     List<Slot> getSlotsInShift(long id);

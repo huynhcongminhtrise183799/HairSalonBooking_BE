@@ -37,6 +37,10 @@ public class StylistRequest {
 
     String levelName;
 
+
     Set<Long> skillId;
+
+
+    boolean isDelete = false;
 
 }

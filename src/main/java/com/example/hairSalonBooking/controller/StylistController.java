@@ -38,12 +38,13 @@ public class StylistController {
         return apiResponse;
 
     }
-
-      @GetMapping("/status")
-    public ResponseEntity getStylistByStatus() {
+    
+    @GetMapping("/status")
+    public ResponseEntity getStylistByStatus() {        
         List<StylistResponse> StylistStatus = stylistService.getStylistByStatus();
         return ResponseEntity.ok(StylistStatus);
     }
+
     
     @PutMapping("{accountid}") // Đảm bảo có dấu "/"
     public ApiResponse<StylistResponse> updateStylist(
