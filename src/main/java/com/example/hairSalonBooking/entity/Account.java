@@ -97,7 +97,7 @@ public class Account implements UserDetails {
 
     @ManyToMany
     @JoinTable(name = "specific_skill",
-    joinColumns = @JoinColumn(name = "account_id"),
+            joinColumns = @JoinColumn(name = "account_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
     @JsonIgnore
