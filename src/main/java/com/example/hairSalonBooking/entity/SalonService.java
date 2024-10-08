@@ -33,5 +33,6 @@ public class SalonService {
 
     @ManyToMany(mappedBy = "services")
     Set<Booking> bookings;
+    boolean isDelete = false;
 
 }

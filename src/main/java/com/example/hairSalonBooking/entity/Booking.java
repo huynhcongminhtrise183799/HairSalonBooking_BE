@@ -47,7 +47,6 @@ public class Booking {
     @JoinTable(name = "booking_detail",
     joinColumns = @JoinColumn(name = "booking_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
-
     )
     @JsonIgnore
     Set<SalonService> services;
