@@ -27,5 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "order by b.booking_id desc\n" +
             "limit 1 ",nativeQuery = true)
     Booking bookingNearest(LocalDate date, long stylistId);
+
     List<Booking> findByAccountAndStatus(Account account, BookingStatus status);
+    Booking findBookingByBookingId(long bookingId);
 }

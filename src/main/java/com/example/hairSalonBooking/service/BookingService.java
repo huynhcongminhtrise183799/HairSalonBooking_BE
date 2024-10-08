@@ -3,6 +3,8 @@ package com.example.hairSalonBooking.service;
 import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.BookingStatus;
 import com.example.hairSalonBooking.enums.Role;
+import com.example.hairSalonBooking.exception.AppException;
+import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
@@ -158,6 +160,7 @@ public class BookingService {
         return status.stream()
                 .map(booking -> {
                     CusBookingResponse response = new CusBookingResponse();
+                    response.setBookingId(booking.getBookingId());
                     response.setSalonName(booking.getSalonBranch() != null ? booking.getSalonBranch().getAddress() : null);
                     response.setStylistName(booking.getStylistSchedule() != null ? booking.getStylistSchedule().getAccount().getFullname() : null);
                     response.setDate(booking.getBookingDay());
@@ -175,6 +178,29 @@ public class BookingService {
                 })
                 .collect(Collectors.toList());
     }
+    private CusBookingResponse createCusBookingResponse(Booking booking) {
+        CusBookingResponse response = new CusBookingResponse();
+        response.setBookingId(booking.getBookingId());
+        response.setSalonName(booking.getSalonBranch() != null ? booking.getSalonBranch().getAddress() : null);
+        response.setStylistName(booking.getStylistSchedule() != null ? booking.getStylistSchedule().getAccount().getFullname() : null);
+        response.setDate(booking.getBookingDay());
+        response.setTime(booking.getSlot() != null ? booking.getSlot().getSlottime() : null);
+
+        // Map services to SalonServiceCusResponse
+        Set<SalonServiceCusResponse> serviceDTOs = booking.getServices().stream()
+                .map(service -> new SalonServiceCusResponse(
+                        service.getServiceName(),
+                        service.getPrice(),
+                        service.getDuration()
+                ))
+                .collect(Collectors.toSet());
+
+        response.setServiceName(serviceDTOs);  // This should now correctly map services
+        response.setStatus(booking.getStatus());
+
+        return response;
+    }
+
     public List<CusBookingResponse> getBookingByStatusPendingByCustomer(Long accountid) {
         Account account = new Account();
         account.setAccountid(accountid);
@@ -193,5 +219,16 @@ public class BookingService {
         List<Booking> status = bookingRepository.findByAccountAndStatus(account, BookingStatus.COMPLETED);
         return getBookingResponses(status);
     }
+    public CusBookingResponse checkIn(Long bookingId){
+        Booking booking = bookingRepository.findBookingByBookingId(bookingId);
+        if(booking == null){
+            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+        }
+        if(booking.getStatus() == BookingStatus.PENDING){
+            booking.setStatus(BookingStatus.IN_PROGRESS);
+            bookingRepository.save(booking);
+        }
+        return createCusBookingResponse(booking);
 
+    }
 }
