@@ -18,7 +18,7 @@ public class Feedback {
     long feedbackId;
     LocalDate day;
     String content;
-
+    double score;
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;

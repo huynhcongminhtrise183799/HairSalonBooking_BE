@@ -40,12 +40,13 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "voucher_id")
     Voucher voucher;
+
     @Enumerated(EnumType.STRING)
     BookingStatus status;
 
     @ManyToMany
     @JoinTable(name = "booking_detail",
-    joinColumns = @JoinColumn(name = "booking_id"),
+            joinColumns = @JoinColumn(name = "booking_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
     @JsonIgnore

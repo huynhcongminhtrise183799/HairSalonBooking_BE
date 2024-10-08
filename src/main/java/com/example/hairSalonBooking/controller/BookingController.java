@@ -1,12 +1,14 @@
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.entity.Booking;
+import com.example.hairSalonBooking.entity.Shift;
 import com.example.hairSalonBooking.entity.Slot;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.BookingResponse;
+import com.example.hairSalonBooking.model.response.ShiftResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.service.BookingService;
 import com.example.hairSalonBooking.service.HairSalonServiceService;
@@ -29,13 +31,13 @@ public class BookingController {
     private HairSalonServiceService hairSalonServiceService;
     @Autowired
     private BookingService bookingService;
-    @GetMapping("/booking/stylists")
+    @PostMapping("/booking/stylists")
     public ApiResponse<Set<StylistForBooking>> getListService(@RequestBody BookingStylits bookingStylits){
         ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(bookingService.getListService(bookingStylits));
+        apiResponse.setResult(bookingService.getStylistForBooking(bookingStylits));
         return apiResponse;
     }
-    @GetMapping("/booking/slots")
+    @PostMapping("/booking/slots")
     public ApiResponse<List<Slot>> getListSlots(@RequestBody BookingSlots bookingSlots){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getListSlot(bookingSlots));
@@ -55,12 +57,12 @@ public class BookingController {
         apiResponse.setResult(bookingService.getBookingByStatusPendingByCustomer(accountId));
         return apiResponse;
     }
-    @GetMapping("/customer/{accountId}/in-progress")
-    public ApiResponse<List<Booking>> getInProcessBookings(@PathVariable Long accountId){
-        ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(bookingService.getBookingByStatusIN_PROGRESSByCustomer(accountId));
-        return apiResponse;
-    }
+//    @GetMapping("/customer/{accountId}/in-progress")
+//    public ApiResponse<List<Booking>> getInProcessBookings(@PathVariable Long accountId){
+//        ApiResponse apiResponse = new ApiResponse<>();
+//        apiResponse.setResult(bookingService.getBookingByStatusIN_PROGRESSByCustomer(accountId));
+//        return apiResponse;
+//    }
     @GetMapping("/customer/{accountId}/completed")
     public ApiResponse<List<Booking>> getCompleteBookings(@PathVariable Long accountId){
         ApiResponse apiResponse = new ApiResponse<>();
@@ -68,11 +70,11 @@ public class BookingController {
         return apiResponse;
     }
     // controller checkin
-    @PutMapping("/{bookingId}/checkin")
-    public ApiResponse<Booking> checkIn(@PathVariable Long bookingId) {
-         ApiResponse apiResponse = new ApiResponse<>();
-         apiResponse.setResult(bookingService.checkIn(bookingId));
-         return apiResponse;
-    }
+//    @PutMapping("/{bookingId}/checkin")
+//    public ApiResponse<Booking> checkIn(@PathVariable Long bookingId) {
+//         ApiResponse apiResponse = new ApiResponse<>();
+//         apiResponse.setResult(bookingService.checkIn(bookingId));
+//         return apiResponse;
+//    }
 
 }

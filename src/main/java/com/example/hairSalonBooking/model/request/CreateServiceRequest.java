@@ -1,5 +1,11 @@
 package com.example.hairSalonBooking.model.request;
 
+
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -20,5 +26,6 @@ public class CreateServiceRequest {
     String description;
     LocalTime duration;
     String image;
-    String skillName;
+    long skillId;
+
 }

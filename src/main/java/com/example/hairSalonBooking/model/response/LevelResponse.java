@@ -4,12 +4,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
-public class StylistForBooking {
+public class LevelResponse {
     long id;
-    String fullname;
-    String image;
+    String name;
 }

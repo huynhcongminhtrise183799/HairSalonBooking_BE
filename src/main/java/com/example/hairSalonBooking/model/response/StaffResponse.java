@@ -1,5 +1,8 @@
 package com.example.hairSalonBooking.model.response;
 
+
+import jakarta.validation.constraints.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

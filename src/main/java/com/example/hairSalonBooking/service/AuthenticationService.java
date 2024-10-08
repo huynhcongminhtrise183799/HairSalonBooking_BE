@@ -29,8 +29,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
-
 
 @Slf4j
 @Service
@@ -69,7 +72,7 @@ public class AuthenticationService implements UserDetailsService {
 //                .build();
 //    }
 
-    public AccountResponse register(RegisterRequest registerRequest) {
+    public AccountResponse register(@Valid RegisterRequest registerRequest) {
         if(!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
@@ -92,7 +95,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-   public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
+    public AuthenticationResponse login(LoginRequest loginRequest) { // xac minh xem username va password co trong database hay khong
         Account account; // Declare account here to make it accessible later
         try {
             // Authenticate the username and password

@@ -24,7 +24,7 @@ public class Shift {
 
     @ManyToMany
     @JoinTable(name = "specific_stylist_schedule",
-    joinColumns = @JoinColumn(name = "shift_id"),
+            joinColumns = @JoinColumn(name = "shift_id"),
             inverseJoinColumns = @JoinColumn(name = "stylist_schedule_id")
     )
     @JsonIgnore
