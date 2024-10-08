@@ -195,6 +195,9 @@ public class BookingService {
         Slot slot = slotRepository.findSlotBySlotid(request.getSlotId());
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         Voucher voucher = voucherRepository.findVoucherByVoucherId(request.getVoucherId());
+        if(voucher != null){
+            voucher.setQuantity(voucher.getQuantity() - 1 );
+        }
         StylistSchedule stylistSchedule = stylistScheduleRepository.getScheduleId(request.getStylistId(), request.getBookingDate());
         Booking booking = new Booking();
         booking.setBookingDay(request.getBookingDate());
@@ -207,6 +210,49 @@ public class BookingService {
         booking.setStatus(BookingStatus.PENDING);
         bookingRepository.save(booking);
         return request;
+    }
+    public BookingRequest updateBooking(long bookingId,BookingRequest request){
+        Booking booking = bookingRepository.findBookingByBookingId(bookingId);
+        bookingRepository.deleteBookingDetail(booking.getBookingId());
+        Account account = accountRepository.findAccountByAccountid(request.getCustomerId());
+        Set<SalonService> services = new HashSet<>();
+        for(Long id : request.getServiceId()){
+            SalonService service = serviceRepository.getServiceById(id);
+            services.add(service);
+        }
+        Slot slot = slotRepository.findSlotBySlotid(request.getSlotId());
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
+        if(booking.getVoucher() != null){
+            Voucher oldVoucher = voucherRepository.findVoucherByVoucherId(booking.getVoucher().getVoucherId());
+            oldVoucher.setQuantity(oldVoucher.getQuantity() + 1);
+        }
+        Voucher newVoucher = voucherRepository.findVoucherByVoucherId(request.getVoucherId());
+        if(newVoucher != null){
+            newVoucher.setQuantity(newVoucher.getQuantity() - 1 );
+        }
+        StylistSchedule stylistSchedule = stylistScheduleRepository.getScheduleId(request.getStylistId(), request.getBookingDate());
+        booking.setBookingDay(request.getBookingDate());
+        booking.setAccount(account);
+        booking.setSlot(slot);
+        booking.setSalonBranch(salonBranch);
+        booking.setServices(services);
+        booking.setVoucher(newVoucher);
+        booking.setStylistSchedule(stylistSchedule);
+        booking.setStatus(BookingStatus.PENDING);
+        bookingRepository.save(booking);
+        return request;
+    }
+    public String deleteBooking(long id){
+        Booking booking = bookingRepository.findBookingByBookingId(id);
+        if(booking == null){
+            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+        }
+        if(booking.getVoucher() != null){
+            Voucher voucher = voucherRepository.findVoucherByVoucherId(booking.getVoucher().getVoucherId());
+            voucher.setQuantity(voucher.getQuantity() + 1 );
+        }
+        bookingRepository.delete(booking);
+        return "booking deleted";
     }
     private LocalTime totalTimeServiceBooking(Set<Long> serviceId){
         LocalTime totalTimeDuration = LocalTime.of(0,0,0);
@@ -288,6 +334,7 @@ public class BookingService {
         account.setAccountid(accountid);
         //List<Booking> status = bookingRepository.findByAccountAndStatus(account, BookingStatus.PENDING);
         List<Booking> status = new ArrayList<>();
+        // lấy list booking truyền vô database lay chuoi enium duoi. name de query duoi database
         List<Booking> bookings =bookingRepository.getBookingsByIdAndSatus(accountid, BookingStatus.PENDING.name());
         for(Booking booking : bookings){
             Set<SalonService> service = serviceRepository.getServiceForBooking(booking.getBookingId());

@@ -24,8 +24,8 @@ import java.util.Set;
 public interface ServiceRepository extends JpaRepository<SalonService,Long> {
     Optional<SalonService> findByServiceName(String serviceName);
     Optional<SalonService> findByServiceId(long serviceId);
-    List<SalonService> findByIsDeleteFalse();
 
+    List<SalonService> findByIsDeleteFalse();
     List<SalonService> findByServiceNameContaining(String name);
     @Query(value = "select ss.* from salon_service ss\n" +
             "inner join booking_detail bd\n" +
