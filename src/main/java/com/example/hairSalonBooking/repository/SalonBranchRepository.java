@@ -10,12 +10,13 @@ import java.util.List;
 public interface SalonBranchRepository extends JpaRepository<SalonBranch,Long> {
     SalonBranch findSalonBranchByHotline(String hotline);
     List<SalonBranch> findSalonBranchsByIsDeleteFalse();
-    SalonBranch findSalonBranchBySalonidAndIsDeleteFalse(long id);
-    SalonBranch findSalonBranchBySalonid(long id);
+    SalonBranch findSalonBranchBySalonIdAndIsDeleteFalse(long id);
+    SalonBranch findSalonBranchBySalonId(long id);
     @Query("select sb from SalonBranch sb where sb.address like %?1%")
     @Transactional
     List<SalonBranch> findSalonBranchByAddress(String address);
     @Query("select sb from SalonBranch sb where sb.address = ?1")
     @Transactional
     SalonBranch findSalonBranchByAddressIsDeleteFalse(String address);
+
 }

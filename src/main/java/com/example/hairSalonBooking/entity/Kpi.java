@@ -13,10 +13,10 @@ import lombok.experimental.FieldDefaults;
 public class Kpi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long kipid;
-    String yearandmonth;
-    double revenuegenerated;
-    double performancescore;
+    long kipId;
+    String yearAndMonth;
+    double revenueGenerated;
+    double performanceScore;
     @ManyToOne
     @JoinColumn(name = "level_id")
     Level level;

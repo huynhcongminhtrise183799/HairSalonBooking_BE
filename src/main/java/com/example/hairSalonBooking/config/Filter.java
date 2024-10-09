@@ -1,3 +1,4 @@
+
 package com.example.hairSalonBooking.config;
 
 
@@ -40,8 +41,8 @@ public class Filter extends OncePerRequestFilter {
             "/api/register",
             "/api/booking",
             "/api/verifyEmail/{email}",
-            "verifyOtp/{email}/{otp}",
-            "changePassword/{email}"
+            "/api/verifyOtp/{email}/{otp}",
+            "/api/changePassword/{email}"
     );
 
     public boolean checkIsPublic(String uri){

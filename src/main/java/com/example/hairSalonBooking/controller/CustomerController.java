@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/customer")
@@ -20,11 +21,11 @@ public class CustomerController {
     CustomerService customerService;
 
     @PutMapping("/{AccountId}")
-    public ApiResponse<UpdateCustomerRequest> updateCustomer(@PathVariable long AccountId, @Valid @RequestBody UpdateCustomerRequest request){
+    public ApiResponse<UpdateCustomerRequest> updateCustomer(@Valid @RequestBody UpdateCustomerRequest request,
+                                                             @PathVariable long AccountId){
         ApiResponse response = new ApiResponse();
         response.setResult(customerService.updateCustomer(request,AccountId));
         response.setMessage("Update successfully");
-
         return response;
     }
 

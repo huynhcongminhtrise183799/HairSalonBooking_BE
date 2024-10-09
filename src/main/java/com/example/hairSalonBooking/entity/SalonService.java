@@ -1,5 +1,6 @@
 package com.example.hairSalonBooking.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -23,8 +25,14 @@ public class SalonService {
     int price;
     String description;
     LocalTime duration;
+    String image;
+
     @ManyToOne
     @JoinColumn(name = "skill_id")
     Skill skill;
+
+    @ManyToMany(mappedBy = "services")
+    Set<Booking> bookings;
+    boolean isDelete = false;
 
 }

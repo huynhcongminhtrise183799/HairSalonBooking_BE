@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class SalonResponse {
+    long id;
     String address;
     String hotline;
     boolean isDelete;

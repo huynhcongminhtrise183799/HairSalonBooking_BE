@@ -1,5 +1,6 @@
 package com.example.hairSalonBooking.model.response;
 
+import com.example.hairSalonBooking.enums.Role;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class ProfileResponse {
     String email;
     LocalDate dob;
     String phone;
-    int gender;
+    String gender;
     String image;
+    Role role;
 }

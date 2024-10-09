@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -17,13 +18,18 @@ import java.util.List;
 public class SalonBranch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long salonid;
+    long salonId;
     String address;
     @Column(unique = true)
     String hotline;
     boolean isDelete = false;
+
     @OneToMany(mappedBy = "salonBranch")
     @JsonIgnore
-    List<Account> accounts;
+    Set<Account> accounts;
+
+    @OneToMany(mappedBy = "salonBranch")
+    @JsonIgnore
+    Set<Booking> bookings;
 
 }
