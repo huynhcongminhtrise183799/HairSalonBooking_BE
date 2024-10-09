@@ -36,7 +36,6 @@ public class StylistRequest {
   long salonId;
   long levelId;
 
-
     Set<Long> skillId;
 
 

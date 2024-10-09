@@ -287,5 +287,18 @@ public class BookingService {
         }
         return getBookingResponses(status);
     }
-
+//    public BookingResponse checkout(Long bookingId) {
+//        Booking booking = bookingRepository.getBookingById(bookingId);
+//        if(booking == null){
+//            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+//        }
+//        if(booking.getStatus() == BookingStatus.PENDING){
+//            booking.setStatus(BookingStatus.IN_PROGRESS);
+//            bookingRepository.save(booking);
+//            BookingResponse response = BookingResponse.builder()
+//
+//                    .build();
+//        }
+//
+//    }
 }
