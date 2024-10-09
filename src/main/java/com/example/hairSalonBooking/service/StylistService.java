@@ -66,6 +66,8 @@ public class StylistService {
                 skills.add(skill);
             }
             stylist.setSkills(skills);
+
+
             stylist.setImage(stylistRequest.getImage());
             // Lưu vào database
             Account newStylist = accountRepository.save(stylist);

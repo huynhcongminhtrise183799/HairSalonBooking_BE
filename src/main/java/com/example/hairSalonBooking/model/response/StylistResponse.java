@@ -30,6 +30,8 @@ public class StylistResponse {
 
     String levelName;
     //    @JsonIgnore // ẩn delete status không cho người dùng nhập
+    String skillName;
+
     boolean isDeleted = false;
 
 }
