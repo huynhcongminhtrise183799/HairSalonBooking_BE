@@ -32,7 +32,7 @@ public class BranchManagerService {
     public ManagerResponse createManager(CreateManagerRequest request){
         Account account  = modelMapper.map(request,Account.class);
         try {
-            SalonBranch salonBranch = salonBranchRepository.findSalonBranchByAddressIsDeleteFalse(request.getSalonAddress());
+            SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
             account.setSalonBranch(salonBranch);
             account.setRole(Role.BRANCH_MANAGER);
             account.setPassword(passwordEncoder.encode(request.getPassword()));

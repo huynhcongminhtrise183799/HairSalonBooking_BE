@@ -306,28 +306,6 @@ public class BookingService {
                 })
                 .collect(Collectors.toList());
     }
-//    private CusBookingResponse createCusBookingResponse(Booking booking) {
-//        CusBookingResponse response = new CusBookingResponse();
-//        response.setBookingId(booking.getBookingId());
-//        response.setSalonName(booking.getSalonBranch() != null ? booking.getSalonBranch().getAddress() : null);
-//        response.setStylistName(booking.getStylistSchedule() != null ? booking.getStylistSchedule().getAccount().getFullname() : null);
-//        response.setDate(booking.getBookingDay());
-//        response.setTime(booking.getSlot() != null ? booking.getSlot().getSlottime() : null);
-//
-//        // Map services to SalonServiceCusResponse
-//        Set<SalonServiceCusResponse> serviceDTOs = booking.getServices().stream()
-//                .map(service -> new SalonServiceCusResponse(
-//                        service.getServiceName(),
-//                        service.getPrice(),
-//                        service.getDuration()
-//                ))
-//                .collect(Collectors.toSet());
-//
-//        response.setServiceName(serviceDTOs);  // This should now correctly map services
-//        response.setStatus(booking.getStatus());
-//
-//        return response;
-//    }
 
     public List<CusBookingResponse> getBookingByStatusPendingByCustomer(Long accountid) {
         Account account = new Account();
@@ -343,28 +321,17 @@ public class BookingService {
         }
         return getBookingResponses(status);
     }
-    public List<CusBookingResponse> getBookingByStatusIN_PROGRESSByCustomer(Long accountid) {
-        Account account = new Account();
-        account.setAccountid(accountid);
-        List<Booking> status = bookingRepository.findByAccountAndStatus(account, BookingStatus.IN_PROGRESS);
-        return getBookingResponses(status);
-    }
     public List<CusBookingResponse> getBookingByStatusCompletedByCustomer(Long accountid) {
         Account account = new Account();
         account.setAccountid(accountid);
-        List<Booking> status = bookingRepository.findByAccountAndStatus(account, BookingStatus.COMPLETED);
+        List<Booking> status = new ArrayList<>();
+        List<Booking> bookings =bookingRepository.getBookingsByIdAndSatus(accountid, BookingStatus.COMPLETED.name());
+        for(Booking booking : bookings){
+            Set<SalonService> service = serviceRepository.getServiceForBooking(booking.getBookingId());
+            booking.setServices(service);
+            status.add(booking);
+        }
         return getBookingResponses(status);
     }
-//    public CusBookingResponse checkIn(Long bookingId){
-//        Booking booking = bookingRepository.findBookingByBookingId(bookingId);
-//        if(booking == null){
-//            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
-//        }
-//        if(booking.getStatus() == BookingStatus.PENDING){
-//            booking.setStatus(BookingStatus.IN_PROGRESS);
-//            bookingRepository.save(booking);
-//        }
-//        return createCusBookingResponse(booking);
-//
-//    }
+
 }
