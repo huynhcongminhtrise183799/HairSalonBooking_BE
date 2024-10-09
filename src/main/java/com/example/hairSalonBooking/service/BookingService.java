@@ -333,5 +333,13 @@ public class BookingService {
         }
         return getBookingResponses(status);
     }
-
+    public String checkIn(long bookingId){
+        Booking booking = bookingRepository.findBookingByBookingId(bookingId);
+        if(booking == null){
+            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+        }
+        booking.setStatus(BookingStatus.IN_PROGRESS);
+        bookingRepository.save(booking);
+        return "check-in success";
+    }
 }

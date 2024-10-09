@@ -2,11 +2,13 @@ package com.example.hairSalonBooking.repository;
 
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.entity.Booking;
+import com.example.hairSalonBooking.entity.SalonBranch;
 import com.example.hairSalonBooking.enums.BookingStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,4 +42,12 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     @Transactional
     @Query(value = "DELETE FROM booking_detail WHERE booking_id = ?1 ",nativeQuery = true)
     void deleteBookingDetail(long id);
+    @Query("SELECT b FROM Booking b WHERE b.account.accountid = :stylistId AND b.account.role = 'STYLIST' AND b.bookingDay = :today")
+    List<Booking> findBookingsByStylistAndDate(@Param("stylistId") Long stylistId, @Param("today") LocalDate today);
+
+    @Query(value = "select b.* from booking b\n" +
+            "inner join stylist_schedule ss\n" +
+            "on b.stylist_schedule_id = ss.stylist_schedule_id\n" +
+            "where ss.account_id = ?1 and b.booking_day = ?2",nativeQuery = true)
+    List<Booking> findAllByAccountInAndSalonBranch(long stylistId, LocalDate date);
 }

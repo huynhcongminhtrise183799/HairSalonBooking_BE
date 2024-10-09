@@ -33,8 +33,8 @@ public class StylistRequest {
     LocalDate dob;
     String gender;
 
-  long salonId;
-  long levelId;
+    long salonId;
+    long levelId;
 
 
     Set<Long> skillId;

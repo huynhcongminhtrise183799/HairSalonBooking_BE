@@ -32,6 +32,11 @@ public interface ServiceRepository extends JpaRepository<SalonService,Long> {
             "on ss.service_id = bd.service_id\n" +
             "where bd.booking_id = ?1 ",nativeQuery = true)
     Set<SalonService> getServiceForBooking(long bookingId);
+    @Query(value = "select  ss.service_name from salon_service ss\n" +
+            "inner join booking_detail bd\n" +
+            "on ss.service_id = bd.service_id\n" +
+            "where bd.booking_id = ?1",nativeQuery = true)
+    Set<String> getServiceNameByBooking(long id);
 
     @Query(value = "select sec_to_time(sum(time_to_sec(ss.duration))) from salon_service ss\n" +
             "inner join booking_detail bd\n" +
