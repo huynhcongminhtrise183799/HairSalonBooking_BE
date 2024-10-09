@@ -105,6 +105,7 @@ public class StylistService {
             // Handle the case when the stylist is not found
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
         }
+        accountRepository.deleteSpecificSkills(accountid);
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonIdAndIsDeleteFalse(stylistRequest.getSalonId());
         updeStylist.setSalonBranch(salonBranch);
         Level level  = levelRepository.findLevelByLevelid(stylistRequest.getLevelId());
@@ -123,6 +124,7 @@ public class StylistService {
         updeStylist.setGender(stylistRequest.getGender());
         updeStylist.setImage(stylistRequest.getImage());
         updeStylist.setDeleted(stylistRequest.isDelete());
+        updeStylist.setDob(stylistRequest.getDob());
         //Làm xong thì lưu xuống DataBase
         Account updatedStylist = accountRepository.save(updeStylist);
         // trả về thôi

@@ -32,6 +32,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
 
     List<Booking> findByAccountAndStatus(Account account, BookingStatus status);
 
+
     @Query(value = "select * from booking b\n" +
             "where b.account_id = ?1 and b.status = ?2;",nativeQuery = true)
     List<Booking> getBookingsByIdAndSatus(long id, String status);

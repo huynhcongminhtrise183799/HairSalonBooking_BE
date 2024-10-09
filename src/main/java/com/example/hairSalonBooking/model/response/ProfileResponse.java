@@ -19,7 +19,7 @@ public class ProfileResponse {
     String email;
     LocalDate dob;
     String phone;
-    int gender;
+    String gender;
     String image;
     Role role;
 }
