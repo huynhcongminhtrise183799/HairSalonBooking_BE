@@ -1,22 +1,30 @@
 package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.entity.SalonBranch;
+import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateManagerRequest;
 import com.example.hairSalonBooking.model.request.UpdateManagerRequest;
+import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.ManagerResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
+import com.example.hairSalonBooking.repository.BookingRepository;
 import com.example.hairSalonBooking.repository.SalonBranchRepository;
+import com.example.hairSalonBooking.repository.ServiceRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class BranchManagerService {
@@ -28,7 +36,10 @@ public class BranchManagerService {
     private ModelMapper modelMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private ServiceRepository serviceRepository;
     public ManagerResponse createManager(CreateManagerRequest request){
         Account account  = modelMapper.map(request,Account.class);
         try {
@@ -116,5 +127,33 @@ public class BranchManagerService {
                 .isDelete(account.isDeleted())
                 .build();
         return response;
+    }
+    // cái này để lấy tất cả các booking của stylist theo chi nhánh
+    public List<BookingResponse> getAllBookingsForStylistsInBranch(Long branchId, LocalDate date) {
+        // Kiểm tra xem chi nhánh có tồn tại không
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Lấy tất cả các stylist trong chi nhánh
+        List<Account> stylists = accountRepository.getStylistsBySalo(branchId);
+
+        // Lấy danh sách booking của các stylist trong chi nhánh
+        List<Booking> bookings = new ArrayList<>();
+        for(Account account : stylists){
+            List<Booking> list = bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date);
+            bookings.addAll(list);
+        }
+        List<BookingResponse> responses = new ArrayList<>();
+        for(Booking booking : bookings){
+            Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
+            BookingResponse bookingResponse = new BookingResponse();
+            bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+            bookingResponse.setTime(booking.getSlot().getSlottime());
+            bookingResponse.setDate(booking.getBookingDay());
+            bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+            bookingResponse.setServiceName(serviceNames);
+            responses.add(bookingResponse);
+        }
+        return responses;
     }
 }

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -69,12 +70,7 @@ public class BookingController {
         apiResponse.setResult(bookingService.getBookingByStatusPendingByCustomer(accountId));
         return apiResponse;
     }
-//    @GetMapping("/customer/{accountId}/in-progress")
-//    public ApiResponse<List<Booking>> getInProcessBookings(@PathVariable Long accountId){
-//        ApiResponse apiResponse = new ApiResponse<>();
-//        apiResponse.setResult(bookingService.getBookingByStatusIN_PROGRESSByCustomer(accountId));
-//        return apiResponse;
-//    }
+
     @GetMapping("/customer/{accountId}/completed")
     public ApiResponse<List<Booking>> getCompleteBookings(@PathVariable Long accountId){
         ApiResponse apiResponse = new ApiResponse<>();
@@ -82,11 +78,18 @@ public class BookingController {
         return apiResponse;
     }
     // controller checkin
-    /*@PutMapping("/{bookingId}/checkin")
-    public ApiResponse<Booking> checkIn(@PathVariable Long bookingId) {
+    @PutMapping("/{bookingId}/checkin")
+    public ApiResponse<String> checkIn(@PathVariable Long bookingId) {
          ApiResponse apiResponse = new ApiResponse<>();
          apiResponse.setResult(bookingService.checkIn(bookingId));
          return apiResponse;
-    }*/
+    }
+    @GetMapping("/bookings/stylist/{date}/{accountId}")
+    public ApiResponse<List<BookingResponse>> getTodayBookingsForStylist(@PathVariable Long accountId, @PathVariable String date) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        LocalDate localDate = LocalDate.parse(date); // chắc rằng form đúng yyyy-mm-dd
+        apiResponse.setResult(stylistService.getBookingsForStylistOnDate(accountId, localDate));
+        return apiResponse;
+    }
 
 }

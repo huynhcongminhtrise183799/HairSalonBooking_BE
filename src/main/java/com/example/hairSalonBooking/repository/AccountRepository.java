@@ -39,7 +39,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
 
     List<Account> findByRole(Role role);
-
+    @Query(value = "\n" +
+            "select ac.* from account ac\n" +
+            "where ac.salon_id = ?1 and ac.role = 'STYLIST'",nativeQuery = true)
+    List<Account> getStylistsBySalo(long id);
 
     @Query(value = "select ac.* from account ac\n" +
             "inner join specific_skill ss\n" +

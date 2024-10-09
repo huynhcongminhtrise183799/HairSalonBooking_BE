@@ -20,5 +20,5 @@ public class BookingResponse {
     String stylistName;
     LocalDate date;
     LocalTime time;
-    Set<SalonService> serviceName;
+    Set<String> serviceName;
 }

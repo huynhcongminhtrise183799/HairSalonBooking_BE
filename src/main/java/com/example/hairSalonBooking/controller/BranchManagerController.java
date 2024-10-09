@@ -3,12 +3,16 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.model.request.CreateManagerRequest;
 import com.example.hairSalonBooking.model.request.UpdateManagerRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
+import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.ManagerResponse;
 import com.example.hairSalonBooking.service.BranchManagerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/")
@@ -43,6 +47,13 @@ public class BranchManagerController {
     public ApiResponse<ManagerResponse> deleteManager(@PathVariable long id){
         ApiResponse response = new ApiResponse<>();
         response.setResult(branchManagerService.deleteManager(id));
+        return response;
+    }
+
+    @GetMapping("/manager/stylists/booking/{branchId}/{date}")
+    public ApiResponse<List<BookingResponse>> getAllBookingsForStylistInBranch(@PathVariable Long branchId, @PathVariable LocalDate date) {
+        ApiResponse<List<BookingResponse>> response = new ApiResponse<>();
+        response.setResult(branchManagerService.getAllBookingsForStylistsInBranch(branchId,date));
         return response;
     }
 }
