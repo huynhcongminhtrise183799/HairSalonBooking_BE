@@ -3,11 +3,11 @@ package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.enums.Role;
-import com.example.hairSalonBooking.exception.AppException;
-import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.exception.AppException;
+import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.AccountPageResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
@@ -155,6 +155,7 @@ public class AuthenticationService implements UserDetailsService {
 //      return accountRepository.findAll(PageRequest.of(page, size));
 //    }
 
+    // cái này chia luồng page Customer
     public AccountPageResponse getAllAccountCustomer(int page, int size) {
         Page<Account> customerPage = accountRepository.findByRole(Role.CUSTOMER, PageRequest.of(page, size));
         AccountPageResponse customerPageResponse = new AccountPageResponse();
