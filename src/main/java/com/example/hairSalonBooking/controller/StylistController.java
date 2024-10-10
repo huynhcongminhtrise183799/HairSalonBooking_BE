@@ -35,9 +35,7 @@ public class StylistController {
     public ApiResponse<StylistResponse> getAllStylist() {
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(stylistService.getAllStylist());
-
         return apiResponse;
-
     }
     
     @GetMapping("/status")
