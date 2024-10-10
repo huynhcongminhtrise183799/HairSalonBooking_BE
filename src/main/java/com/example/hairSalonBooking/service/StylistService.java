@@ -106,6 +106,7 @@ public class StylistService {
                 .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
     }
 
+    // cái này chia luồng page stylist
     public AccountPageResponse getAllAccountStylist(int page, int size) {
         Page<Account> customerPage = accountRepository.findByRole(Role.STYLIST, PageRequest.of(page, size));
         AccountPageResponse customerPageResponse = new AccountPageResponse();
