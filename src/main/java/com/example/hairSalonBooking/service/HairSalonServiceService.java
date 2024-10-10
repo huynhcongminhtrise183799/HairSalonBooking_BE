@@ -112,6 +112,7 @@ public class HairSalonServiceService {
         return modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
     }
 
+    // cái này chia luồng page Service
     public ServicePageResponse getAllServicePage(int page, int size) {
         Page<SalonService> servicePage = serviceRepository.findAll(PageRequest.of(page, size));
         ServicePageResponse servicePageResponse = new ServicePageResponse();
