@@ -5,6 +5,7 @@ import com.example.hairSalonBooking.enums.BookingStatus;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
+import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
@@ -19,6 +20,7 @@ import com.example.hairSalonBooking.repository.*;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -99,6 +101,10 @@ public class BookingService {
         List<Shift> shifts = new ArrayList<>();
         List<Shift> shiftsFromSpecificStylistSchedule = shiftRepository.getShiftsFromSpecificStylistSchedule(bookingSlots.getAccountId(),bookingSlots.getDate());
         List<Shift> shiftMissingInSpecificStylistSchedule = shiftMissingInSpecificStylistSchedule(shiftsFromSpecificStylistSchedule);
+        // stylist đã có booking trong ngày
+        // tính tổng thời gian để hoàn thành yêu cầu booking mới
+        LocalTime totalTimeServiceNewBooking = totalTimeServiceBooking(bookingSlots.getServiceId());
+        slotToRemove.addAll(getSlotsExperiedTime(totalTimeServiceNewBooking,shiftsFromSpecificStylistSchedule));
         if(!shiftMissingInSpecificStylistSchedule.isEmpty()){
             for(Shift shift :shiftMissingInSpecificStylistSchedule ){
                 List<Slot> slot = slotRepository.getSlotsInShift(shift.getShiftId());
@@ -131,9 +137,7 @@ public class BookingService {
             allSlot.removeAll(slotToRemove);
             return allSlot;
         }
-        // stylist đã có booking trong ngày
-        // tính tổng thời gian để hoàn thành yêu cầu booking mới
-        LocalTime totalTimeServiceNewBooking = totalTimeServiceBooking(bookingSlots.getServiceId());
+
         // duyệt qua từng booking có trong list allBookingInDay
         for(Booking booking : allBookingInDay){ // vd: lấy đc booking có ID là 1
             // tính tổng thời gian của tất cả service của 1 booking vd: tổng thời gian để hoàn thành
@@ -184,6 +188,62 @@ public class BookingService {
         }
         allSlot.removeAll(slotToRemove);
         return allSlot;
+    }
+    public Set<StylistForBooking> getStylistWhenUpdateBookingByManager(AssignNewStylistForBooking newStylistForBooking){
+        BookingStylits bookingStylits = new BookingStylits();
+        bookingStylits.setServiceId(newStylistForBooking.getServiceId());
+        bookingStylits.setSalonId(newStylistForBooking.getSalonId());
+        // lay dc tat ca stylist co the lam list service do
+        Set<StylistForBooking> stylistForBookings = getStylistForBooking(bookingStylits);
+        // tìm đc slot
+        Slot slotBookingUpdate = slotRepository.findSlotBySlotid(newStylistForBooking.getSlotId());
+        // tính tổng thời gian hoàn thành các services của booking mới
+        LocalTime totalServiceTimeForNewBooking = totalTimeServiceBooking(newStylistForBooking.getServiceId());
+        // tạo ra 1 list dùng để remove
+        List<StylistForBooking> stylistsToRemove = new ArrayList<>();
+        for(StylistForBooking stylist : stylistForBookings){
+                // lay ra tat ca booking co trong ngay cua stylist do
+                List<Booking> bookings = bookingRepository.getBookingsByStylistInDay(newStylistForBooking.getDate(), stylist.getId());
+                // tìm đc booking gần nhất với thời gian của khách hàng muốn đổi
+                Booking bookingNearestOverTime = bookingRepository.bookingNearestOverTime(stylist.getId(),slotBookingUpdate.getSlottime(),newStylistForBooking.getDate());
+                Booking bookingNearestBeforeTime = bookingRepository.bookingNearestBeforeTime(stylist.getId(),slotBookingUpdate.getSlottime(),newStylistForBooking.getDate());
+                Booking bookingAtTimeUpdate = bookingRepository.bookingAtTime(slotBookingUpdate.getSlotid(),stylist.getId(),newStylistForBooking.getDate());
+                // tính đc thời gian hoàn thành booking mới đó
+                LocalTime timeToCheckValid = slotBookingUpdate.getSlottime().plusHours(totalServiceTimeForNewBooking.getHour())
+                        .plusMinutes(totalServiceTimeForNewBooking.getMinute());
+                if(bookingAtTimeUpdate != null){
+                    stylistsToRemove.add(stylist);
+                }
+                if(bookingNearestOverTime != null){
+                    // lấy đc thời gian của cái booking có sẵn của stylist đó
+                    Slot slotTimeBooking = slotRepository.findSlotBySlotid(bookingNearestOverTime.getSlot().getSlotid());
+                    // nếu tổng thời gian hoàn thành booking mới đó mà lố thời gian của booking có sẵn thì stylist đó ko thỏa
+                    if(timeToCheckValid.isAfter(slotTimeBooking.getSlottime())){
+                        stylistsToRemove.add(stylist);
+                    }
+                }
+                if(bookingNearestBeforeTime != null){
+                    LocalTime totalTimeServiceForBooking = serviceRepository.getTotalTime(bookingNearestBeforeTime.getBookingId());
+                    // lấy đc thời gian của cái booking có sẵn của stylist đó
+                    Slot slotTimeBooking = slotRepository.findSlotBySlotid(bookingNearestBeforeTime.getSlot().getSlotid());
+                    LocalTime totalTimeFinishBooking = slotTimeBooking.getSlottime().plusHours(totalTimeServiceForBooking.getHour())
+                        .plusMinutes(totalTimeServiceForBooking.getMinute());
+
+                    // nếu tổng thời gian hoàn thành booking mới đó mà lố thời gian của booking có sẵn thì stylist đó ko thỏa
+                    if(totalTimeFinishBooking.isAfter(slotBookingUpdate.getSlottime())){
+                        stylistsToRemove.add(stylist);
+                    }
+                }
+                if(!bookings.isEmpty()){
+                    boolean checkStylist = shiftsHaveFullBooking(bookings,slotBookingUpdate);
+                    if(checkStylist){
+                        stylistsToRemove.add(stylist);
+                    }
+                }
+        }
+
+        stylistForBookings.removeAll(stylistsToRemove);
+        return stylistForBookings;
     }
     public BookingRequest createNewBooking(BookingRequest request){
         Account account = accountRepository.findAccountByAccountid(request.getCustomerId());
@@ -251,7 +311,8 @@ public class BookingService {
             Voucher voucher = voucherRepository.findVoucherByVoucherId(booking.getVoucher().getVoucherId());
             voucher.setQuantity(voucher.getQuantity() + 1 );
         }
-        bookingRepository.delete(booking);
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
         return "booking deleted";
     }
     private LocalTime totalTimeServiceBooking(Set<Long> serviceId){
@@ -265,6 +326,26 @@ public class BookingService {
         return totalTimeDuration;
     }
 
+    public boolean shiftsHaveFullBooking(List<Booking> bookings,Slot slotBookingUpdate){
+        List<Shift> shifts = new ArrayList<>();
+        // duyet qua tat ca booking trong ngay cua stylist do
+        for(Booking booking : bookings){
+            Slot slot = slotRepository.findSlotBySlotid(booking.getSlot().getSlotid());
+            LocalTime totalTimeServiceForBooking = serviceRepository.getTotalTime(booking.getBookingId());
+            LocalTime timeFinishBooking = slot.getSlottime().plusHours(totalTimeServiceForBooking.getHour())
+                    .plusMinutes(totalTimeServiceForBooking.getMinute());
+            List<Shift> shiftBookingBelongTo = shiftRepository.getShiftForBooking(slot.getSlottime(),timeFinishBooking,booking.getBookingId());
+            shifts.addAll(shiftBookingBelongTo);
+        }
+        List<Shift> shiftReachedBookingLimit = shiftReachedBookingLimit(shifts);
+        for(Shift shift : shiftReachedBookingLimit){
+            Shift shiftBySlot = shiftRepository.getShiftBySlot(slotBookingUpdate.getSlotid());
+            if(shift.getShiftId() == shiftBySlot.getShiftId()){
+                return true;
+            }
+        }
+        return false;
+    }
     private List<Shift> shiftReachedBookingLimit(List<Shift> shifts){
         List<Shift> list = new ArrayList<>();
         // tạo set vì trong set ko có phần tử trùng lặp
@@ -283,6 +364,23 @@ public class BookingService {
         List<Shift> allShift = shiftRepository.findAll();
         allShift.removeAll(shifts);
         return allShift;
+    }
+    private List<Slot> getSlotsExperiedTime(LocalTime time,List<Shift> shifts){
+        Shift shift = new Shift();
+        List<Slot> slotsToRemove = new ArrayList<>();
+        for(Shift s : shifts){
+            shift = s;
+            break;
+        }
+        List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
+        for(Slot slot : slots){
+            LocalTime totalTime = slot.getSlottime().plusHours(time.getHour())
+                    .plusMinutes(time.getMinute());
+            if(totalTime.isAfter(shift.getEndTime())){
+                slotsToRemove.add(slot);
+            }
+        }
+        return slotsToRemove;
     }
     private List<CusBookingResponse> getBookingResponses(List<Booking> status) {
         return status.stream()

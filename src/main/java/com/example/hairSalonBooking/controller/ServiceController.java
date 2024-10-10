@@ -45,7 +45,7 @@ public class ServiceController {
     }
 
     @GetMapping
-    ApiResponse<List<ServiceResponse>> getAllServices() {
+    ApiResponse<List<ServiceResponse>> getAllServicesActive() {
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(hairSalonServiceService.getAllServicesActive());
         return apiResponse;

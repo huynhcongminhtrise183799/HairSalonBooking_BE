@@ -85,7 +85,7 @@ public class BranchManagerService {
         if(account == null){
             throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
         }
-        SalonBranch salonBranch = salonBranchRepository.findSalonBranchByAddressIsDeleteFalse(request.getSalonAddress());
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         account.setEmail(request.getEmail());
         account.setDob(request.getDob());
         account.setPhone(request.getPhone());
@@ -152,6 +152,10 @@ public class BranchManagerService {
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
             bookingResponse.setServiceName(serviceNames);
+            bookingResponse.setCustomerName(booking.getAccount().getFullname());
+            if(booking.getVoucher() != null){
+                bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+            }
             responses.add(bookingResponse);
         }
         return responses;

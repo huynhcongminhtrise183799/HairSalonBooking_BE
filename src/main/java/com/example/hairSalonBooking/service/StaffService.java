@@ -31,7 +31,7 @@ public class StaffService {
     public StaffResponse createStaff(CreateStaffRequest request){
         Account account = modelMapper.map(request,Account.class);
         try {
-            SalonBranch salonBranch = salonBranchRepository.findSalonBranchByAddressIsDeleteFalse(request.getSalonAddress());
+            SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
             account.setSalonBranch(salonBranch);
             account.setPassword(passwordEncoder.encode(request.getPassword()));
             account.setRole(Role.STAFF);
@@ -81,7 +81,7 @@ public class StaffService {
         if(account == null){
             throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
         }
-        SalonBranch salonBranch = salonBranchRepository.findSalonBranchByAddressIsDeleteFalse(request.getSalonAddress());
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         account.setEmail(request.getEmail());
         account.setDob(request.getDob());
         account.setPhone(request.getPhone());
