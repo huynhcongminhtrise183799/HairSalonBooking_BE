@@ -106,24 +106,25 @@ public class StylistService {
 
     public StylistPageResponse getAllAccountStylist(int page, int size) {
         Page<Account> accountPage = accountRepository.findByRole(Role.STYLIST, PageRequest.of(page, size));
+        Page<StyPageResponse> stylistPage = accountPage.map(account -> {
+            String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
 
+            return new StyPageResponse(
+                    account.getAccountid(),
+                    account.getUsername(),
+                    account.getEmail(),
+                    account.getFullname(),
+                    account.getPhone(),
+                    account.getImage(),
+                    account.getDob(),
+                    account.getGender(),
+                    salonAddress,  
+                    account.getLevel() != null ? account.getLevel().getLevelname() : null,
+                    account.getSkills()
+            );
+        });
 
-        Page<StyPageResponse> stylistPage = accountPage.map(account ->
-                new StyPageResponse(
-                        account.getAccountid(),
-                        account.getUsername(),
-                        account.getEmail(),
-                        account.getFullname(),
-                        account.getPhone(),
-                        account.getImage(),
-                        account.getDob(),
-                        account.getGender(),
-                        account.getSalonBranch().getAddress(),
-                        account.getLevel().getLevelname(),
-                        account.getSkills())
-        );
-
-        // Building the AccountPageResponse using stylistPageResponse
+        // set up lúc trả về
         StylistPageResponse stylistPageResponse = new StylistPageResponse();
         stylistPageResponse.setPageNumber(stylistPage.getNumber()); // Set the correct Page number
         stylistPageResponse.setTotalPages(stylistPage.getTotalPages()); // Set total pages
