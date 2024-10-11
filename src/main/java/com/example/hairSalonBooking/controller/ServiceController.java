@@ -77,12 +77,13 @@ public class ServiceController {
         return hairSalonServiceService.updateService(serviceId, request);
     }
 
-    @GetMapping("/service/page")
-    public ResponseEntity getAllServicePage(@RequestParam int page, @RequestParam int size) {
-        ServicePageResponse servicePageResponse = hairSalonServiceService.getAllServicePage(page, size);
-        return ResponseEntity.ok(servicePageResponse);
+    @GetMapping("/page")
+    public ApiResponse<ServicePageResponse> getAllServicePage(@RequestParam int page, @RequestParam int size) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(hairSalonServiceService.getAllServicePage(page, size));
+        return response;
     }
-    @GetMapping("/account")
+    @GetMapping("/all")
     public ResponseEntity getAllService() {
         List<ServiceResponse> services = hairSalonServiceService.getAllServices();
         return ResponseEntity.ok(services);

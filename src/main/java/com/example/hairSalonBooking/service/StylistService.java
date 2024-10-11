@@ -7,9 +7,7 @@ import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
-import com.example.hairSalonBooking.model.response.AccountPageResponse;
-import com.example.hairSalonBooking.model.response.BookingResponse;
-import com.example.hairSalonBooking.model.response.StylistResponse;
+import com.example.hairSalonBooking.model.response.*;
 import com.example.hairSalonBooking.repository.*;
 
 import org.modelmapper.ModelMapper;
@@ -106,14 +104,33 @@ public class StylistService {
                 .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
     }
 
-    public AccountPageResponse getAllAccountStylist(int page, int size) {
-        Page<Account> customerPage = accountRepository.findByRole(Role.STYLIST, PageRequest.of(page, size));
-        AccountPageResponse customerPageResponse = new AccountPageResponse();
-        customerPageResponse.setPageNumber(customerPage.getNumber());
-        customerPageResponse.setTotalPages(customerPage.getTotalPages());
-        customerPageResponse.setTotalElements(customerPage.getTotalElements());
-        customerPageResponse.setContent(customerPage.getContent());
-        return customerPageResponse;
+    public StylistPageResponse getAllAccountStylist(int page, int size) {
+        Page<Account> accountPage = accountRepository.findByRole(Role.STYLIST, PageRequest.of(page, size));
+
+
+        Page<StyPageResponse> stylistPage = accountPage.map(account ->
+                new StyPageResponse(
+                        account.getAccountid(),
+                        account.getUsername(),
+                        account.getEmail(),
+                        account.getFullname(),
+                        account.getPhone(),
+                        account.getImage(),
+                        account.getDob(),
+                        account.getGender(),
+                        account.getSalonBranch().getAddress(),
+                        account.getLevel().getLevelname(),
+                        account.getSkills())
+        );
+
+        // Building the AccountPageResponse using stylistPageResponse
+        StylistPageResponse stylistPageResponse = new StylistPageResponse();
+        stylistPageResponse.setPageNumber(stylistPage.getNumber()); // Set the correct Page number
+        stylistPageResponse.setTotalPages(stylistPage.getTotalPages()); // Set total pages
+        stylistPageResponse.setTotalElements(stylistPage.getTotalElements()); // Set total elements
+        stylistPageResponse.setContent(stylistPage.getContent()); // Set the list of StylistResponse DTOs
+
+        return stylistPageResponse;
     }
 
     public List<StylistResponse> getStylistByStatus() {

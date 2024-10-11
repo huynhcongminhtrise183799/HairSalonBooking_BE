@@ -10,6 +10,7 @@ import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.AccountPageResponse;
+import com.example.hairSalonBooking.model.response.CusPageResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 
 import jakarta.validation.Valid;
@@ -156,12 +157,24 @@ public class AuthenticationService implements UserDetailsService {
 //    }
 
     public AccountPageResponse getAllAccountCustomer(int page, int size) {
-        Page<Account> customerPage = accountRepository.findByRole(Role.CUSTOMER, PageRequest.of(page, size));
+        Page<Account> accountPage = accountRepository.findByRole(Role.CUSTOMER, PageRequest.of(page, size));
+        Page<CusPageResponse> customerPage = accountPage.map(account ->
+                new CusPageResponse(
+                        account.getAccountid(),
+                        account.getEmail(),
+                        account.getFullname(),
+                        account.getDob(),
+                        account.getGender(),
+                        account.getPhone(),
+                        account.getImage())
+        );
+
         AccountPageResponse customerPageResponse = new AccountPageResponse();
         customerPageResponse.setPageNumber(customerPage.getNumber());
         customerPageResponse.setTotalPages(customerPage.getTotalPages());
         customerPageResponse.setTotalElements(customerPage.getTotalElements());
         customerPageResponse.setContent(customerPage.getContent());
+
         return customerPageResponse;
     }
 
