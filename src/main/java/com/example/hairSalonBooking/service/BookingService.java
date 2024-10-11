@@ -2,31 +2,24 @@ package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.BookingStatus;
-import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
-
-import com.example.hairSalonBooking.model.response.ShiftResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.repository.*;
-import jdk.jfr.Frequency;
+
 
 import com.example.hairSalonBooking.model.response.*;
-import com.example.hairSalonBooking.repository.*;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-
-import java.util.*;
 import java.util.Collections;
 
 import java.util.ArrayList;
