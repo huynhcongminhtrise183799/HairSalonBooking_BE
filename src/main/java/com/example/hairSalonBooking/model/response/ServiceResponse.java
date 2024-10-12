@@ -25,5 +25,6 @@ public class ServiceResponse {
     LocalTime duration;
     String image;
     String skillName;
+    boolean isDelete;
 
 }

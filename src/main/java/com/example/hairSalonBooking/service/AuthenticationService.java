@@ -3,6 +3,7 @@ package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.enums.Role;
+
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
@@ -20,6 +21,23 @@ import ognl.Token;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+
+import com.example.hairSalonBooking.model.request.RegisterRequest;
+import com.example.hairSalonBooking.model.response.AccountResponse;
+import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.exception.AppException;
+import com.example.hairSalonBooking.exception.ErrorCode;
+import com.example.hairSalonBooking.model.response.AuthenticationResponse;
+import com.example.hairSalonBooking.model.response.AccountPageResponse;
+import com.example.hairSalonBooking.repository.AccountRepository;
+
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,10 +47,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+
 import java.util.List;
 
 @Slf4j
@@ -157,9 +177,28 @@ public class AuthenticationService implements UserDetailsService {
         return accounts;
     }
 
+//    public Page<Account> getAllAccountCustomer(int page, int size) {
+//      return accountRepository.findAll(PageRequest.of(page, size));
+//    }
+
+    // cái này chia luồng page Customer
+    public AccountPageResponse getAllAccountCustomer(int page, int size) {
+        Page<Account> customerPage = accountRepository.findAccountByRole(Role.CUSTOMER, PageRequest.of(page, size));
+        AccountPageResponse customerPageResponse = new AccountPageResponse();
+        customerPageResponse.setPageNumber(customerPage.getNumber());
+        customerPageResponse.setTotalPages(customerPage.getTotalPages());
+        customerPageResponse.setTotalElements(customerPage.getTotalElements());
+        customerPageResponse.setContent(customerPage.getContent());
+        return customerPageResponse;
+    }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return accountRepository.findAccountByUsername(username);
     } // Định nghĩa cho mình biet cach lay Username
+
 }
+
+
+

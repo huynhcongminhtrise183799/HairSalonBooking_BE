@@ -71,7 +71,6 @@ public class ForgotPasswordService {
         ForgotPasswordResponse response = ForgotPasswordResponse.builder()
                 .message("OTP is verified")
                 .build();
-
         return response;
     }
     public ForgotPasswordResponse changePassword(String email, ChangePasswordRequest request){

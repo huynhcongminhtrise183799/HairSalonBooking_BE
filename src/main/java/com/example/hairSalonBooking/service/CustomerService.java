@@ -52,6 +52,9 @@ public class CustomerService {
         profileResponse.setEmail(account.getEmail());
         profileResponse.setPhone(account.getPhone());
         profileResponse.setFullname(account.getFullname());
+        if(account.getSalonBranch() != null){
+            profileResponse.setSalonId(account.getSalonBranch().getSalonId());
+        }
         return profileResponse;
     }
 

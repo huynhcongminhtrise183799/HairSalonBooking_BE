@@ -19,7 +19,9 @@ public class UpdateStaffRequest {
     String fullName;
     @PastOrPresent(message = "INVALID_DOB")
     LocalDate dob;
+
     long salonId;
+
     @Pattern(regexp = "(84|0[35789])\\d{8}\\b", message = "INVALID_PHONE")
     String phone;
     String gender;

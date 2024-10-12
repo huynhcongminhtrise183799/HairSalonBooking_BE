@@ -16,11 +16,15 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingResponse {
+
     String customerName;
+
     String salonName;
     String stylistName;
     LocalDate date;
     LocalTime time;
+
     String voucherCode;
+
     Set<String> serviceName;
 }

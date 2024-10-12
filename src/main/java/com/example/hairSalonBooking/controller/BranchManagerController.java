@@ -37,6 +37,13 @@ public class BranchManagerController {
         return response;
     }
 
+    @GetMapping("/manager/{accountId}")
+    public ApiResponse<ManagerResponse> getAllManagers(@PathVariable long accountId){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(branchManagerService.getSpecificManager(accountId));
+        return response;
+    }
+
     @PutMapping("/manager/{id}")
     public ApiResponse<ManagerResponse> updateManager(@PathVariable long id, @RequestBody UpdateManagerRequest request){
         ApiResponse response = new ApiResponse<>();

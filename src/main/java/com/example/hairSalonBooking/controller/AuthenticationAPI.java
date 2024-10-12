@@ -3,14 +3,19 @@ package com.example.hairSalonBooking.controller;
 
 
 import com.example.hairSalonBooking.entity.Account;
+
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
+
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
-import com.example.hairSalonBooking.model.response.IntrospectResponse;
-import com.example.hairSalonBooking.service.AuthenticationService;
 
+import com.example.hairSalonBooking.model.response.IntrospectResponse;
+
+import com.example.hairSalonBooking.model.response.AccountPageResponse;
+
+import com.example.hairSalonBooking.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 
@@ -20,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.text.ParseException;
+
 import java.util.List;
 
 @RestController
@@ -59,6 +66,13 @@ public class AuthenticationAPI {
         return ResponseEntity.ok(accounts);
     }
 
+
+
+    @GetMapping("/account/page")
+    public ResponseEntity getAllAccountCustomer(@RequestParam int page, @RequestParam int size) {
+        AccountPageResponse customerPageResponse = authenticationService.getAllAccountCustomer(page, size);
+        return ResponseEntity.ok(customerPageResponse);
+    }
 
 
 

@@ -6,6 +6,10 @@ import com.example.hairSalonBooking.enums.Role;
 import jakarta.transaction.Transactional;
 
 import org.springframework.cglib.core.Local;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDate;
@@ -37,7 +41,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Transactional
     List<Account> getAccountsByRoleManager();
 
-
+    Account findByAccountidAndRole(long id, Role role);
     List<Account> findByRole(Role role);
     @Query(value = "\n" +
             "select ac.* from account ac\n" +
@@ -68,5 +72,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Transactional
     @Modifying
     void deleteSpecificSkills(long id);
+
+
+    Page<Account> findAccountByRole(Role role, Pageable pageable);
+
 }
 
