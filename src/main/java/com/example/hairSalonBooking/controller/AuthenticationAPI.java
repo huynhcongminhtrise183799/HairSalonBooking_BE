@@ -54,7 +54,7 @@ public class AuthenticationAPI {
 
     @GetMapping("/account")
     public ResponseEntity getAllAccount() {
-        List<Account> accounts = authenticationService.getAllAccount();
+        List<AccountResponse> accounts = authenticationService.getAllAccount();
         return ResponseEntity.ok(accounts);
     }
 
