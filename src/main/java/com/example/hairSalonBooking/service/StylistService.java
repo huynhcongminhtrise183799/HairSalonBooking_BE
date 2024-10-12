@@ -18,11 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 public class StylistService {
@@ -82,7 +81,8 @@ public class StylistService {
             stylistResponse.setGender(newStylist.getGender());
             stylistResponse.setSalonAddress(newStylist.getSalonBranch().getAddress());
             stylistResponse.setLevelName(newStylist.getLevel().getLevelname());
-           stylistResponse.setSkillName(skillNames);
+            stylistResponse.setSkillName(skillNames);
+
 
             // Chuyển đổi để trả về response
             return stylistResponse;
@@ -99,46 +99,120 @@ public class StylistService {
 
     public List<StylistResponse> getAllStylist() {
         List<Account> stylists = accountRepository.findByRole(Role.STYLIST);
-        return stylists.stream() // Chuyển đổi sang danh sách StylistResponse
-                .map(account -> modelMapper.map(account, StylistResponse.class))
-                .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
+
+        // Chuyển đổi sang danh sách StylistResponse
+        return stylists.stream()
+                .map(account -> {
+                    StylistResponse stylistResponse = new StylistResponse();
+
+                    // Map basic fields
+                    stylistResponse.setUsername(account.getUsername());
+                    stylistResponse.setAccountid(account.getAccountid());
+                    stylistResponse.setEmail(account.getEmail());
+                    stylistResponse.setFullname(account.getFullname());
+                    stylistResponse.setPhone(account.getPhone());
+                    stylistResponse.setImage(account.getImage());
+                    stylistResponse.setDob(account.getDob());
+                    stylistResponse.setGender(account.getGender());
+
+                    // Map salon address
+                    String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
+                    stylistResponse.setSalonAddress(salonAddress);
+
+                    // Map level name
+                    String levelName = (account.getLevel() != null) ? account.getLevel().getLevelname() : null;
+                    stylistResponse.setLevelName(levelName);
+
+                    // Map skill names
+                    Set<String> skillNames = account.getSkills().stream()
+                            .map(Skill::getSkillName)
+                            .collect(Collectors.toSet());
+                    stylistResponse.setSkillName(skillNames);
+
+                    return stylistResponse;
+                })
+                .collect(Collectors.toList()); // Collect the results into a list
     }
 
-    public StylistPageResponse getAllAccountStylist(int page, int size) {
-        Page<Account> accountPage = accountRepository.findByRole(Role.STYLIST, PageRequest.of(page, size));
-        Page<StyPageResponse> stylistPage = accountPage.map(account -> {
-            String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
+public StylistPageResponse getAllAccountStylist(int page, int size) {
+    Page<Account> accountPage = accountRepository.findByRole(Role.STYLIST, PageRequest.of(page, size));
 
-            return new StyPageResponse(
-                    account.getAccountid(),
-                    account.getUsername(),
-                    account.getEmail(),
-                    account.getFullname(),
-                    account.getPhone(),
-                    account.getImage(),
-                    account.getDob(),
-                    account.getGender(),
-                    salonAddress,  
-                    account.getLevel() != null ? account.getLevel().getLevelname() : null,
-                    account.getSkills()
-            );
-        });
+    Page<StyPageResponse> stylistPage = accountPage.map(account -> {
+        String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
+        String levelName = (account.getLevel() != null) ? account.getLevel().getLevelname() : null;
 
-        // set up lúc trả về
-        StylistPageResponse stylistPageResponse = new StylistPageResponse();
-        stylistPageResponse.setPageNumber(stylistPage.getNumber()); // Set the correct Page number
-        stylistPageResponse.setTotalPages(stylistPage.getTotalPages()); // Set total pages
-        stylistPageResponse.setTotalElements(stylistPage.getTotalElements()); // Set total elements
-        stylistPageResponse.setContent(stylistPage.getContent()); // Set the list of StylistResponse DTOs
+        // Fetch skills from account and ensure all skills are correctly mapped
+        Set<String> skillNames = account.getSkills().stream()
+                .map(skill -> {
+                    if (skill == null) {
+                        System.out.println("Skill not found for account ID: " + account.getAccountid());
+                    }
+                    return skill.getSkillName();
+                })
+                .filter(Objects::nonNull)  // Filter out any null skill names
+                .collect(Collectors.toSet());
 
-        return stylistPageResponse;
-    }
+        return new StyPageResponse(
+                account.getAccountid(),
+                account.getUsername(),
+                account.getEmail(),
+                account.getFullname(),
+                account.getPhone(),
+                account.getImage(),
+                account.getDob(),
+                account.getGender(),
+                salonAddress,
+                levelName,
+                skillNames  // Return all mapped skill names
+        );
+    });
+
+    // Build and return the StylistPageResponse
+    StylistPageResponse stylistPageResponse = new StylistPageResponse();
+    stylistPageResponse.setPageNumber(stylistPage.getNumber());
+    stylistPageResponse.setTotalPages(stylistPage.getTotalPages());
+    stylistPageResponse.setTotalElements(stylistPage.getTotalElements());
+    stylistPageResponse.setContent(stylistPage.getContent());
+
+    return stylistPageResponse;
+}
+
+
 
     public List<StylistResponse> getStylistByStatus() {
-        List<Account> StylistStatus = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
-        return StylistStatus.stream()
-                .map(account -> modelMapper.map(account, StylistResponse.class))
-                .collect(Collectors.toList());
+        List<Account> stylists = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
+        // Chuyển đổi sang danh sách StylistResponse
+        return stylists.stream()
+                .map(account -> {
+                    StylistResponse stylistResponse = new StylistResponse();
+
+                    // Map basic fields
+                    stylistResponse.setUsername(account.getUsername());
+                    stylistResponse.setAccountid(account.getAccountid());
+                    stylistResponse.setEmail(account.getEmail());
+                    stylistResponse.setFullname(account.getFullname());
+                    stylistResponse.setPhone(account.getPhone());
+                    stylistResponse.setImage(account.getImage());
+                    stylistResponse.setDob(account.getDob());
+                    stylistResponse.setGender(account.getGender());
+
+                    // Map salon address
+                    String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
+                    stylistResponse.setSalonAddress(salonAddress);
+
+                    // Map level name
+                    String levelName = (account.getLevel() != null) ? account.getLevel().getLevelname() : null;
+                    stylistResponse.setLevelName(levelName);
+
+                    // Map skill names
+                    Set<String> skillNames = account.getSkills().stream()
+                            .map(Skill::getSkillName)
+                            .collect(Collectors.toSet());
+                    stylistResponse.setSkillName(skillNames);
+
+                    return stylistResponse;
+                })
+                .collect(Collectors.toList()); // Collect the results into a list
     }
 
     public StylistResponse updateStylist(long accountid, UpdateStylistRequest stylistRequest) {
