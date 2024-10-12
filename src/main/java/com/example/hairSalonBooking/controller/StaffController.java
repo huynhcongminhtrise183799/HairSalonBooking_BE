@@ -32,6 +32,13 @@ public class StaffController {
         return response;
     }
 
+    @GetMapping("/staff/{accountId}")
+    public ApiResponse<StaffResponse> getAllStaff(@PathVariable long accountId){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(staffService.getSpecificStaff(accountId));
+        return response;
+    }
+
     @PutMapping("/staff/{id}")
     public ApiResponse<StaffResponse> updateStaff(@PathVariable long id, @RequestBody UpdateStaffRequest request){
         ApiResponse response = new ApiResponse<>();

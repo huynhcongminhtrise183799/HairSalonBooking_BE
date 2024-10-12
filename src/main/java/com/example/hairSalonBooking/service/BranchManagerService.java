@@ -79,12 +79,24 @@ public class BranchManagerService {
         }
         return managerResponses;
     }
-
+    public ManagerResponse getSpecificManager(long accountId){
+        Account account = accountRepository.findAccountByAccountid(accountId);
+        ManagerResponse response = new ManagerResponse();
+        response.setAccountid(account.getAccountid());
+        response.setGender(account.getGender());
+        response.setDob(account.getDob());
+        response.setEmail(account.getEmail());
+        response.setPhone(account.getPhone());
+        response.setFullName(account.getFullname());
+        response.setSalonAddress(account.getSalonBranch().getAddress());
+        return response;
+    }
     public ManagerResponse updateManager(long id, UpdateManagerRequest request){
         Account account = accountRepository.findAccountByAccountid(id);
         if(account == null){
             throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
         }
+
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         account.setEmail(request.getEmail());
         account.setDob(request.getDob());

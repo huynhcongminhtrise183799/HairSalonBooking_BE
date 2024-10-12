@@ -84,4 +84,7 @@ public Slot delete(long slotid) {
     return slotRepository.save(updeSlot);
 }
 
+
+
+
 }

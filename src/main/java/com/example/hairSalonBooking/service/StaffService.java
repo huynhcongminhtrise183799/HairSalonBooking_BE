@@ -75,12 +75,24 @@ public class StaffService {
         }
         return staffResponses;
     }
-
+    public StaffResponse getSpecificStaff(long accountId){
+        Account account = accountRepository.findAccountByAccountid(accountId);
+        StaffResponse staffResponse = new StaffResponse();
+        staffResponse.setAccountid(account.getAccountid());
+        staffResponse.setGender(account.getGender());
+        staffResponse.setEmail(account.getEmail());
+        staffResponse.setDob(account.getDob());
+        staffResponse.setPhone(account.getPhone());
+        staffResponse.setFullName(account.getFullname());
+        staffResponse.setSalonAddress(account.getSalonBranch().getAddress());
+        return staffResponse;
+    }
     public StaffResponse updateStaff(UpdateStaffRequest request, long id){
         Account account = accountRepository.findAccountByAccountid(id);
         if(account == null){
             throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
         }
+
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         account.setEmail(request.getEmail());
         account.setDob(request.getDob());

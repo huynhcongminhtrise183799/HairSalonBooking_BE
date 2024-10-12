@@ -1,8 +1,16 @@
 package com.example.hairSalonBooking.repository;
 
 import com.example.hairSalonBooking.entity.SalonService;
+
 import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
 import jakarta.transaction.Transactional;
+
+import com.example.hairSalonBooking.enums.Role;
+import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -48,5 +56,9 @@ public interface ServiceRepository extends JpaRepository<SalonService,Long> {
 
     @Query("SELECT s FROM SalonService s WHERE LOWER(s.serviceName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<SalonService> findByServiceNameContainingIgnoreCase(@Param("keyword") String keyword);
+
+
+    Page<SalonService> findAll(Pageable pageable);
+
 
 }

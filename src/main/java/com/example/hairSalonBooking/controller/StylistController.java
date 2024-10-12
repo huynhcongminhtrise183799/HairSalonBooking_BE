@@ -3,6 +3,9 @@ package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
+
+import com.example.hairSalonBooking.model.response.AccountPageResponse;
+
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.service.StylistService;
@@ -36,6 +39,17 @@ public class StylistController {
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(stylistService.getAllStylist());
         return apiResponse;
+    }
+    @GetMapping("/read/{accountId}")
+    public ApiResponse<StylistResponse> getSpecificStylist(@PathVariable long accountId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(stylistService.getSpecificStylist(accountId));
+        return apiResponse;
+    }
+    @GetMapping("/page")
+    public ResponseEntity getAllAccountStylist(@RequestParam int page, @RequestParam int size) {
+        AccountPageResponse customerPageResponse = stylistService.getAllAccountStylist(page, size);
+        return ResponseEntity.ok(customerPageResponse);
     }
     
     @GetMapping("/status")

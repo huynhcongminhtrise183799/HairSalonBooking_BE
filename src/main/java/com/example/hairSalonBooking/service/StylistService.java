@@ -1,23 +1,36 @@
 package com.example.hairSalonBooking.service;
 
 
+
 import com.example.hairSalonBooking.controller.StylistController;
+
 import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
+
 import com.example.hairSalonBooking.model.response.AccountResponse;
+
+import com.example.hairSalonBooking.model.response.AccountPageResponse;
+
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.repository.*;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -105,6 +118,38 @@ public class StylistService {
                 .map(account -> modelMapper.map(account, StylistResponse.class))
                 .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
     }
+
+    public StylistResponse getSpecificStylist(long accountId){
+        Account  stylist = accountRepository.findByAccountidAndRole(accountId,Role.STYLIST);
+        Set<Skill> skills = skillRepository.getSkillByAccountId(accountId);
+        Set<String> skillName = new HashSet<>();
+        for(Skill skill : skills){
+            skillName.add(skill.getSkillName());
+        }
+        StylistResponse response = new StylistResponse();
+        response.setAccountid(stylist.getAccountid());
+        response.setImage(stylist.getImage());
+        response.setFullname(stylist.getFullname());
+        response.setDob(stylist.getDob());
+        response.setEmail(stylist.getEmail());
+        response.setPhone(stylist.getPhone());
+        response.setGender(stylist.getGender());
+        response.setSkillName(skillName);
+        response.setSalonAddress(stylist.getSalonBranch().getAddress());
+        response.setLevelName(stylist.getLevel().getLevelname());
+        return response;
+    }
+    // cái này chia luồng page stylist
+    public AccountPageResponse getAllAccountStylist(int page, int size) {
+        Page<Account> customerPage = accountRepository.findAccountByRole(Role.STYLIST, PageRequest.of(page, size));
+        AccountPageResponse customerPageResponse = new AccountPageResponse();
+        customerPageResponse.setPageNumber(customerPage.getNumber());
+        customerPageResponse.setTotalPages(customerPage.getTotalPages());
+        customerPageResponse.setTotalElements(customerPage.getTotalElements());
+        customerPageResponse.setContent(customerPage.getContent());
+        return customerPageResponse;
+    }
+
 
     public List<StylistResponse> getStylistByStatus() {
         List<Account> StylistStatus = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
@@ -199,4 +244,6 @@ public class StylistService {
         return responses;
     }
 
+
 }
+

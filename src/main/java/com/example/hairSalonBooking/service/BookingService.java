@@ -391,6 +391,7 @@ public class BookingService {
 //                                    service.getDuration()
                             ))
                             .collect(Collectors.toSet());
+                    //response.setVoucherCode(booking.getVoucher() != null ? booking.getVoucher().getCode() : null);
                     response.setServiceName(serviceDTOs);
                     response.setStatus(booking.getStatus());
                     return response;

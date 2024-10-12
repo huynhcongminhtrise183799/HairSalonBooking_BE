@@ -3,7 +3,9 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.entity.Shift;
 import com.example.hairSalonBooking.entity.Slot;
+
 import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
+
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
@@ -92,10 +94,12 @@ public class BookingController {
         apiResponse.setResult(stylistService.getBookingsForStylistOnDate(accountId, localDate));
         return apiResponse;
     }
+
     @PostMapping("/booking/stylists/update")
     public ApiResponse<Set<StylistForBooking>> getListService(@RequestBody AssignNewStylistForBooking bookingStylits){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getStylistWhenUpdateBookingByManager(bookingStylits));
         return apiResponse;
     }
+
 }

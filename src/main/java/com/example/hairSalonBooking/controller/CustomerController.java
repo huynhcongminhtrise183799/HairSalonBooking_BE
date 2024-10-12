@@ -28,10 +28,12 @@ public class CustomerController {
         response.setMessage("Update successfully");
         return response;
     }
+
     @GetMapping("/profile")
     public ApiResponse<ProfileResponse> getProfile(){
         ApiResponse response = new ApiResponse();
         response.setResult(customerService.getProfile());
         return response;
+
     }
 }

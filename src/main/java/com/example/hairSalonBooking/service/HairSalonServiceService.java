@@ -8,6 +8,7 @@ import com.example.hairSalonBooking.model.request.BookingStylits;
 import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
 import com.example.hairSalonBooking.model.request.ServiceUpdateRequest;
 import com.example.hairSalonBooking.model.response.SalonResponse;
+import com.example.hairSalonBooking.model.response.ServicePageResponse;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.repository.AccountRepository;
@@ -15,10 +16,13 @@ import com.example.hairSalonBooking.repository.ServiceRepository;
 import com.example.hairSalonBooking.repository.SkillRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class HairSalonServiceService {
@@ -85,11 +89,17 @@ public class HairSalonServiceService {
         }
         return responses;
     }
-    public Optional<SalonService> searchServiceId(long serviceId) {
-        return serviceRepository.findByServiceId(serviceId)
-                .or(() -> {
-                    throw new RuntimeException("Service not found");
-                });
+    public ServiceResponse searchServiceId(long serviceId) {
+        Optional<SalonService> salonService = serviceRepository.findByServiceId(serviceId);
+        ServiceResponse response = new ServiceResponse();
+        response.setServiceName(salonService.get().getServiceName());
+        response.setDescription(salonService.get().getDescription());
+        response.setId(salonService.get().getServiceId());
+        response.setDuration(salonService.get().getDuration());
+        response.setImage(salonService.get().getImage());
+        response.setPrice(salonService.get().getPrice());
+        response.setDelete(salonService.get().isDelete());
+        return response;
     }
     public void deleteService(long serviceId) {
         SalonService salonService = serviceRepository.getServiceById(serviceId);
@@ -108,6 +118,34 @@ public class HairSalonServiceService {
         return modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
     }
 
+    // cái này chia luồng page Service
+    public ServicePageResponse getAllServicePage(int page, int size) {
+        Page<SalonService> servicePage = serviceRepository.findAll(PageRequest.of(page, size));
+        ServicePageResponse servicePageResponse = new ServicePageResponse();
+        servicePageResponse.setPageNumber(servicePage.getNumber());
+        servicePageResponse.setTotalPages(servicePage.getTotalPages());
+        servicePageResponse.setTotalElements(servicePage.getTotalElements());
+        servicePageResponse.setContent(servicePage.getContent());
+        return servicePageResponse;
+    }
 
+    public List<ServiceResponse> getAllServices() {
+        // Lấy tất cả dịch vụ từ cơ sở dữ liệu
+        List<SalonService> services = serviceRepository.findAll();
+
+        // Chuyển đổi từng đối tượng SalonService thành ServiceResponse
+        List<ServiceResponse> responses = services.stream().map(service -> {
+            ServiceResponse serviceResponse = new ServiceResponse();
+            serviceResponse.setId(service.getServiceId());
+            serviceResponse.setServiceName(service.getServiceName());
+            serviceResponse.setPrice(service.getPrice());
+            serviceResponse.setImage(service.getImage());
+            serviceResponse.setDuration(service.getDuration());
+            serviceResponse.setDescription(service.getDescription());
+            return serviceResponse;
+        }).collect(Collectors.toList());
+
+        return responses;
+    }
 
 }
