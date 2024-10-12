@@ -147,9 +147,17 @@ public class AuthenticationService implements UserDetailsService {
 //    }
 
 
-    public List<Account> getAllAccount() {
+    public List<AccountResponse> getAllAccount() {
         List<Account> accounts = accountRepository.findAll();
-        return accounts;
+
+        // Map each Account to AccountResponse and return the list
+        return accounts.stream()
+                .map(account -> AccountResponse.builder()
+                        .AccountId(account.getAccountid()) // Map account ID
+                        .username(account.getUsername())   // Map username
+                        .phone(account.getPhone())         // Map phone
+                        .build())
+                .collect(Collectors.toList()); // Collect the results into a list
     }
 
 //    public Page<Account> getAllAccountCustomer(int page, int size) {
