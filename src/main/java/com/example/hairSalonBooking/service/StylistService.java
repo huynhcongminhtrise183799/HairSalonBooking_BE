@@ -2,16 +2,14 @@ package com.example.hairSalonBooking.service;
 
 
 import com.example.hairSalonBooking.controller.StylistController;
-import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.entity.Level;
-import com.example.hairSalonBooking.entity.SalonBranch;
-import com.example.hairSalonBooking.entity.Skill;
+import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
+import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.repository.*;
 
@@ -21,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +47,8 @@ public class StylistService {
     private SkillRepository skillRepository;
     @Autowired
     private ServiceRepository serviceRepository;
+    @Autowired
+    private BookingRepository bookingRepository;
 
     public StylistResponse create(StylistRequest stylistRequest) {
         // Chuyển từ StylistRequest sang thực thể Account
@@ -60,9 +62,11 @@ public class StylistService {
             stylist.setLevel(level);
             stylist.setRole(Role.STYLIST);
             Set<Skill> skills = new HashSet<>();
+            Set<String> skillNames = new HashSet<>();
             // Lưu vào database
             for(Long id : stylistRequest.getSkillId()){
                 Skill skill = skillRepository.findSkillBySkillId(id);
+                skillNames.add(skill.getSkillName());
                 skills.add(skill);
             }
             stylist.setSkills(skills);
@@ -71,9 +75,21 @@ public class StylistService {
             stylist.setImage(stylistRequest.getImage());
             // Lưu vào database
             Account newStylist = accountRepository.save(stylist);
+            StylistResponse stylistResponse = new StylistResponse();
+            stylistResponse.setUsername(newStylist.getUsername());
+            stylistResponse.setAccountid(newStylist.getAccountid());
+            stylistResponse.setEmail(newStylist.getEmail());
+            stylistResponse.setFullname(newStylist.getFullname());
+            stylistResponse.setPhone(newStylist.getPhone());
+            stylistResponse.setImage(newStylist.getImage());
+            stylistResponse.setDob(newStylist.getDob());
+            stylistResponse.setGender(newStylist.getGender());
+            stylistResponse.setSalonAddress(newStylist.getSalonBranch().getAddress());
+            stylistResponse.setLevelName(newStylist.getLevel().getLevelname());
+           stylistResponse.setSkillName(skillNames);
 
             // Chuyển đổi để trả về response
-            return modelMapper.map(newStylist, StylistResponse.class);
+            return stylistResponse;
         }catch(Exception e) {
             if(e.getMessage().contains(stylist.getUsername())) {
                 throw new AppException(ErrorCode.USERNAME_EXISTED);
@@ -107,14 +123,17 @@ public class StylistService {
             // Handle the case when the stylist is not found
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
         }
+        accountRepository.deleteSpecificSkills(accountid);
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonIdAndIsDeleteFalse(stylistRequest.getSalonId());
         updeStylist.setSalonBranch(salonBranch);
         Level level  = levelRepository.findLevelByLevelid(stylistRequest.getLevelId());
         updeStylist.setLevel(level);
         Set<Skill> skills = new HashSet<>();
+        Set<String> skillNames = new HashSet<>();
         // Lưu vào database
         for(Long id : stylistRequest.getSkillId()){
             Skill skill = skillRepository.findSkillBySkillId(id);
+            skillNames.add(skill.getSkillName());
             skills.add(skill);
         }
         updeStylist.setSkills(skills);
@@ -125,10 +144,23 @@ public class StylistService {
         updeStylist.setGender(stylistRequest.getGender());
         updeStylist.setImage(stylistRequest.getImage());
         updeStylist.setDeleted(stylistRequest.isDelete());
+        updeStylist.setDob(stylistRequest.getDob());
         //Làm xong thì lưu xuống DataBase
         Account updatedStylist = accountRepository.save(updeStylist);
+        StylistResponse stylistResponse = new StylistResponse();
+        stylistResponse.setUsername(updatedStylist.getUsername());
+        stylistResponse.setAccountid(updatedStylist.getAccountid());
+        stylistResponse.setEmail(updatedStylist.getEmail());
+        stylistResponse.setFullname(updatedStylist.getFullname());
+        stylistResponse.setPhone(updatedStylist.getPhone());
+        stylistResponse.setImage(updatedStylist.getImage());
+        stylistResponse.setDob(updatedStylist.getDob());
+        stylistResponse.setGender(updatedStylist.getGender());
+        stylistResponse.setSalonAddress(updatedStylist.getSalonBranch().getAddress());
+        stylistResponse.setLevelName(updatedStylist.getLevel().getLevelname());
+        stylistResponse.setSkillName(skillNames);
         // trả về thôi
-        return modelMapper.map(updatedStylist, StylistResponse.class);
+        return stylistResponse;
     }
 
     public StylistResponse deleteStylist(long accountid) {
@@ -142,6 +174,31 @@ public class StylistService {
         updeStylist.setDeleted(true);
         Account deleteStylist = accountRepository.save(updeStylist);
         return modelMapper.map(deleteStylist, StylistResponse.class);
+    }
+    public List<BookingResponse> getBookingsForStylistOnDate(Long stylistId, LocalDate date) {
+        // Kiểm tra xem account có phải là Stylist không
+        Account stylist = accountRepository.findById(stylistId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        // Kiểm tra Role
+        if (stylist.getRole() != Role.STYLIST) {
+            throw new IllegalArgumentException("Account is not a Stylist");
+        }
+
+        // Lấy danh sách booking từ database
+        List<Booking> bookings = bookingRepository.findAllByAccountInAndSalonBranch(stylistId, date);
+        // Chuyển đổi lúc trả ra từ Booking sang BookingResponse
+        List<BookingResponse> responses = new ArrayList<>();
+        for(Booking booking : bookings){
+            Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
+            BookingResponse bookingResponse = new BookingResponse();
+            bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+            bookingResponse.setTime(booking.getSlot().getSlottime());
+            bookingResponse.setDate(booking.getBookingDay());
+            bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+            bookingResponse.setServiceName(serviceNames);
+            responses.add(bookingResponse);
+        }
+        return responses;
     }
 
 }

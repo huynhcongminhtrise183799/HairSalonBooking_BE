@@ -1,9 +1,6 @@
 package com.example.hairSalonBooking.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,4 +19,9 @@ public class Payment {
     double paymentAmount;
     LocalDate paymentDate;
     String paymentMethod;
+    String paymentStatus;
+    String transactionId;
+    @OneToOne
+    @JoinColumn(name = "booking_id")
+    Booking booking;
 }

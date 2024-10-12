@@ -6,8 +6,7 @@ import com.example.hairSalonBooking.enums.Role;
 import jakarta.transaction.Transactional;
 
 import org.springframework.cglib.core.Local;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +39,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
 
     List<Account> findByRole(Role role);
-
+    @Query(value = "\n" +
+            "select ac.* from account ac\n" +
+            "where ac.salon_id = ?1 and ac.role = 'STYLIST'",nativeQuery = true)
+    List<Account> getStylistsBySalo(long id);
 
     @Query(value = "select ac.* from account ac\n" +
             "inner join specific_skill ss\n" +
@@ -62,7 +64,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "            where ss.service_id = ?1 and ssch.working_day = ?2 and ac.salon_id = ?3",nativeQuery = true)
     List<Account> getStylistForBooking(long serviceId, LocalDate workingDay, long salonId);
 
-
-
+    @Query(value = "DELETE FROM specific_skill WHERE account_id = ?1",nativeQuery = true)
+    @Transactional
+    @Modifying
+    void deleteSpecificSkills(long id);
 }
 
