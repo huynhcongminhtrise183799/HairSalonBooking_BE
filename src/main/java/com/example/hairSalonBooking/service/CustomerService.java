@@ -43,7 +43,16 @@ public class CustomerService {
         var context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         Account account =(Account) authentication.getPrincipal();
-        return modelMapper.map(account,ProfileResponse.class);
+        ProfileResponse profileResponse = new ProfileResponse();
+        profileResponse.setAccountid(account.getAccountid());
+        profileResponse.setDob(account.getDob());
+        profileResponse.setImage(account.getImage());
+        profileResponse.setGender(account.getGender());
+        profileResponse.setRole(account.getRole());
+        profileResponse.setEmail(account.getEmail());
+        profileResponse.setPhone(account.getPhone());
+        profileResponse.setFullname(account.getFullname());
+        return profileResponse;
     }
 
 }
