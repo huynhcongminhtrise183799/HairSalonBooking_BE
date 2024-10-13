@@ -11,4 +11,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Payment findPaymentByBooking(@Param("booking") Booking booking);
 
     Payment findByTransactionId(String transactionId);
+    Payment findByBooking_BookingId(Long booking);
 }

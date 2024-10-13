@@ -84,10 +84,11 @@ public class BookingController {
          apiResponse.setResult(bookingService.checkIn(bookingId));
          return apiResponse;
     }
-    @PutMapping("/{Transid}/checkout")
-    public ApiResponse<String> checkIn(@PathVariable String Transid) {
-        ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(bookingService.checkout(Transid));
+    @PutMapping("/checkout")
+    public ApiResponse<String> checkOut(@RequestParam(required = false) String transactionId,
+                                        @RequestParam(required = false) Long bookingId) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.checkout(transactionId, bookingId));  // Truyền cả hai tham số
         return apiResponse;
     }
     @PostMapping("/{bookingId}/finish")

@@ -379,17 +379,35 @@ public class BookingService {
         paymentRepository.save(payment);
         return totalAmount;
     }
-    public String checkout(String transactionId) {
-        Payment payment = paymentRepository.findByTransactionId(transactionId);
-        if (payment == null) {
-            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+    public String checkout(String transactionId, Long bookingId) {
+        Payment payment = null;
+        Booking booking = null;
+        if (transactionId != null && !transactionId.isEmpty()) {
+            payment = paymentRepository.findByTransactionId(transactionId);
+            if (payment == null) {
+                throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+            }
+            booking = payment.getBooking();
         }
-        Booking booking = payment.getBooking();
+
+        // Check if bookingId is provided
+        else if (bookingId != null) {
+            booking = bookingRepository.findById(bookingId)
+                    .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+            payment = booking.getPayment();
+        } else {
+            throw new AppException(ErrorCode.EXCEPTION);
+        }
+
+        // Update booking status
         booking.setStatus(BookingStatus.COMPLETED);
         bookingRepository.save(booking);
-        payment.setPaymentStatus("Completed");
+
+        // Update payment status
+        booking.getPayment().setPaymentStatus("Completed");
         paymentRepository.save(payment);
-        return "check-out success";
+
+        return "Check-out success";
     }
 
 }
