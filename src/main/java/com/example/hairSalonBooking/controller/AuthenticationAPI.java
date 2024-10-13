@@ -9,6 +9,7 @@ import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
+import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 
 import com.example.hairSalonBooking.model.response.IntrospectResponse;
@@ -55,9 +56,10 @@ public class AuthenticationAPI {
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@Valid @RequestBody LoginRequest loginRequest) {
-        AuthenticationResponse newAccount = authenticationService.login(loginRequest);
-        return ResponseEntity.ok(newAccount);
+    public ApiResponse<AuthenticationResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(authenticationService.login(loginRequest));
+        return apiResponse;
     }
 
     @GetMapping("/account")
@@ -69,9 +71,10 @@ public class AuthenticationAPI {
 
 
     @GetMapping("/account/page")
-    public ResponseEntity getAllAccountCustomer(@RequestParam int page, @RequestParam int size) {
-        AccountPageResponse customerPageResponse = authenticationService.getAllAccountCustomer(page, size);
-        return ResponseEntity.ok(customerPageResponse);
+    public ApiResponse<AccountPageResponse> getAllAccountCustomer(@RequestParam int page, @RequestParam int size) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(authenticationService.getAllAccountCustomer(page, size));
+        return response;
     }
 
 

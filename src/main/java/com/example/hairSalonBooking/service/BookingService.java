@@ -13,6 +13,7 @@ import com.example.hairSalonBooking.repository.*;
 
 
 import com.example.hairSalonBooking.model.response.*;
+import org.hibernate.sql.Update;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,12 +183,42 @@ public class BookingService {
         allSlot.removeAll(slotToRemove);
         return allSlot;
     }
+    private Set<StylistForBooking> getStylistsBySkillAndDateWorkingAndShift(AssignNewStylistForBooking newStylistForBooking){
+        Slot slotBookingUpdate = slotRepository.findSlotBySlotid(newStylistForBooking.getSlotId());
+        Set<SalonService> services = new HashSet<>();
+        for(Long id : newStylistForBooking.getServiceId()){
+            SalonService service = serviceRepository.getServiceById(id);
+            services.add(service);
+        }
+        Set<Skill> skills = new HashSet<>();
+        for(SalonService service : services){
+            Skill skill = skillRepository.findSkillBySkillId(service.getSkill().getSkillId());
+            skills.add(skill);
+        }
+        Shift shift = shiftRepository.getShiftBySlot(newStylistForBooking.getSlotId());
+        Set<Account> stylists = new HashSet<>();
+        for(Skill skill : skills){
+            Set<Account> accounts = accountRepository.getStylistForBooking(newStylistForBooking.getDate(),shift.getShiftId(),skill.getSkillId());
+            if(stylists.isEmpty()){
+                stylists.addAll(accounts);
+            }else{
+                stylists.retainAll(accounts);
+            }
+        }
+        Set<StylistForBooking> stylistForBookings = new HashSet<>();
+        for(Account account : stylists){
+            StylistForBooking stylist = new StylistForBooking();
+            stylist.setId(account.getAccountid());
+            stylist.setFullname(account.getFullname());
+            stylist.setImage(account.getImage());
+            stylistForBookings.add(stylist);
+        }
+        return stylistForBookings;
+    }
     public Set<StylistForBooking> getStylistWhenUpdateBookingByManager(AssignNewStylistForBooking newStylistForBooking){
-        BookingStylits bookingStylits = new BookingStylits();
-        bookingStylits.setServiceId(newStylistForBooking.getServiceId());
-        bookingStylits.setSalonId(newStylistForBooking.getSalonId());
-        // lay dc tat ca stylist co the lam list service do
-        Set<StylistForBooking> stylistForBookings = getStylistForBooking(bookingStylits);
+
+        // lay dc tat ca stylist co the lam list service do theo ca lam va ngay lam
+        Set<StylistForBooking> stylistForBookings = getStylistsBySkillAndDateWorkingAndShift(newStylistForBooking);
         // tìm đc slot
         Slot slotBookingUpdate = slotRepository.findSlotBySlotid(newStylistForBooking.getSlotId());
         // tính tổng thời gian hoàn thành các services của booking mới
@@ -307,6 +338,25 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
         return "booking deleted";
+    }
+    public BookingResponse getBookingById(long bookingId){
+        Booking booking = bookingRepository.findBookingByBookingId(bookingId);
+        Set<String> serviceName = serviceRepository.getServiceNameByBooking(bookingId);
+        Account account = accountRepository.findAccountByAccountid(booking.getStylistSchedule().getAccount().getAccountid());
+        BookingResponse bookingResponse = new BookingResponse();
+        bookingResponse.setId(booking.getBookingId());
+        bookingResponse.setDate(booking.getBookingDay());
+        bookingResponse.setTime(booking.getSlot().getSlottime());
+        bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+        bookingResponse.setCustomerName(booking.getAccount().getFullname());
+        bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+        bookingResponse.setServiceName(serviceName);
+        bookingResponse.setStylistName(account.getFullname());
+        if(booking.getVoucher() != null){
+            bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+        }
+        return bookingResponse;
+
     }
     private LocalTime totalTimeServiceBooking(Set<Long> serviceId){
         LocalTime totalTimeDuration = LocalTime.of(0,0,0);

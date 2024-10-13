@@ -11,12 +11,16 @@ import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 
+
 import com.example.hairSalonBooking.model.response.AccountResponse;
 
 import com.example.hairSalonBooking.model.response.AccountPageResponse;
 
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
+
+import com.example.hairSalonBooking.model.response.*;
+
 import com.example.hairSalonBooking.repository.*;
 
 import org.modelmapper.ModelMapper;
@@ -119,6 +123,7 @@ public class StylistService {
                 .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
     }
 
+
     public StylistResponse getSpecificStylist(long accountId){
         Account  stylist = accountRepository.findByAccountidAndRole(accountId,Role.STYLIST);
         Set<Skill> skills = skillRepository.getSkillByAccountId(accountId);
@@ -140,16 +145,37 @@ public class StylistService {
         return response;
     }
     // cái này chia luồng page stylist
-    public AccountPageResponse getAllAccountStylist(int page, int size) {
-        Page<Account> customerPage = accountRepository.findAccountByRole(Role.STYLIST, PageRequest.of(page, size));
-        AccountPageResponse customerPageResponse = new AccountPageResponse();
-        customerPageResponse.setPageNumber(customerPage.getNumber());
-        customerPageResponse.setTotalPages(customerPage.getTotalPages());
-        customerPageResponse.setTotalElements(customerPage.getTotalElements());
-        customerPageResponse.setContent(customerPage.getContent());
-        return customerPageResponse;
-    }
+    public StylistPageResponse getAllAccountStylist(int page, int size) {
+        Page<Account> accountPage = accountRepository.findAccountByRole(Role.STYLIST, PageRequest.of(page, size));
+        Page<StyPageResponse> stylistPage = accountPage.map(account -> {
+            String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
+            Set<String> skillNames = account.getSkills().stream()
+                    .filter(skill -> skill.getSkillName() != null) // Filter out null skill names if necessary
+                    .map(Skill::getSkillName)                      // Map Skill objects to their skillName property
+                    .collect(Collectors.toSet());
 
+            return new StyPageResponse(
+                    account.getAccountid(),
+                    account.getUsername(),
+                    account.getEmail(),
+                    account.getFullname(),
+                    account.getPhone(),
+                    account.getImage(),
+                    account.getDob(),
+                    account.getGender(),
+                    salonAddress,
+                    account.getLevel() != null ? account.getLevel().getLevelname() : null,
+                    skillNames
+            );
+        });
+        // set up lúc trả về
+        StylistPageResponse stylistPageResponse = new StylistPageResponse();
+        stylistPageResponse.setPageNumber(stylistPage.getNumber()); // Set the correct Page number
+        stylistPageResponse.setTotalPages(stylistPage.getTotalPages()); // Set total pages
+        stylistPageResponse.setTotalElements(stylistPage.getTotalElements()); // Set total elements
+        stylistPageResponse.setContent(stylistPage.getContent()); // Set the list of StylistResponse DTOs
+        return stylistPageResponse;
+    }
 
     public List<StylistResponse> getStylistByStatus() {
         List<Account> StylistStatus = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
@@ -245,5 +271,9 @@ public class StylistService {
     }
 
 
+
 }
+
+
+
 

@@ -11,12 +11,15 @@ import com.example.hairSalonBooking.model.request.CreateManagerRequest;
 import com.example.hairSalonBooking.model.request.UpdateManagerRequest;
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.ManagerResponse;
+import com.example.hairSalonBooking.model.response.ProfileResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 import com.example.hairSalonBooking.repository.BookingRepository;
 import com.example.hairSalonBooking.repository.SalonBranchRepository;
 import com.example.hairSalonBooking.repository.ServiceRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -61,7 +64,7 @@ public class BranchManagerService {
     }
 
     public List<ManagerResponse> getAllManagers(){
-        List<Account> accounts = accountRepository.getAccountsByRoleManager();
+        List<Account> accounts = accountRepository.findByRoleAndIsDeletedFalse(Role.BRANCH_MANAGER);
         List<ManagerResponse> managerResponses = new ArrayList<>();
         for(Account account : accounts){
             ManagerResponse response = ManagerResponse.builder()
@@ -159,6 +162,8 @@ public class BranchManagerService {
         for(Booking booking : bookings){
             Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
             BookingResponse bookingResponse = new BookingResponse();
+            bookingResponse.setId(booking.getBookingId());
+            bookingResponse.setCustomerId(booking.getAccount().getAccountid());
             bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setDate(booking.getBookingDay());
@@ -171,5 +176,23 @@ public class BranchManagerService {
             responses.add(bookingResponse);
         }
         return responses;
+    }
+    public ProfileResponse getProfile(){
+        var context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Account account =(Account) authentication.getPrincipal();
+        ProfileResponse profileResponse = new ProfileResponse();
+        profileResponse.setAccountid(account.getAccountid());
+        profileResponse.setDob(account.getDob());
+        profileResponse.setImage(account.getImage());
+        profileResponse.setGender(account.getGender());
+        profileResponse.setRole(account.getRole());
+        profileResponse.setEmail(account.getEmail());
+        profileResponse.setPhone(account.getPhone());
+        profileResponse.setFullname(account.getFullname());
+        if(account.getSalonBranch() != null){
+            profileResponse.setSalonId(account.getSalonBranch().getSalonId());
+        }
+        return profileResponse;
     }
 }

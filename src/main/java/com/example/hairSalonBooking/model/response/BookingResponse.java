@@ -16,7 +16,8 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingResponse {
-
+    long id;
+    long customerId;
     String customerName;
 
     String salonName;

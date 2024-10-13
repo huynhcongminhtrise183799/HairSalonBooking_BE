@@ -118,15 +118,30 @@ public class HairSalonServiceService {
         return modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
     }
 
-    // cái này chia luồng page Service
+
     public ServicePageResponse getAllServicePage(int page, int size) {
         Page<SalonService> servicePage = serviceRepository.findAll(PageRequest.of(page, size));
-        ServicePageResponse servicePageResponse = new ServicePageResponse();
-        servicePageResponse.setPageNumber(servicePage.getNumber());
-        servicePageResponse.setTotalPages(servicePage.getTotalPages());
-        servicePageResponse.setTotalElements(servicePage.getTotalElements());
-        servicePageResponse.setContent(servicePage.getContent());
-        return servicePageResponse;
+
+        Page<ServiceResponse> servicePageResponse = servicePage.map(service ->
+                new ServiceResponse(
+                        service.getServiceId(),
+                        service.getServiceName(),
+                        service.getPrice(),
+                        service.getDescription(),
+                        service.getDuration(),
+                        service.getImage(),
+                        service.getSkill().getSkillName(),
+                        service.isDelete()
+                )
+        );
+
+        ServicePageResponse servicePageResponseResult = new ServicePageResponse();
+        servicePageResponseResult.setPageNumber(servicePageResponse.getNumber());
+        servicePageResponseResult.setTotalPages(servicePageResponse.getTotalPages());
+        servicePageResponseResult.setTotalElements(servicePageResponse.getTotalElements());
+        servicePageResponseResult.setContent(servicePageResponse.getContent());
+
+        return servicePageResponseResult;
     }
 
     public List<ServiceResponse> getAllServices() {
