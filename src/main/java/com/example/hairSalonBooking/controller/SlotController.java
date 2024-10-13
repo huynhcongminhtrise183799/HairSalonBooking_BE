@@ -35,8 +35,10 @@ public class SlotController {
 
 
     @GetMapping("/read")
-    List<Slot> getAllSlot() {
-        return slotService.getAllSlot();
+    ApiResponse<List<Slot>> getAllSlot() {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(slotService.getAllSlot());
+        return response;
     }
 
     @PutMapping("{slotid}")

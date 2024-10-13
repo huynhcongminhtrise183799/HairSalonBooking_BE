@@ -29,6 +29,7 @@ import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.model.response.AccountPageResponse;
+import com.example.hairSalonBooking.model.response.CusPageResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 
 import jakarta.validation.Valid;
@@ -92,7 +93,7 @@ public class AuthenticationService implements UserDetailsService {
 //                .build();
 //    }
 
-    public AccountResponse register(@Valid RegisterRequest registerRequest) {
+    public AccountResponse register(RegisterRequest registerRequest) {
         if(!registerRequest.getPassword().equals(registerRequest.getConfirmpassword())) {
             throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
         }
@@ -183,12 +184,26 @@ public class AuthenticationService implements UserDetailsService {
 
     // cái này chia luồng page Customer
     public AccountPageResponse getAllAccountCustomer(int page, int size) {
-        Page<Account> customerPage = accountRepository.findAccountByRole(Role.CUSTOMER, PageRequest.of(page, size));
+
+        Page<Account> accountPage = accountRepository.findAccountByRole(Role.CUSTOMER, PageRequest.of(page, size));
+        Page<CusPageResponse> customerPage = accountPage.map(account ->
+                new CusPageResponse(
+                        account.getAccountid(),
+                        account.getEmail(),
+                        account.getFullname(),
+                        account.getDob(),
+                        account.getGender(),
+                        account.getPhone(),
+                        account.getImage())
+        );
+
+
         AccountPageResponse customerPageResponse = new AccountPageResponse();
         customerPageResponse.setPageNumber(customerPage.getNumber());
         customerPageResponse.setTotalPages(customerPage.getTotalPages());
         customerPageResponse.setTotalElements(customerPage.getTotalElements());
         customerPageResponse.setContent(customerPage.getContent());
+
         return customerPageResponse;
     }
 

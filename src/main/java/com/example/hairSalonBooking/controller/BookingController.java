@@ -54,6 +54,13 @@ public class BookingController {
         apiResponse.setResult(bookingService.createNewBooking(request));
         return apiResponse;
     }
+
+    @GetMapping("/booking/{bookingId}")
+    public ApiResponse<BookingResponse> createBooking(@PathVariable long bookingId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getBookingById(bookingId));
+        return apiResponse;
+    }
     @PutMapping("/booking/{bookingId}")
     public ApiResponse<Booking> updateBooking(@PathVariable long bookingId,@RequestBody BookingRequest request){
         ApiResponse apiResponse = new ApiResponse<>();

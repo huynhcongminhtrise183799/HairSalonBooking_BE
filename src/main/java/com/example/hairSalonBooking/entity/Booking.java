@@ -10,7 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

@@ -58,15 +58,15 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByRoleAndIsDeletedFalse(Role role);
 
-    @Query(value = "select distinct ac.* from account ac\n" +
-            "            inner join specific_skill sk\n" +
-            "            on ac.accountid = sk.account_id\n" +
-            "            inner join salon_service ss\n" +
-            "            on sk.skill_id = ss.skill_id\n" +
-            "            inner join stylist_schedule ssch\n" +
-            "            on ac.accountid = ssch.account_id\n" +
-            "            where ss.service_id = ?1 and ssch.working_day = ?2 and ac.salon_id = ?3",nativeQuery = true)
-    List<Account> getStylistForBooking(long serviceId, LocalDate workingDay, long salonId);
+    @Query(value = "select distinct a.* from account a\n" +
+            "inner join stylist_schedule ss\n" +
+            "on a.accountid = ss.account_id\n" +
+            "inner join specific_stylist_schedule sssch\n" +
+            "on ss.stylist_schedule_id = sssch.stylist_schedule_id\n" +
+            "inner join specific_skill ssk\n" +
+            "on a.accountid = ssk.account_id\n" +
+            "where ss.working_day = ?1 and sssch.shift_id = ?2 and ssk.skill_id = ?3 ;",nativeQuery = true)
+    Set<Account> getStylistForBooking(LocalDate date, long shiftId, long skillId);
 
     @Query(value = "DELETE FROM specific_skill WHERE account_id = ?1",nativeQuery = true)
     @Transactional

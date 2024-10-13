@@ -95,9 +95,11 @@ public class ServiceController {
 
 
     @GetMapping("/page")
-    public ResponseEntity getAllServicePage(@RequestParam int page, @RequestParam int size) {
-        ServicePageResponse servicePageResponse = hairSalonServiceService.getAllServicePage(page, size);
-        return ResponseEntity.ok(servicePageResponse);
+    public ApiResponse<ServicePageResponse> getAllServicePage(@RequestParam int page, @RequestParam int size) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(hairSalonServiceService.getAllServicePage(page, size));
+        return response;
+
     }
     @GetMapping("/all")
     public ResponseEntity getAllService() {

@@ -24,4 +24,17 @@ public class FeedbackController {
         response.setResult(feedbackService.createFeedback(request));
         return response;
     }
+
+    @GetMapping("/feedback/{bookingId}")
+    public ApiResponse<FeedbackResponse> getFeedback(@PathVariable long bookingId){
+        ApiResponse response = new ApiResponse<>();
+        FeedbackResponse feedbackResponse = feedbackService.getFeedbackByBookingId(bookingId);
+        if(feedbackResponse == null){
+            response.setResult("Not feedback yet");
+        }else{
+            response.setResult(feedbackResponse);
+        }
+        return response;
+
+    }
 }

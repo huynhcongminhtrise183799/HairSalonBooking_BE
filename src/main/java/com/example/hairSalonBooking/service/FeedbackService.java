@@ -45,4 +45,17 @@ public class FeedbackService {
         response.setBookingId(feedback.getBooking().getBookingId());
         return response;
     }
+
+    public FeedbackResponse getFeedbackByBookingId(long bookingId){
+        Feedback feedback = feedbackRepository.findFeedbackByBookingBookingId(bookingId);
+        if(feedback == null){
+            return null;
+        }
+        FeedbackResponse response = new FeedbackResponse();
+        response.setScore(feedback.getScore());
+        response.setContent(feedback.getContent());
+        response.setDate(feedback.getDay());
+        response.setBookingId(feedback.getBooking().getBookingId());
+        return response;
+    }
 }

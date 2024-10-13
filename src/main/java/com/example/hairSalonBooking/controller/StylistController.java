@@ -7,6 +7,7 @@ import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 import com.example.hairSalonBooking.model.response.AccountPageResponse;
 
 import com.example.hairSalonBooking.model.response.ApiResponse;
+import com.example.hairSalonBooking.model.response.StylistPageResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -46,10 +47,12 @@ public class StylistController {
         apiResponse.setResult(stylistService.getSpecificStylist(accountId));
         return apiResponse;
     }
+
     @GetMapping("/page")
-    public ResponseEntity getAllAccountStylist(@RequestParam int page, @RequestParam int size) {
-        AccountPageResponse customerPageResponse = stylistService.getAllAccountStylist(page, size);
-        return ResponseEntity.ok(customerPageResponse);
+    public ApiResponse<StylistPageResponse> getAllAccountStylist(@RequestParam int page, @RequestParam int size) {
+    ApiResponse response = new ApiResponse<>();
+    response.setResult(stylistService.getAllAccountStylist(page, size));
+    return response;
     }
     
     @GetMapping("/status")
