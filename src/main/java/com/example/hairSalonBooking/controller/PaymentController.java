@@ -44,7 +44,6 @@ public class PaymentController {
     @GetMapping("/payment/response")
     public ResponseEntity<String> checkPaymentSuccess(@RequestParam Map<String, String> vnp_Params) {
         String vnp_ResponseCode = vnp_Params.get("vnp_ResponseCode");
-
         // Kiểm tra mã phản hồi từ VNPay
         if ("00".equals(vnp_ResponseCode)) {
             // Giao dịch thành công
