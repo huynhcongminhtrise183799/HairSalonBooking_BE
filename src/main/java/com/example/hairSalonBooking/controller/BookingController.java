@@ -6,10 +6,7 @@ import com.example.hairSalonBooking.entity.Slot;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
-import com.example.hairSalonBooking.model.response.ApiResponse;
-import com.example.hairSalonBooking.model.response.BookingResponse;
-import com.example.hairSalonBooking.model.response.ShiftResponse;
-import com.example.hairSalonBooking.model.response.StylistForBooking;
+import com.example.hairSalonBooking.model.response.*;
 import com.example.hairSalonBooking.service.BookingService;
 import com.example.hairSalonBooking.service.HairSalonServiceService;
 import com.example.hairSalonBooking.service.StylistService;
@@ -92,10 +89,10 @@ public class BookingController {
         return apiResponse;
     }
     @PostMapping("/{bookingId}/finish")
-    public ApiResponse<Double> finishBooking(@PathVariable Long bookingId) {
-        ApiResponse<Double> apiResponse = new ApiResponse<>();
-        double totalAmount = bookingService.finishedService(bookingId);
-        apiResponse.setResult(totalAmount);
+    public ApiResponse<PaymentResponse> finishBooking(@PathVariable Long bookingId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        PaymentResponse paymentResponse = bookingService.finishedService(bookingId);
+        apiResponse.setResult(paymentResponse);
         return apiResponse;
     }
     @GetMapping("/bookings/stylist/{date}/{accountId}")

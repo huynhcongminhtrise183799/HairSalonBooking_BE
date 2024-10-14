@@ -354,7 +354,7 @@ public class BookingService {
         return "check-in success";
     }
 
-    public double finishedService(long bookingId) {
+    public PaymentResponse finishedService(long bookingId) {
 
         Booking booking = bookingRepository.findBookingByBookingId(bookingId);
         if (booking == null) {
@@ -362,12 +362,16 @@ public class BookingService {
         }
         Set<SalonService> services = booking.getServices();
         double totalAmount = 0;
+        Set<PaymentServiceResponse> serviceResponses = new HashSet<>();
         for (SalonService service : services) {
             totalAmount += service.getPrice();
+            serviceResponses.add(new PaymentServiceResponse(service.getServiceName(), service.getPrice()));
         }
+        String voucherCode = null;
         if (booking.getVoucher() != null) {
             double discount = booking.getVoucher().getDiscountAmount();
             totalAmount -= totalAmount * discount / 100;
+            voucherCode = booking.getVoucher().getCode();
         }
         Payment payment = Payment.builder()
                 .paymentAmount(totalAmount)
@@ -377,7 +381,12 @@ public class BookingService {
                 .booking(booking)         // Liên kết với Booking
                 .build();
         paymentRepository.save(payment);
-        return totalAmount;
+        return new PaymentResponse(
+                booking.getBookingId(),
+                serviceResponses,
+                totalAmount,
+                voucherCode
+        );
     }
     public String checkout(String transactionId, Long bookingId) {
         Payment payment = null;
