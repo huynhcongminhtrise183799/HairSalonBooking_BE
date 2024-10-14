@@ -45,9 +45,6 @@ public class PaymentService {
         String bankCode = req.getParameter("bankCode");
         String vnp_TxnRef = VnpayConfig.getRandomNumber(8);
 
-        payment.setTransactionId(vnp_TxnRef);
-        paymentRepository.save(payment);
-
         String vnp_IpAddr = VnpayConfig.getIpAddress(req);
         String vnp_TmnCode = VnpayConfig.vnp_TmnCode;
 
@@ -98,7 +95,8 @@ public class PaymentService {
         String paymentUrl = VnpayConfig.vnp_PayUrl + "?" + query.toString();
         log.info("VNPay Request Params: " + vnp_Params);
         log.info("VNPay Payment URL: " + paymentUrl);
-
+        payment.setTransactionId(vnp_TxnRef);
+        paymentRepository.save(payment);
         return paymentUrl;
     }
 

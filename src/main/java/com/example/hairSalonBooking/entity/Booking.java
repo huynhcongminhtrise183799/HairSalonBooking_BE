@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Setter
@@ -62,4 +63,8 @@ public class Booking {
     @OneToOne(mappedBy = "booking")
     @JsonIgnore
     Payment payment;
+
+//    @OneToMany(mappedBy = "from")
+//    Set<Transactions> transactionsForm;
+
 }
