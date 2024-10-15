@@ -34,6 +34,8 @@ import java.util.*;
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     @GetMapping("/Pay/{bookingId}")
     public String getPay(@PathVariable Long bookingId, HttpServletRequest req ) throws UnsupportedEncodingException {
@@ -44,9 +46,13 @@ public class PaymentController {
     @GetMapping("/payment/response")
     public ResponseEntity<String> checkPaymentSuccess(@RequestParam Map<String, String> vnp_Params) {
         String vnp_ResponseCode = vnp_Params.get("vnp_ResponseCode");
+        String vnp_txnRef = vnp_Params.get("vnp_TxnRef");
+        Payment payment = paymentRepository.findByTransactionId(vnp_txnRef);
         // Kiểm tra mã phản hồi từ VNPay
         if ("00".equals(vnp_ResponseCode)) {
             // Giao dịch thành công
+            payment.setPaymentMethod("VNPAY-Banking");
+            paymentRepository.save(payment);
             return ResponseEntity.ok("Payment success. Transaction ID: " + vnp_Params.get("vnp_TxnRef"));
         } else {
             // Giao dịch không thành công
