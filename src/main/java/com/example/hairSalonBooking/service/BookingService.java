@@ -376,7 +376,7 @@ public class BookingService {
         Payment payment = Payment.builder()
                 .paymentAmount(totalAmount)
                 .paymentDate(LocalDate.now())
-                .paymentMethod("VNPay")   // Hoặc phương thức thanh toán khác
+//                .paymentMethod("VNPay-Banking")   // Hoặc phương thức thanh toán khác
                 .paymentStatus("Pending") // Trạng thái ban đầu
                 .booking(booking)         // Liên kết với Booking
                 .build();
@@ -414,6 +414,9 @@ public class BookingService {
 
         // Update payment status
         booking.getPayment().setPaymentStatus("Completed");
+        if(booking.getPayment().getPaymentMethod() == null){
+            booking.getPayment().setPaymentMethod("Tra tien mat");
+        }
         paymentRepository.save(payment);
 
         return "Check-out success";
