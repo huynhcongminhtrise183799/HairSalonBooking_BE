@@ -175,6 +175,108 @@ public class BookingService {
         // tìm xem có ca làm nào đạt limitBooking chưa
         List<Shift> shiftsReachedBookingLimit = shiftReachedBookingLimit(shifts);
         for(Shift shift : shiftsReachedBookingLimit){
+            // đếm xem có bao nhiêu booking complete trong ca làm đó
+            int countTotalBookingCompleteInShift = bookingRepository.countTotalBookingCompleteInShift(shift.getShiftId(),bookingSlots.getAccountId(),bookingSlots.getDate());
+            // nếu có đủ số lượng booking complete với limitBooking mà còn dư slot vẫn hiện ra 
+            if(countTotalBookingCompleteInShift == shift.getLimitBooking()){
+                break;
+            }
+            // Tìm ra đc các slots thuộc về ca làm đó
+            List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
+            // add list vừa tìm đc vào slotToRemove
+            slotToRemove.addAll(slots);
+        }
+        allSlot.removeAll(slotToRemove);
+        return allSlot;
+    }
+    public List<Slot> getSlotsUpdateByCustomer(BookingSlots bookingSlots, long bookingId){
+        List<Slot> allSlot = slotRepository.findAll();
+        List<Slot> slotToRemove = new ArrayList<>();
+        List<Shift> shifts = new ArrayList<>();
+        List<Shift> shiftsFromSpecificStylistSchedule = shiftRepository.getShiftsFromSpecificStylistSchedule(bookingSlots.getAccountId(),bookingSlots.getDate());
+        List<Shift> shiftMissingInSpecificStylistSchedule = shiftMissingInSpecificStylistSchedule(shiftsFromSpecificStylistSchedule);
+        // stylist đã có booking trong ngày
+        // tính tổng thời gian để hoàn thành yêu cầu booking mới
+        LocalTime totalTimeServiceNewBooking = totalTimeServiceBooking(bookingSlots.getServiceId());
+        slotToRemove.addAll(getSlotsExperiedTime(totalTimeServiceNewBooking,shiftsFromSpecificStylistSchedule));
+        if(!shiftMissingInSpecificStylistSchedule.isEmpty()){
+            for(Shift shift :shiftMissingInSpecificStylistSchedule ){
+                List<Slot> slot = slotRepository.getSlotsInShift(shift.getShiftId());
+                slotToRemove.addAll(slot);
+            }
+            if(slotToRemove.size() == allSlot.size()){
+                allSlot.removeAll(slotToRemove);
+                return allSlot;
+            }
+        }
+        // lấy được tất cả booking trong ngày của stylist đc truyền vào
+        List<Booking> allBookingInDay = bookingRepository.getBookingsByStylistInDayForUpdate(bookingSlots.getDate(),bookingSlots.getAccountId(),bookingId);
+        // lấy ra tất cả các slot có trong database
+        for (Slot slot : allSlot){
+            // duyệt qua từng slot xét xem coi thời gian thực có qua thời gian của slot đó chưa
+            LocalTime localTime = LocalTime.now();
+            LocalDate date = LocalDate.now();
+            if(date.isEqual(bookingSlots.getDate())){
+                // nếu thời gian thực qua thời gian của slot đó r thì add slot đó vào 1 cái list slotToRemove
+                if(localTime.isAfter(slot.getSlottime())){
+                    slotToRemove.add(slot);
+                }else{
+                    break;
+                }
+            }else{
+                break;
+            }
+        }
+        // nếu stylist đó chưa có booking nào trong ngày
+        if(allBookingInDay.isEmpty()){
+            // xóa tất cả thằng có trong slotToRemove
+            allSlot.removeAll(slotToRemove);
+            return allSlot;
+        }
+
+        // duyệt qua từng booking có trong list allBookingInDay
+        for(Booking booking : allBookingInDay){ // vd: lấy đc booking có ID là 1
+            // tính tổng thời gian của tất cả service của 1 booking vd: tổng thời gian để hoàn thành
+            // tất cả service có
+            //  trong booking đó là 1:30:00
+            LocalTime totalTimeServiceForBooking = serviceRepository.getTotalTime(booking.getBookingId());
+            // lấy ra đc slot cụ thể của từng booking vd: slot 1 -> thời gian là 8:00:00
+            Slot slot = slotRepository.findSlotBySlotid(booking.getSlot().getSlotid());
+            // thời gian dự kiến  hoàn thành của cái booking đó vd: 9:30:00 do slot bắt đầu là 8h
+            // và thời gian hoàn thành tất cả service là 1:30
+            LocalTime TimeFinishBooking = slot.getSlottime().plusHours(totalTimeServiceForBooking.getHour())
+                    .plusMinutes(totalTimeServiceForBooking.getMinute());
+            // Xét nếu thời gian của tất cả service của 1 booking đó có lớn hơn 1 tiếng không
+            if(totalTimeServiceForBooking.getHour() >= 1 ){
+                // lấy ra list các slot booking ko hợp lệ
+                // vd: 8:00:00 bắt đầu và thời gian hoàn thành là 9:30:00 thì
+                // slot bắt đầu 9:00:00 là ko hợp lệ sẽ bị add vào list slotToRemove
+                if(totalTimeServiceForBooking.getMinute() == 0 ){
+                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour() - 1 );
+                    slotToRemove.addAll(list); // 9
+                }else{
+                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
+                    slotToRemove.addAll(list); // 9
+                }
+            }
+            // tính ra thời gian
+            // vd: slot 10h có ng đặt r, tổng thời gian service cho booking mới là 1h30p
+            // tối thiểu phải là 8h30p mới đc đặt mà do slot ko có 8h30p
+            // thì có nghĩa là 8h thỏa thời gian booking này và slot 9h ko thỏa
+            LocalTime minimunTimeToBooking = slot.getSlottime().minusHours(totalTimeServiceNewBooking.getHour())
+                    .minusMinutes(totalTimeServiceNewBooking.getMinute());
+            // tìm ra list chứa các slot ko thỏa và add vào list slotToRemove
+            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,totalTimeServiceNewBooking.getHour());
+            slotToRemove.addAll(list);
+            slotToRemove.add(slot);// 10 11
+            // tìm ra list ca làm mà cái booking đó thuộc về
+            List<Shift> bookingBelongToShifts = shiftRepository.getShiftForBooking(slot.getSlottime(),TimeFinishBooking,booking.getBookingId());
+            // add list vừa tìm đc vào list shifts
+            shifts.addAll(bookingBelongToShifts);
+        }
+        // tìm xem có ca làm nào đạt limitBooking chưa
+        List<Shift> shiftsReachedBookingLimit = shiftReachedBookingLimit(shifts);
+        for(Shift shift : shiftsReachedBookingLimit){
             // Tìm ra đc các slots thuộc về ca làm đó
             List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
             // add list vừa tìm đc vào slotToRemove

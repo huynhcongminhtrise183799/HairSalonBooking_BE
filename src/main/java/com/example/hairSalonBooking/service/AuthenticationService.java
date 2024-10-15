@@ -8,12 +8,13 @@ import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.IntrospectRequest;
 import com.example.hairSalonBooking.model.request.RegisterRequest;
-import com.example.hairSalonBooking.model.response.AccountResponse;
+import com.example.hairSalonBooking.model.response.*;
 import com.example.hairSalonBooking.model.request.LoginRequest;
-import com.example.hairSalonBooking.model.response.AuthenticationResponse;
-import com.example.hairSalonBooking.model.response.IntrospectResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import jakarta.validation.Valid;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,6 @@ import com.example.hairSalonBooking.model.request.LoginRequest;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
-import com.example.hairSalonBooking.model.response.AccountPageResponse;
-import com.example.hairSalonBooking.model.response.CusPageResponse;
 import com.example.hairSalonBooking.repository.AccountRepository;
 
 import jakarta.validation.Valid;
@@ -55,6 +54,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -140,7 +140,34 @@ public class AuthenticationService implements UserDetailsService {
 
         return response;
     }
-
+    public UserResponse loginGoogle (String token) {
+        try{
+            UserResponse userResponseDTO = new UserResponse();
+            FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
+            String email = decodeToken.getEmail();
+            Account user = accountRepository.findAccountByEmail(email);
+            if(user == null) {
+                Account user2 = new Account();
+                user2.setEmail(email);
+                user2.setFullname(decodeToken.getName());
+                user2.setImage(decodeToken.getPicture());
+                user2.setRole(Role.CUSTOMER);
+                user = accountRepository.save(user2);
+            }
+            user.setUsername(user.getEmail());
+            userResponseDTO.setRole(user.getRole());
+            userResponseDTO.setToken(tokenService.generateToken(user));
+            userResponseDTO.setId(user.getAccountid());
+            userResponseDTO.setName(user.getFullname());
+            userResponseDTO.setEmail(user.getEmail());
+            userResponseDTO.setImage(user.getImage());
+            return userResponseDTO;
+        } catch (FirebaseAuthException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
     //tạo token
 //    private String generateToken(String username) {
 //        // b1: tạo header có thuat toán sử dụng
@@ -173,9 +200,17 @@ public class AuthenticationService implements UserDetailsService {
 //    }
 
 
-    public List<Account> getAllAccount() {
+    public List<AccountResponse> getAllAccount() {
         List<Account> accounts = accountRepository.findAll();
-        return accounts;
+
+        // Map each Account to AccountResponse and return the list
+        return accounts.stream()
+                .map(account -> AccountResponse.builder()
+                        .AccountId(account.getAccountid()) // Map account ID
+                        .username(account.getUsername())   // Map username
+                        .phone(account.getPhone())         // Map phone
+                        .build())
+                .collect(Collectors.toList()); // Collect the results into a list
     }
 
 //    public Page<Account> getAllAccountCustomer(int page, int size) {
@@ -213,7 +248,9 @@ public class AuthenticationService implements UserDetailsService {
         return accountRepository.findAccountByUsername(username);
     } // Định nghĩa cho mình biet cach lay Username
 
+
 }
+
 
 
 

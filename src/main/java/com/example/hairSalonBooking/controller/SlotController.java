@@ -40,6 +40,12 @@ public class SlotController {
         response.setResult(slotService.getAllSlot());
         return response;
     }
+    @GetMapping()
+    ApiResponse<List<Slot>> getAllSlotValid() {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(slotService.getAllSlotValid());
+        return response;
+    }
 
     @PutMapping("{slotid}")
     ApiResponse <SalonResponse> updateSlot(@PathVariable long slotid,@Valid @RequestBody Slot slot) {
@@ -55,17 +61,4 @@ public class SlotController {
         return response;
     }
 
-    /*@GetMapping("/booking/{workingDate}/{stylistId}")
-    public ApiResponse<List<Slot>> getSlotsForBooking(@PathVariable LocalDate workingDate, @PathVariable long stylistId){
-        ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(slotService.getSlotsForBooking(workingDate,stylistId));
-        return apiResponse;
-    }*/
-
-   /* @GetMapping("/booking/slot/{workingDate}/{stylistId}")
-    public ApiResponse<List<Slot>> test(@PathVariable LocalDate workingDate, @PathVariable long stylistId){
-        ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(slotService.getSlotsForBooking(workingDate,stylistId));
-        return apiResponse;
-    }*/
 }

@@ -61,10 +61,14 @@ public class AuthenticationAPI {
         apiResponse.setResult(authenticationService.login(loginRequest));
         return apiResponse;
     }
+    @PostMapping("/login-gg")
+    private ResponseEntity checkLoginGoogle(@RequestBody String token){
+        return ResponseEntity.ok().body(authenticationService.loginGoogle(token));
+    }
 
     @GetMapping("/account")
     public ResponseEntity getAllAccount() {
-        List<Account> accounts = authenticationService.getAllAccount();
+        List<AccountResponse> accounts = authenticationService.getAllAccount();
         return ResponseEntity.ok(accounts);
     }
 
@@ -79,4 +83,6 @@ public class AuthenticationAPI {
 
 
 
+
 }
+

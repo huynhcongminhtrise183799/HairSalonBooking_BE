@@ -1,6 +1,8 @@
 package com.example.hairSalonBooking.controller;
 
+import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.model.request.CreateStaffRequest;
+import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
 import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.StaffResponse;
@@ -24,14 +26,24 @@ public class StaffController {
         response.setResult(staffService.createStaff(request));
         return response;
     }
-
+    @PostMapping("staff/booking")
+    public ApiResponse<Booking> createBookingByStaff(@Valid @RequestBody StaffCreateBookingRequest request){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(staffService.createBookingByStaff(request));
+        return response;
+    }
     @GetMapping("/staffs")
     public ApiResponse<StaffResponse> getAllStaff(){
         ApiResponse response = new ApiResponse<>();
         response.setResult(staffService.getAllStaffs());
         return response;
     }
-
+    @GetMapping("/staff/salon/{salonId}")
+    public ApiResponse<StaffResponse> getAllStaffBySalonId(@PathVariable long salonId){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(staffService.getAllStaffBySalonId(salonId));
+        return response;
+    }
     @GetMapping("/staff/{accountId}")
     public ApiResponse<StaffResponse> getAllStaff(@PathVariable long accountId){
         ApiResponse response = new ApiResponse<>();
