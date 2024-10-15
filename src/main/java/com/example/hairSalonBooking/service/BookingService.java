@@ -416,6 +416,7 @@ public class BookingService {
         booking.getPayment().setPaymentStatus("Completed");
         if(booking.getPayment().getPaymentMethod() == null){
             booking.getPayment().setPaymentMethod("Tra tien mat");
+            booking.getPayment().setTransactionId(null);
         }
         paymentRepository.save(payment);
 
