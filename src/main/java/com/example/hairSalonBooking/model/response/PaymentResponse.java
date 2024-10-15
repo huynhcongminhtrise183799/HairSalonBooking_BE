@@ -4,6 +4,7 @@ import com.example.hairSalonBooking.entity.Booking;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -13,11 +14,13 @@ import java.util.Set;
 @Builder
 public class PaymentResponse {
      long bookingId;
+     LocalDate bookingDate;
+     String stylistName;
      Set<PaymentServiceResponse> services;
      String voucher;
      double totalAmount;
 
-     public PaymentResponse(long bookingId, Set<PaymentServiceResponse> services,
+     public PaymentResponse(long bookingId,Set<PaymentServiceResponse> services,
                             double totalAmount, String voucher) {
           this.bookingId = bookingId;
           this.services = services;

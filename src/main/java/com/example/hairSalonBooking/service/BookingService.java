@@ -373,6 +373,8 @@ public class BookingService {
             totalAmount -= totalAmount * discount / 100;
             voucherCode = booking.getVoucher().getCode();
         }
+        String stylistName = booking.getStylistSchedule().getAccount().getFullname();
+
         Payment payment = Payment.builder()
                 .paymentAmount(totalAmount)
                 .paymentDate(LocalDate.now())
@@ -383,9 +385,12 @@ public class BookingService {
         paymentRepository.save(payment);
         return new PaymentResponse(
                 booking.getBookingId(),
+                booking.getBookingDay(),
+                stylistName,
                 serviceResponses,
-                totalAmount,
-                voucherCode
+                voucherCode,
+                totalAmount
+
         );
     }
     public String checkout(String transactionId, Long bookingId) {
@@ -416,7 +421,8 @@ public class BookingService {
         booking.getPayment().setPaymentStatus("Completed");
         if(booking.getPayment().getPaymentMethod() == null){
             booking.getPayment().setPaymentMethod("Tra tien mat");
-            booking.getPayment().setTransactionId(null);
+            booking.getPayment().setTransactionId(
+                    null);
         }
         paymentRepository.save(payment);
 
