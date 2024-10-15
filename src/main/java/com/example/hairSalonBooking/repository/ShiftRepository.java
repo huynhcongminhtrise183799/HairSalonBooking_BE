@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public interface ShiftRepository extends JpaRepository<Shift,Long> {
     Shift findByShiftId(long id);
@@ -37,4 +38,9 @@ public interface ShiftRepository extends JpaRepository<Shift,Long> {
             "JOIN slot s ON s.slotid = ?1\n" +
             "WHERE s.slottime >= sh.start_time AND s.slottime < sh.end_time;",nativeQuery = true)
     Shift getShiftBySlot(long id);
+    @Query(value = "select s.shift_id from shift s\n" +
+            "inner join specific_stylist_schedule sss\n" +
+            "on s.shift_id = sss.shift_id\n" +
+            "where sss.stylist_schedule_id = ?1 ", nativeQuery = true)
+    Set<Long> getShiftIdByStylistSchedule(long id);
 }

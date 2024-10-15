@@ -4,11 +4,8 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 
-import com.example.hairSalonBooking.model.response.AccountPageResponse;
+import com.example.hairSalonBooking.model.response.*;
 
-import com.example.hairSalonBooking.model.response.ApiResponse;
-import com.example.hairSalonBooking.model.response.StylistPageResponse;
-import com.example.hairSalonBooking.model.response.StylistResponse;
 import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -47,11 +44,16 @@ public class StylistController {
         apiResponse.setResult(stylistService.getSpecificStylist(accountId));
         return apiResponse;
     }
-
-    @GetMapping("/page")
-    public ApiResponse<StylistPageResponse> getAllAccountStylist(@RequestParam int page, @RequestParam int size) {
+    @GetMapping("/salon/{salonId}")
+    public ApiResponse<List<StylistForCreateSchedule>> getStylistsBySalon(@PathVariable long salonId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(stylistService.getStylistsBySalon(salonId));
+        return apiResponse;
+    }
+    @GetMapping("/page/{salonId}")
+    public ApiResponse<StylistPageResponse> getAllAccountStylist(@RequestParam int page, @RequestParam int size, @PathVariable long salonId) {
     ApiResponse response = new ApiResponse<>();
-    response.setResult(stylistService.getAllAccountStylist(page, size));
+    response.setResult(stylistService.getAllAccountStylist(page, size,salonId));
     return response;
     }
     

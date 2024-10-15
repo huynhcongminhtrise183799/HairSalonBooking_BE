@@ -33,7 +33,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Account findAccountByUsername(String username);
     Account findAccountByEmail(String email);
     Account findAccountByAccountid(Long accountid);
-
+    Account findByPhone(String phone);
+    List<Account> findByRoleAndIsDeletedFalseAndSalonBranchSalonId(Role role, long salonId);
     @Query("SELECT ac FROM Account ac WHERE ac.role = com.example.hairSalonBooking.enums.Role.STAFF")
     @Transactional
     List<Account> getAccountsByRoleSTAFF();
@@ -75,6 +76,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
 
     Page<Account> findAccountByRole(Role role, Pageable pageable);
+
+    Page<Account> findAccountByRoleAndSalonBranchSalonId(Role role, Pageable pageable, long salonId);
 
 }
 

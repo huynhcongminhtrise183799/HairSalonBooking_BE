@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -15,7 +16,6 @@ import java.util.Set;
 @Builder
 public class StyPageResponse {
     long accountid;
-    String username;
     String email;
     String fullname;
     String phone;

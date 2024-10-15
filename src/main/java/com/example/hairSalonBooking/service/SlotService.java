@@ -26,19 +26,7 @@ public class SlotService {
     BookingRepository bookingRepository;
     @Autowired
     ServiceRepository serviceRepository;
-//
-//    public Slot create(Slot slot) {
-//        try {
-//            Slot newSlot = slotRepository.save(slot);
-//        }catch(Exception e) {
-//            if(e.getMessage().contains(slot.getSlotid())) {
-//                throw new AppException(ErrorCode.USERNAME_EXISTED);
-//            }else {
-//                throw new AppException(ErrorCode.Phone_EXISTED);
-//            }
-//        }
-//        return newSlot;
-//    }
+
     public Slot create(Slot slot) {
         // Kiểm tra xem slot có ID đã tồn tại không
         if (slot.getSlotid() != 0 && slotRepository.existsById(slot.getSlotid())) {
@@ -55,6 +43,18 @@ public class SlotService {
         return slots;
     }
 
+    public List<Slot> getAllSlotValid() {
+        List<Slot> slots = slotRepository.findAll();
+        List<Slot> slotToRemove = new ArrayList<>();
+        for(Slot slot : slots){
+            LocalTime now = LocalTime.now();
+            if(now.isAfter(slot.getSlottime())){
+                slotToRemove.add(slot);
+            }
+        }
+        slots.removeAll(slotToRemove);
+        return slots;
+    }
     //Update
     public Slot update(long slotid, Slot slot) {
         //B1: tìm ra thằng student cần đc update thông qua ID

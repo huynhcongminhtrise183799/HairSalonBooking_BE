@@ -47,6 +47,12 @@ public class BookingController {
         apiResponse.setResult(bookingService.getListSlot(bookingSlots));
         return apiResponse;
     }
+    @PostMapping("/booking/slots/{bookingId}")
+    public ApiResponse<List<Slot>> getSlotsUpdateByCustomer(@RequestBody BookingSlots bookingSlots, long bookingId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getSlotsUpdateByCustomer(bookingSlots,bookingId));
+        return apiResponse;
+    }
 
     @PostMapping("/booking")
     public ApiResponse<Booking> createBooking(@RequestBody BookingRequest request){
