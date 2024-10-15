@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -24,4 +25,8 @@ public class Payment {
     @OneToOne
     @JoinColumn(name = "booking_id")
     Booking booking;
+
+    @OneToMany(mappedBy = "payment")
+    Set<Transactions> transactions;
+
 }

@@ -68,5 +68,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Transactional
     @Modifying
     void deleteSpecificSkills(long id);
+    Account  findTopByRole(Role role);
 }
 

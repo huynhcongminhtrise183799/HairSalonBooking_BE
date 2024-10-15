@@ -64,7 +64,5 @@ public class Booking {
     @JsonIgnore
     Payment payment;
 
-//    @OneToMany(mappedBy = "from")
-//    Set<Transactions> transactionsForm;
 
 }

@@ -114,4 +114,10 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     Set<SalaryRecord> salaryRecords;
+
+    @OneToMany(mappedBy = "fromAccount")
+    Set<Transactions> transactionsForm;
+    @OneToMany(mappedBy = "toAccount")
+    Set<Transactions> transactionsTo;
+
 }
