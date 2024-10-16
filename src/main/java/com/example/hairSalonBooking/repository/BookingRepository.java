@@ -22,6 +22,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "            where ssch.working_day = ?1 and ssch.account_id = ?2 and b.status != 'CANCELLED'\n" +
             "            order by b.slot_id desc ",nativeQuery = true)
     List<Booking> getBookingsByStylistInDay(LocalDate date, long stylistId);
+
     @Query(value = "select b.* from booking b\n" +
             "      inner join stylist_schedule ssch\n" +
             "         on b.stylist_schedule_id = ssch.stylist_schedule_id\n" +
@@ -30,7 +31,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     List<Booking> getBookingsByStylistInDayForUpdate(LocalDate date, long stylistId, long bookingId);
 
 
-    Booking findBookingByBookingId(long id);
+
     @Query(value = "select b.* from booking b\n" +
             "inner join slot sl\n" +
             "on b.slot_id = sl.slotid\n" +
@@ -59,7 +60,23 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
 
 
 
+
+
+
+
+    Booking findBookingByBookingId(long id);
+    @Query(value = "select b.* from booking b \n" +
+            "inner join stylist_schedule ssch\n" +
+            "on b.stylist_schedule_id = ssch.stylist_schedule_id\n" +
+            "inner join booking_detail bd\n" +
+            "on b.booking_id = bd.booking_id\n" +
+            "where ssch.working_day = ?1 and ssch.account_id = ?2\n" +
+            "order by b.booking_id desc\n" +
+            "limit 1 ",nativeQuery = true)
+    Booking bookingNearest(LocalDate date, long stylistId);
+
     List<Booking> findByAccountAndStatus(Account account, BookingStatus status);
+
 
 
     @Query(value = "select * from booking b\n" +
@@ -77,6 +94,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "on b.stylist_schedule_id = ss.stylist_schedule_id\n" +
             "where ss.account_id = ?1 and b.booking_day = ?2",nativeQuery = true)
     List<Booking> findAllByAccountInAndSalonBranch(long stylistId, LocalDate date);
+
     @Query(value = "select count(*) from booking b\n" +
             "inner join slot s\n" +
             "on b.slot_id = s.slotid\n" +
@@ -89,4 +107,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "where s.slottime >= sh.start_time and s.slottime < sh.end_time and  sh.shift_id = ?1 and b.status = 'COMPLETED' \n" +
             "and ss.account_id = ?2 and ss.working_day = ?3;",nativeQuery = true)
     int countTotalBookingCompleteInShift(long shiftId, long accountId, LocalDate date);
+
+    @Query(value = "select b.* from booking b where b.booking_day = ?1 and b.status = 'PENDING'",nativeQuery = true)
+    List<Booking> getBookingByDateAndStatusPending(LocalDate date);
 }

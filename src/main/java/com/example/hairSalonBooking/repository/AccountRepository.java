@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.cglib.core.Local;
 
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -66,8 +67,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "on ss.stylist_schedule_id = sssch.stylist_schedule_id\n" +
             "inner join specific_skill ssk\n" +
             "on a.accountid = ssk.account_id\n" +
-            "where ss.working_day = ?1 and sssch.shift_id = ?2 and ssk.skill_id = ?3 ;",nativeQuery = true)
-    Set<Account> getStylistForBooking(LocalDate date, long shiftId, long skillId);
+            "where ss.working_day = ?1 and sssch.shift_id = ?2 and ssk.skill_id = ?3 and a.salon_id = ?4 ;",nativeQuery = true)
+    Set<Account> getStylistForBooking(LocalDate date, long shiftId, long skillId, long salonId);
 
     @Query(value = "DELETE FROM specific_skill WHERE account_id = ?1",nativeQuery = true)
     @Transactional
@@ -75,9 +76,14 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     void deleteSpecificSkills(long id);
 
 
+
     Page<Account> findAccountByRole(Role role, Pageable pageable);
 
     Page<Account> findAccountByRoleAndSalonBranchSalonId(Role role, Pageable pageable, long salonId);
+
+
+
+    Account  findTopByRole(Role role);
 
 }
 

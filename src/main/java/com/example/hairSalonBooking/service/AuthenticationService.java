@@ -140,28 +140,24 @@ public class AuthenticationService implements UserDetailsService {
 
         return response;
     }
-    public UserResponse loginGoogle (String token) {
+    public AuthenticationResponse loginGoogle (String token) {
         try{
-            UserResponse userResponseDTO = new UserResponse();
             FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
             String email = decodeToken.getEmail();
             Account user = accountRepository.findAccountByEmail(email);
             if(user == null) {
                 Account user2 = new Account();
                 user2.setEmail(email);
+                user2.setUsername(decodeToken.getEmail());
                 user2.setFullname(decodeToken.getName());
                 user2.setImage(decodeToken.getPicture());
                 user2.setRole(Role.CUSTOMER);
                 user = accountRepository.save(user2);
             }
-            user.setUsername(user.getEmail());
-            userResponseDTO.setRole(user.getRole());
-            userResponseDTO.setToken(tokenService.generateToken(user));
-            userResponseDTO.setId(user.getAccountid());
-            userResponseDTO.setName(user.getFullname());
-            userResponseDTO.setEmail(user.getEmail());
-            userResponseDTO.setImage(user.getImage());
-            return userResponseDTO;
+            AuthenticationResponse response = new AuthenticationResponse();
+            response.setToken(tokenService.generateToken(user));
+            response.setRole(user.getRole());
+            return response;
         } catch (FirebaseAuthException e)
         {
             e.printStackTrace();

@@ -8,7 +8,9 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.Set;
+
 
 @Getter
 @Setter
@@ -53,6 +55,15 @@ public class Booking {
     @JsonIgnore
     Set<SalonService> services;
 
+
     @OneToOne(mappedBy = "booking")
+    @JsonIgnore
     Feedback feedback;
+
+
+    @OneToOne(mappedBy = "booking")
+    @JsonIgnore
+    Payment payment;
+
+
 }

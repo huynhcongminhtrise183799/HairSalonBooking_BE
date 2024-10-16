@@ -162,21 +162,26 @@ public class BranchManagerService {
         for(Booking booking : bookings){
             Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
             BookingResponse bookingResponse = new BookingResponse();
+
             bookingResponse.setId(booking.getBookingId());
             bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+
             bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
             bookingResponse.setServiceName(serviceNames);
+            bookingResponse.setStatus(booking.getStatus());
             bookingResponse.setCustomerName(booking.getAccount().getFullname());
             if(booking.getVoucher() != null){
                 bookingResponse.setVoucherCode(booking.getVoucher().getCode());
             }
+
             responses.add(bookingResponse);
         }
         return responses;
     }
+
     public ProfileResponse getProfile(){
         var context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -195,4 +200,5 @@ public class BranchManagerService {
         }
         return profileResponse;
     }
+
 }

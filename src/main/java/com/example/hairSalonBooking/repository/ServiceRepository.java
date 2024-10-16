@@ -17,7 +17,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalTime;
 
-import com.example.hairSalonBooking.entity.Account;
+//import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.entity.SalonService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

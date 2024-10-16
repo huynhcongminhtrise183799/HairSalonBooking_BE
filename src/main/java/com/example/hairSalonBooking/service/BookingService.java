@@ -52,6 +52,8 @@ public class BookingService {
     ModelMapper modelMapper;
     @Autowired
     private ShiftRepository shiftRepository;
+    @Autowired
+    private PaymentRepository paymentRepository;
     public Set<StylistForBooking> getStylistForBooking(BookingStylits bookingStylits){
         // tao 1 danh sach skills rong
         Set<Skill> skills = new HashSet<>();
@@ -135,13 +137,13 @@ public class BookingService {
         // duyệt qua từng booking có trong list allBookingInDay
         for(Booking booking : allBookingInDay){ // vd: lấy đc booking có ID là 1
             // tính tổng thời gian của tất cả service của 1 booking vd: tổng thời gian để hoàn thành
-                                                                        // tất cả service có
-                                                                        //  trong booking đó là 1:30:00
+            // tất cả service có
+            //  trong booking đó là 1:30:00
             LocalTime totalTimeServiceForBooking = serviceRepository.getTotalTime(booking.getBookingId());
             // lấy ra đc slot cụ thể của từng booking vd: slot 1 -> thời gian là 8:00:00
             Slot slot = slotRepository.findSlotBySlotid(booking.getSlot().getSlotid());
             // thời gian dự kiến  hoàn thành của cái booking đó vd: 9:30:00 do slot bắt đầu là 8h
-                                                                // và thời gian hoàn thành tất cả service là 1:30
+            // và thời gian hoàn thành tất cả service là 1:30
             LocalTime TimeFinishBooking = slot.getSlottime().plusHours(totalTimeServiceForBooking.getHour())
                     .plusMinutes(totalTimeServiceForBooking.getMinute());
             // Xét nếu thời gian của tất cả service của 1 booking đó có lớn hơn 1 tiếng không
@@ -162,7 +164,7 @@ public class BookingService {
             // tối thiểu phải là 8h30p mới đc đặt mà do slot ko có 8h30p
             // thì có nghĩa là 8h thỏa thời gian booking này và slot 9h ko thỏa
             LocalTime minimunTimeToBooking = slot.getSlottime().minusHours(totalTimeServiceNewBooking.getHour())
-                        .minusMinutes(totalTimeServiceNewBooking.getMinute());
+                    .minusMinutes(totalTimeServiceNewBooking.getMinute());
             // tìm ra list chứa các slot ko thỏa và add vào list slotToRemove
             List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,totalTimeServiceNewBooking.getHour());
             slotToRemove.addAll(list);
@@ -177,7 +179,7 @@ public class BookingService {
         for(Shift shift : shiftsReachedBookingLimit){
             // đếm xem có bao nhiêu booking complete trong ca làm đó
             int countTotalBookingCompleteInShift = bookingRepository.countTotalBookingCompleteInShift(shift.getShiftId(),bookingSlots.getAccountId(),bookingSlots.getDate());
-            // nếu có đủ số lượng booking complete với limitBooking mà còn dư slot vẫn hiện ra 
+            // nếu có đủ số lượng booking complete với limitBooking mà còn dư slot vẫn hiện ra
             if(countTotalBookingCompleteInShift == shift.getLimitBooking()){
                 break;
             }
@@ -300,7 +302,7 @@ public class BookingService {
         Shift shift = shiftRepository.getShiftBySlot(newStylistForBooking.getSlotId());
         Set<Account> stylists = new HashSet<>();
         for(Skill skill : skills){
-            Set<Account> accounts = accountRepository.getStylistForBooking(newStylistForBooking.getDate(),shift.getShiftId(),skill.getSkillId());
+            Set<Account> accounts = accountRepository.getStylistForBooking(newStylistForBooking.getDate(),shift.getShiftId(),skill.getSkillId(), newStylistForBooking.getSalonId());
             if(stylists.isEmpty()){
                 stylists.addAll(accounts);
             }else{
@@ -328,44 +330,44 @@ public class BookingService {
         // tạo ra 1 list dùng để remove
         List<StylistForBooking> stylistsToRemove = new ArrayList<>();
         for(StylistForBooking stylist : stylistForBookings){
-                // lay ra tat ca booking co trong ngay cua stylist do
-                List<Booking> bookings = bookingRepository.getBookingsByStylistInDay(newStylistForBooking.getDate(), stylist.getId());
-                // tìm đc booking gần nhất với thời gian của khách hàng muốn đổi
-                Booking bookingNearestOverTime = bookingRepository.bookingNearestOverTime(stylist.getId(),slotBookingUpdate.getSlottime(),newStylistForBooking.getDate());
-                Booking bookingNearestBeforeTime = bookingRepository.bookingNearestBeforeTime(stylist.getId(),slotBookingUpdate.getSlottime(),newStylistForBooking.getDate());
-                Booking bookingAtTimeUpdate = bookingRepository.bookingAtTime(slotBookingUpdate.getSlotid(),stylist.getId(),newStylistForBooking.getDate());
-                // tính đc thời gian hoàn thành booking mới đó
-                LocalTime timeToCheckValid = slotBookingUpdate.getSlottime().plusHours(totalServiceTimeForNewBooking.getHour())
-                        .plusMinutes(totalServiceTimeForNewBooking.getMinute());
-                if(bookingAtTimeUpdate != null){
+            // lay ra tat ca booking co trong ngay cua stylist do
+            List<Booking> bookings = bookingRepository.getBookingsByStylistInDay(newStylistForBooking.getDate(), stylist.getId());
+            // tìm đc booking gần nhất với thời gian của khách hàng muốn đổi
+            Booking bookingNearestOverTime = bookingRepository.bookingNearestOverTime(stylist.getId(),slotBookingUpdate.getSlottime(),newStylistForBooking.getDate());
+            Booking bookingNearestBeforeTime = bookingRepository.bookingNearestBeforeTime(stylist.getId(),slotBookingUpdate.getSlottime(),newStylistForBooking.getDate());
+            Booking bookingAtTimeUpdate = bookingRepository.bookingAtTime(slotBookingUpdate.getSlotid(),stylist.getId(),newStylistForBooking.getDate());
+            // tính đc thời gian hoàn thành booking mới đó
+            LocalTime timeToCheckValid = slotBookingUpdate.getSlottime().plusHours(totalServiceTimeForNewBooking.getHour())
+                    .plusMinutes(totalServiceTimeForNewBooking.getMinute());
+            if(bookingAtTimeUpdate != null){
+                stylistsToRemove.add(stylist);
+            }
+            if(bookingNearestOverTime != null){
+                // lấy đc thời gian của cái booking có sẵn của stylist đó
+                Slot slotTimeBooking = slotRepository.findSlotBySlotid(bookingNearestOverTime.getSlot().getSlotid());
+                // nếu tổng thời gian hoàn thành booking mới đó mà lố thời gian của booking có sẵn thì stylist đó ko thỏa
+                if(timeToCheckValid.isAfter(slotTimeBooking.getSlottime())){
                     stylistsToRemove.add(stylist);
                 }
-                if(bookingNearestOverTime != null){
-                    // lấy đc thời gian của cái booking có sẵn của stylist đó
-                    Slot slotTimeBooking = slotRepository.findSlotBySlotid(bookingNearestOverTime.getSlot().getSlotid());
-                    // nếu tổng thời gian hoàn thành booking mới đó mà lố thời gian của booking có sẵn thì stylist đó ko thỏa
-                    if(timeToCheckValid.isAfter(slotTimeBooking.getSlottime())){
-                        stylistsToRemove.add(stylist);
-                    }
-                }
-                if(bookingNearestBeforeTime != null){
-                    LocalTime totalTimeServiceForBooking = serviceRepository.getTotalTime(bookingNearestBeforeTime.getBookingId());
-                    // lấy đc thời gian của cái booking có sẵn của stylist đó
-                    Slot slotTimeBooking = slotRepository.findSlotBySlotid(bookingNearestBeforeTime.getSlot().getSlotid());
-                    LocalTime totalTimeFinishBooking = slotTimeBooking.getSlottime().plusHours(totalTimeServiceForBooking.getHour())
+            }
+            if(bookingNearestBeforeTime != null){
+                LocalTime totalTimeServiceForBooking = serviceRepository.getTotalTime(bookingNearestBeforeTime.getBookingId());
+                // lấy đc thời gian của cái booking có sẵn của stylist đó
+                Slot slotTimeBooking = slotRepository.findSlotBySlotid(bookingNearestBeforeTime.getSlot().getSlotid());
+                LocalTime totalTimeFinishBooking = slotTimeBooking.getSlottime().plusHours(totalTimeServiceForBooking.getHour())
                         .plusMinutes(totalTimeServiceForBooking.getMinute());
 
-                    // nếu tổng thời gian hoàn thành booking mới đó mà lố thời gian của booking có sẵn thì stylist đó ko thỏa
-                    if(totalTimeFinishBooking.isAfter(slotBookingUpdate.getSlottime())){
-                        stylistsToRemove.add(stylist);
-                    }
+                // nếu tổng thời gian hoàn thành booking mới đó mà lố thời gian của booking có sẵn thì stylist đó ko thỏa
+                if(totalTimeFinishBooking.isAfter(slotBookingUpdate.getSlottime())){
+                    stylistsToRemove.add(stylist);
                 }
-                if(!bookings.isEmpty()){
-                    boolean checkStylist = shiftsHaveFullBooking(bookings,slotBookingUpdate);
-                    if(checkStylist){
-                        stylistsToRemove.add(stylist);
-                    }
+            }
+            if(!bookings.isEmpty()){
+                boolean checkStylist = shiftsHaveFullBooking(bookings,slotBookingUpdate);
+                if(checkStylist){
+                    stylistsToRemove.add(stylist);
                 }
+            }
         }
 
         stylistForBookings.removeAll(stylistsToRemove);
@@ -498,7 +500,7 @@ public class BookingService {
         for(Shift shift : set){
             // đếm số lần shift xuất hiện trong shifts
             int totalBookingInShift = Collections.frequency(shifts,shift);
-            // nếu totalBookingInShift == limit booking thì add shift đó vào list  
+            // nếu totalBookingInShift == limit booking thì add shift đó vào list
             if(totalBookingInShift == shift.getLimitBooking()){
                 list.add(shift);
             }
@@ -585,5 +587,80 @@ public class BookingService {
         booking.setStatus(BookingStatus.IN_PROGRESS);
         bookingRepository.save(booking);
         return "check-in success";
+    }
+    public PaymentResponse finishedService(long bookingId) {
+
+        Booking booking = bookingRepository.findBookingByBookingId(bookingId);
+        if (booking == null) {
+            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+        }
+        Set<SalonService> services = booking.getServices();
+        double totalAmount = 0;
+        Set<PaymentServiceResponse> serviceResponses = new HashSet<>();
+        for (SalonService service : services) {
+            totalAmount += service.getPrice();
+            serviceResponses.add(new PaymentServiceResponse(service.getServiceName(), service.getPrice()));
+        }
+        String voucherCode = null;
+        if (booking.getVoucher() != null) {
+            double discount = booking.getVoucher().getDiscountAmount();
+            totalAmount -= totalAmount * discount / 100;
+            voucherCode = booking.getVoucher().getCode();
+        }
+        String stylistName = booking.getStylistSchedule().getAccount().getFullname();
+
+        Payment payment = Payment.builder()
+                .paymentAmount(totalAmount)
+                .paymentDate(LocalDate.now())
+//                .paymentMethod("VNPay-Banking")   // Hoặc phương thức thanh toán khác
+                .paymentStatus("Pending") // Trạng thái ban đầu
+                .booking(booking)         // Liên kết với Booking
+                .build();
+        paymentRepository.save(payment);
+        return new PaymentResponse(
+                booking.getBookingId(),
+                booking.getBookingDay(),
+                booking.getAccount().getFullname(),
+                stylistName,
+                booking.getSalonBranch().getAddress(),
+                serviceResponses,
+                voucherCode,
+                totalAmount
+
+        );
+    }
+    public String checkout(String transactionId, Long bookingId) {
+        Payment payment = null;
+        Booking booking = null;
+        if (transactionId != null && !transactionId.isEmpty()) {
+            payment = paymentRepository.findByTransactionId(transactionId);
+            if (payment == null) {
+                throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+            }
+            booking = payment.getBooking();
+        }
+
+        // Check if bookingId is provided
+        else if (bookingId != null) {
+            booking = bookingRepository.findById(bookingId)
+                    .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+            payment = booking.getPayment();
+        } else {
+            throw new AppException(ErrorCode.EXCEPTION);
+        }
+
+        // Update booking status
+        booking.setStatus(BookingStatus.COMPLETED);
+        bookingRepository.save(booking);
+
+        // Update payment status
+        booking.getPayment().setPaymentStatus("Completed");
+        if(booking.getPayment().getPaymentMethod() == null){
+            booking.getPayment().setPaymentMethod("Tra tien mat");
+            booking.getPayment().setTransactionId(null);
+        }
+        paymentRepository.save(payment);
+
+        return "Check-out success";
     }
 }

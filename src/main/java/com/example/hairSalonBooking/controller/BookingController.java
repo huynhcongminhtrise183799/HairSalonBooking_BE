@@ -9,10 +9,7 @@ import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
-import com.example.hairSalonBooking.model.response.ApiResponse;
-import com.example.hairSalonBooking.model.response.BookingResponse;
-import com.example.hairSalonBooking.model.response.ShiftResponse;
-import com.example.hairSalonBooking.model.response.StylistForBooking;
+import com.example.hairSalonBooking.model.response.*;
 import com.example.hairSalonBooking.service.BookingService;
 import com.example.hairSalonBooking.service.HairSalonServiceService;
 import com.example.hairSalonBooking.service.StylistService;
@@ -48,7 +45,8 @@ public class BookingController {
         return apiResponse;
     }
     @PostMapping("/booking/slots/{bookingId}")
-    public ApiResponse<List<Slot>> getSlotsUpdateByCustomer(@RequestBody BookingSlots bookingSlots, long bookingId){
+    public ApiResponse<List<Slot>> getSlotsUpdateByCustomer(@RequestBody BookingSlots bookingSlots,
+                                                            @PathVariable long bookingId){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getSlotsUpdateByCustomer(bookingSlots,bookingId));
         return apiResponse;
@@ -61,12 +59,14 @@ public class BookingController {
         return apiResponse;
     }
 
+
     @GetMapping("/booking/{bookingId}")
     public ApiResponse<BookingResponse> createBooking(@PathVariable long bookingId){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getBookingById(bookingId));
         return apiResponse;
     }
+
     @PutMapping("/booking/{bookingId}")
     public ApiResponse<Booking> updateBooking(@PathVariable long bookingId,@RequestBody BookingRequest request){
         ApiResponse apiResponse = new ApiResponse<>();
@@ -100,6 +100,22 @@ public class BookingController {
          apiResponse.setResult(bookingService.checkIn(bookingId));
          return apiResponse;
     }
+
+    @PutMapping("/checkout")
+    public ApiResponse<String> checkOut(@RequestParam(required = false) String transactionId,
+                                        @RequestParam(required = false) Long bookingId) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.checkout(transactionId, bookingId));  // Truyền cả hai tham số
+        return apiResponse;
+    }
+    @PostMapping("/{bookingId}/finish")
+    public ApiResponse<PaymentResponse> finishBooking(@PathVariable Long bookingId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        PaymentResponse paymentResponse = bookingService.finishedService(bookingId);
+        apiResponse.setResult(paymentResponse);
+        return apiResponse;
+    }
+
     @GetMapping("/bookings/stylist/{date}/{accountId}")
     public ApiResponse<List<BookingResponse>> getTodayBookingsForStylist(@PathVariable Long accountId, @PathVariable String date) {
         ApiResponse apiResponse = new ApiResponse<>();
@@ -108,11 +124,13 @@ public class BookingController {
         return apiResponse;
     }
 
+
     @PostMapping("/booking/stylists/update")
     public ApiResponse<Set<StylistForBooking>> getListService(@RequestBody AssignNewStylistForBooking bookingStylits){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getStylistWhenUpdateBookingByManager(bookingStylits));
         return apiResponse;
     }
+
 
 }

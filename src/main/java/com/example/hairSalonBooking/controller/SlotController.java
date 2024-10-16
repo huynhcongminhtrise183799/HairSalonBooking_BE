@@ -40,10 +40,10 @@ public class SlotController {
         response.setResult(slotService.getAllSlot());
         return response;
     }
-    @GetMapping()
-    ApiResponse<List<Slot>> getAllSlotValid() {
+    @GetMapping("/{date}")
+    ApiResponse<List<Slot>> getAllSlotValid(@PathVariable LocalDate date) {
         ApiResponse response = new ApiResponse<>();
-        response.setResult(slotService.getAllSlotValid());
+        response.setResult(slotService.getAllSlotValid(date));
         return response;
     }
 

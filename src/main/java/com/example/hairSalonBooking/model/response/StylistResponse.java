@@ -25,8 +25,10 @@ public class StylistResponse {
     String gender;
     String salonAddress;
     String levelName;
+
     Set<String> skillName;
     //    @JsonIgnore // ẩn delete status không cho người dùng nhập
+
     boolean isDeleted = false;
 
 }

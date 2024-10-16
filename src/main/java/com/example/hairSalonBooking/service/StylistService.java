@@ -14,7 +14,9 @@ import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 
 import com.example.hairSalonBooking.model.response.AccountResponse;
 
+
 import com.example.hairSalonBooking.model.response.AccountPageResponse;
+
 
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
@@ -31,6 +33,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +42,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
@@ -87,6 +97,8 @@ public class StylistService {
                 skills.add(skill);
             }
             stylist.setSkills(skills);
+
+
             stylist.setImage(stylistRequest.getImage());
             // Lưu vào database
             Account newStylist = accountRepository.save(stylist);
@@ -101,6 +113,7 @@ public class StylistService {
             stylistResponse.setGender(newStylist.getGender());
             stylistResponse.setSalonAddress(newStylist.getSalonBranch().getAddress());
             stylistResponse.setLevelName(newStylist.getLevel().getLevelname());
+
             stylistResponse.setSkillName(skillNames);
 
 
@@ -349,7 +362,9 @@ public class StylistService {
 
 
 
+
 }
+
 
 
 

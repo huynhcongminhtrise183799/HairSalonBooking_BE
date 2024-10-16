@@ -43,14 +43,22 @@ public class SlotService {
         return slots;
     }
 
-    public List<Slot> getAllSlotValid() {
+    public List<Slot> getAllSlotValid(LocalDate date) {
         List<Slot> slots = slotRepository.findAll();
         List<Slot> slotToRemove = new ArrayList<>();
         for(Slot slot : slots){
             LocalTime now = LocalTime.now();
-            if(now.isAfter(slot.getSlottime())){
-                slotToRemove.add(slot);
+            LocalDate dateNow = LocalDate.now();
+            if(dateNow.isEqual(date)){
+                if(now.isAfter(slot.getSlottime())){
+                    slotToRemove.add(slot);
+                }else{
+                    break;
+                }
+            }else{
+                break;
             }
+
         }
         slots.removeAll(slotToRemove);
         return slots;

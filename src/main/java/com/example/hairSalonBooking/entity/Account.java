@@ -72,8 +72,6 @@ public class Account implements UserDetails {
     @Column(unique = true)
     String phone;
     String image;
-    String googleid;
-    String googlename;
 
     //    @JsonIgnore // ẩn delete status không cho người dùng nhập
     boolean isDeleted = false;
@@ -114,4 +112,10 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     Set<SalaryRecord> salaryRecords;
+
+    @OneToMany(mappedBy = "fromAccount")
+    Set<Transactions> transactionsForm;
+    @OneToMany(mappedBy = "toAccount")
+    Set<Transactions> transactionsTo;
+
 }

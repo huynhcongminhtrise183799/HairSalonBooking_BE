@@ -38,6 +38,7 @@ public class Filter extends OncePerRequestFilter {
             "/v3/api-docs/**",
             "/swagger-resources/**",
             "/api/login",
+            "/api/login-gg",
             "/api/register",
             "/api/verifyEmail/{email}",
             "/api/verifyOtp/{email}/{otp}",
