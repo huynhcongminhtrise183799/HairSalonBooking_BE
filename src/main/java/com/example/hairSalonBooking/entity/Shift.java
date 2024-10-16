@@ -22,6 +22,8 @@ public class Shift {
     LocalTime endTime;
     int limitBooking;
 
+
+
     @ManyToMany
     @JoinTable(name = "specific_stylist_schedule",
             joinColumns = @JoinColumn(name = "shift_id"),

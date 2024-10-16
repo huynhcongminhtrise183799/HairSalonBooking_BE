@@ -5,6 +5,7 @@ import com.example.hairSalonBooking.model.request.UpdateManagerRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.ManagerResponse;
+import com.example.hairSalonBooking.model.response.ProfileResponse;
 import com.example.hairSalonBooking.service.BranchManagerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -21,7 +22,6 @@ import java.util.List;
 public class BranchManagerController {
     @Autowired
     private BranchManagerService branchManagerService;
-
     @PostMapping("/manager")
     public ApiResponse<ManagerResponse> createManager(@Valid @RequestBody CreateManagerRequest request){
         ApiResponse response = new ApiResponse<>();
@@ -29,11 +29,24 @@ public class BranchManagerController {
         response.setResult(branchManagerService.createManager(request));
         return response;
     }
+    @GetMapping("/manager/profile")
+    public ApiResponse<ProfileResponse> getProfile(){
+        ApiResponse response = new ApiResponse();
+        response.setResult(branchManagerService.getProfile());
+        return response;
 
+    }
     @GetMapping("/managers")
     public ApiResponse<ManagerResponse> getAllManagers(){
         ApiResponse response = new ApiResponse<>();
         response.setResult(branchManagerService.getAllManagers());
+        return response;
+    }
+
+    @GetMapping("/manager/{accountId}")
+    public ApiResponse<ManagerResponse> getAllManagers(@PathVariable long accountId){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(branchManagerService.getSpecificManager(accountId));
         return response;
     }
 

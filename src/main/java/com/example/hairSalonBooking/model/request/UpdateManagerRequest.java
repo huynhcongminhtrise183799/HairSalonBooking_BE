@@ -19,7 +19,10 @@ public class UpdateManagerRequest {
     String fullName;
     @PastOrPresent(message = "INVALID_DOB")
     LocalDate dob;
-    String salonAddress;
+
+
+    long salonId;
+
     @Pattern(regexp = "(84|0[35789])\\d{8}\\b", message = "INVALID_PHONE")
     String phone;
     String gender;

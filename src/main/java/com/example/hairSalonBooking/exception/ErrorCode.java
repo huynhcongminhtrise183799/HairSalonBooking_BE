@@ -49,7 +49,11 @@ public enum ErrorCode {
 
 
     CAN_NOT_UPLOAD_IMAGE(1030,"Can't not upload image"),
-    BOOKING_NOT_FOUND(1031,"Booking not found")
+
+    BOOKING_NOT_FOUND(1031,"Booking not found"),
+    VOUCHER_NOT_AVAILABLE(1032,"Voucher not available"),
+    INVALID_PAYMENT_AMOUNT(1033,"Invalid payment amount"),
+
     ;
     int code;
     String message;

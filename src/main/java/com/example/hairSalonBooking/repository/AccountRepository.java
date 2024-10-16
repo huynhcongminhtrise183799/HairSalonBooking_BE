@@ -6,6 +6,11 @@ import com.example.hairSalonBooking.enums.Role;
 import jakarta.transaction.Transactional;
 
 import org.springframework.cglib.core.Local;
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDate;
@@ -29,7 +34,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Account findAccountByUsername(String username);
     Account findAccountByEmail(String email);
     Account findAccountByAccountid(Long accountid);
-
+    Account findByPhone(String phone);
+    List<Account> findByRoleAndIsDeletedFalseAndSalonBranchSalonId(Role role, long salonId);
     @Query("SELECT ac FROM Account ac WHERE ac.role = com.example.hairSalonBooking.enums.Role.STAFF")
     @Transactional
     List<Account> getAccountsByRoleSTAFF();
@@ -37,7 +43,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Transactional
     List<Account> getAccountsByRoleManager();
 
-
+    Account findByAccountidAndRole(long id, Role role);
     List<Account> findByRole(Role role);
     @Query(value = "\n" +
             "select ac.* from account ac\n" +
@@ -54,19 +60,30 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByRoleAndIsDeletedFalse(Role role);
 
-    @Query(value = "select distinct ac.* from account ac\n" +
-            "            inner join specific_skill sk\n" +
-            "            on ac.accountid = sk.account_id\n" +
-            "            inner join salon_service ss\n" +
-            "            on sk.skill_id = ss.skill_id\n" +
-            "            inner join stylist_schedule ssch\n" +
-            "            on ac.accountid = ssch.account_id\n" +
-            "            where ss.service_id = ?1 and ssch.working_day = ?2 and ac.salon_id = ?3",nativeQuery = true)
-    List<Account> getStylistForBooking(long serviceId, LocalDate workingDay, long salonId);
+    @Query(value = "select distinct a.* from account a\n" +
+            "inner join stylist_schedule ss\n" +
+            "on a.accountid = ss.account_id\n" +
+            "inner join specific_stylist_schedule sssch\n" +
+            "on ss.stylist_schedule_id = sssch.stylist_schedule_id\n" +
+            "inner join specific_skill ssk\n" +
+            "on a.accountid = ssk.account_id\n" +
+            "where ss.working_day = ?1 and sssch.shift_id = ?2 and ssk.skill_id = ?3 and a.salon_id = ?4 ;",nativeQuery = true)
+    Set<Account> getStylistForBooking(LocalDate date, long shiftId, long skillId, long salonId);
 
     @Query(value = "DELETE FROM specific_skill WHERE account_id = ?1",nativeQuery = true)
     @Transactional
     @Modifying
     void deleteSpecificSkills(long id);
+
+
+
+    Page<Account> findAccountByRole(Role role, Pageable pageable);
+
+    Page<Account> findAccountByRoleAndSalonBranchSalonId(Role role, Pageable pageable, long salonId);
+
+
+
+    Account  findTopByRole(Role role);
+
 }
 

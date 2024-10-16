@@ -33,7 +33,10 @@ public class ForgotPasswordController {
         return response;
     }
     @PostMapping("changePassword/{email}")
-    public ApiResponse<ForgotPasswordResponse> changePassword(@PathVariable String email, @RequestBody ChangePasswordRequest request){
+
+    public ApiResponse<ForgotPasswordResponse> changePassword(@PathVariable String email,
+                                                              @RequestBody ChangePasswordRequest request){
+
         ApiResponse response = new ApiResponse();
         response.setResult(forgotPasswordService.changePassword(email,request));
         return response;

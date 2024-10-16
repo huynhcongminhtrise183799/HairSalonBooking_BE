@@ -3,8 +3,9 @@ package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
-import com.example.hairSalonBooking.model.response.ApiResponse;
-import com.example.hairSalonBooking.model.response.StylistResponse;
+
+import com.example.hairSalonBooking.model.response.*;
+
 import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -35,9 +36,25 @@ public class StylistController {
     public ApiResponse<StylistResponse> getAllStylist() {
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(stylistService.getAllStylist());
-
         return apiResponse;
-
+    }
+    @GetMapping("/read/{accountId}")
+    public ApiResponse<StylistResponse> getSpecificStylist(@PathVariable long accountId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(stylistService.getSpecificStylist(accountId));
+        return apiResponse;
+    }
+    @GetMapping("/salon/{salonId}")
+    public ApiResponse<List<StylistForCreateSchedule>> getStylistsBySalon(@PathVariable long salonId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(stylistService.getStylistsBySalon(salonId));
+        return apiResponse;
+    }
+    @GetMapping("/page/{salonId}")
+    public ApiResponse<StylistPageResponse> getAllAccountStylist(@RequestParam int page, @RequestParam int size, @PathVariable long salonId) {
+    ApiResponse response = new ApiResponse<>();
+    response.setResult(stylistService.getAllAccountStylist(page, size,salonId));
+    return response;
     }
     
     @GetMapping("/status")

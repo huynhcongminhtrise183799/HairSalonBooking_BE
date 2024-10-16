@@ -1,13 +1,21 @@
 package com.example.hairSalonBooking.controller;
 
+
+import com.cloudinary.Api;
+import com.example.hairSalonBooking.entity.Account;
+
 import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.model.request.CreateServiceRequest;
 
 import com.example.hairSalonBooking.model.request.BookingStylits;
 import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
 import com.example.hairSalonBooking.model.request.ServiceUpdateRequest;
+
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
+
+import com.example.hairSalonBooking.model.response.*;
+
 import com.example.hairSalonBooking.service.HairSalonServiceService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
@@ -19,6 +27,9 @@ import com.example.hairSalonBooking.service.HairSalonServiceService;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 
@@ -37,12 +48,18 @@ public class ServiceController {
     @Autowired
     private HairSalonServiceService  hairSalonServiceService;
 
+    @Autowired
+    private ServiceRepository serviceRepository;
+
+
     @PostMapping
     ApiResponse<ServiceResponse> createService(@Valid @RequestBody CreateServiceRequest Request) {
         ApiResponse<ServiceResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(hairSalonServiceService.createService(Request));
         return apiResponse;
     }
+
+
 
     @GetMapping
     ApiResponse<List<ServiceResponse>> getAllServices() {
@@ -51,9 +68,12 @@ public class ServiceController {
         return apiResponse;
     }
 
-    @GetMapping("/searchById")
-    Optional<SalonService> SearchServiceById(@RequestParam long serviceId) {
-        return hairSalonServiceService.searchServiceId(serviceId);
+
+    @GetMapping("/{serviceId}")
+    ApiResponse<ServiceResponse> SearchServiceById(@PathVariable long serviceId) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(hairSalonServiceService.searchServiceId(serviceId));
+        return response ;
     }
     @PostMapping("/searchByName")
     ApiResponse<List<ServiceResponse>> SearchServiceName(@RequestBody SearchServiceNameRequest serviceName) {
@@ -71,6 +91,20 @@ public class ServiceController {
     @PutMapping("/update/{serviceId}")
     public ServiceResponse updateService(@PathVariable long serviceId, @RequestBody ServiceUpdateRequest request) {
         return hairSalonServiceService.updateService(serviceId, request);
+    }
+
+
+    @GetMapping("/page")
+    public ApiResponse<ServicePageResponse> getAllServicePage(@RequestParam int page, @RequestParam int size) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(hairSalonServiceService.getAllServicePage(page, size));
+        return response;
+
+    }
+    @GetMapping("/all")
+    public ResponseEntity getAllService() {
+        List<ServiceResponse> services = hairSalonServiceService.getAllServices();
+        return ResponseEntity.ok(services);
     }
 
 }
