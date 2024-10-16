@@ -143,7 +143,7 @@ public class AuthenticationService implements UserDetailsService {
     public AuthenticationResponse loginGoogle (String token) {
         try{
             FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(token);
-            String email = decodeToken.getEmail();      
+            String email = decodeToken.getEmail();
             Account user = accountRepository.findAccountByEmail(email);
             if(user == null) {
                 Account user2 = new Account();
