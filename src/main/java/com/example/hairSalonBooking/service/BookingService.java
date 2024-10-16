@@ -420,7 +420,7 @@ public class BookingService {
         // Update payment status
         booking.getPayment().setPaymentStatus("Completed");
         if(booking.getPayment().getPaymentMethod() == null){
-            booking.getPayment().setPaymentMethod("Tra tien mat");
+            booking.getPayment().setPaymentMethod("Cash");
             booking.getPayment().setTransactionId(
                     null);
         }
