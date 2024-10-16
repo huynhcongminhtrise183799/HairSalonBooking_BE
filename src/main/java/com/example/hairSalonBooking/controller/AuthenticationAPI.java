@@ -1,3 +1,4 @@
+
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.model.request.LoginGG;
@@ -8,6 +9,18 @@ import com.example.hairSalonBooking.model.response.AccountResponse;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.AuthenticationResponse;
 import com.example.hairSalonBooking.service.AuthenticationService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
+
+import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.model.request.IntrospectRequest;
+import com.example.hairSalonBooking.model.response.AccountResponse;
+import com.example.hairSalonBooking.model.request.LoginRequest;
+import com.example.hairSalonBooking.model.request.RegisterRequest;
+import com.example.hairSalonBooking.model.response.AuthenticationResponse;
+import com.example.hairSalonBooking.model.response.IntrospectResponse;
+import com.example.hairSalonBooking.service.AuthenticationService;
+
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +33,10 @@ import java.util.List;
 @CrossOrigin("http://localhost:3000/")
 @SecurityRequirement(name = "api")
 public class AuthenticationAPI {
+
+
+    // DI :Dependency Injection
+
     @Autowired // mình sử dụng để gọi thằng service phục vụ
     AuthenticationService authenticationService;
 
@@ -60,3 +77,5 @@ public ApiResponse<AccountPageResponse> getAllAccountCustomer(@RequestParam int 
     return response;
 }
 }
+
+
