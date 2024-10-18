@@ -67,9 +67,7 @@ public class BookingService {
         Set<Account> accounts = new HashSet<>();
         // duyệt qua từng skill trong list skills
         for(Skill skill : skills){ // vd: skill 1 2
-            // lấy ra hết những thằng stylist có skill đó và trong chi nhánh đưa vào
-            // 2 3 5
-            //   3 5
+
             Set<Account> allAccountHaveSkill = accountRepository.getAccountBySkill(skill.getSkillId(),bookingStylits.getSalonId());
             // nếu accounts đó đang trống thì add toàn bộ allAccountHaveSkill vào
             if(accounts.isEmpty()){
@@ -125,6 +123,8 @@ public class BookingService {
                 }else{
                     break;
                 }
+            }else{
+                break;
             }
         }
         // nếu stylist đó chưa có booking nào trong ngày
@@ -135,10 +135,7 @@ public class BookingService {
         }
 
         // duyệt qua từng booking có trong list allBookingInDay
-        for(Booking booking : allBookingInDay){ // vd: lấy đc booking có ID là 1
-            // tính tổng thời gian của tất cả service của 1 booking vd: tổng thời gian để hoàn thành
-            // tất cả service có
-            //  trong booking đó là 1:30:00
+        for(Booking booking : allBookingInDay){
             LocalTime totalTimeServiceForBooking = serviceRepository.getTotalTime(booking.getBookingId());
             // lấy ra đc slot cụ thể của từng booking vd: slot 1 -> thời gian là 8:00:00
             Slot slot = slotRepository.findSlotBySlotid(booking.getSlot().getSlotid());
@@ -151,13 +148,9 @@ public class BookingService {
                 // lấy ra list các slot booking ko hợp lệ
                 // vd: 8:00:00 bắt đầu và thời gian hoàn thành là 9:30:00 thì
                 // slot bắt đầu 9:00:00 là ko hợp lệ sẽ bị add vào list slotToRemove
-                if(totalTimeServiceForBooking.getMinute() == 0 ){
-                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour() - 1 );
-                    slotToRemove.addAll(list); // 9
-                }else{
                     List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
                     slotToRemove.addAll(list); // 9
-                }
+
             }
             // tính ra thời gian
             // vd: slot 10h có ng đặt r, tổng thời gian service cho booking mới là 1h30p
@@ -599,7 +592,7 @@ public class BookingService {
         Set<PaymentServiceResponse> serviceResponses = new HashSet<>();
         for (SalonService service : services) {
             totalAmount += service.getPrice();
-            serviceResponses.add(new PaymentServiceResponse(service.getServiceName(), service.getPrice()));
+            serviceResponses.add(new PaymentServiceResponse(service.getServiceName(), service.getImage(),service.getPrice()));
         }
         String voucherCode = null;
         if (booking.getVoucher() != null) {

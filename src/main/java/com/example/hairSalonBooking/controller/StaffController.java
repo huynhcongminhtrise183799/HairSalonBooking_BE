@@ -2,6 +2,7 @@ package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.model.request.CreateStaffRequest;
+import com.example.hairSalonBooking.model.request.FindBookingByPhoneRequest;
 import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
 import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/")
@@ -30,6 +33,12 @@ public class StaffController {
     public ApiResponse<Booking> createBookingByStaff(@Valid @RequestBody StaffCreateBookingRequest request){
         ApiResponse response = new ApiResponse<>();
         response.setResult(staffService.createBookingByStaff(request));
+        return response;
+    }
+    @PostMapping("staff/booking/{date}")
+    public ApiResponse<Booking> getBookingByPhoneNumber(@PathVariable LocalDate date, @RequestBody FindBookingByPhoneRequest request){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(staffService.getBookingByPhoneNumber(date,request.getPhone()));
         return response;
     }
     @GetMapping("/staffs")

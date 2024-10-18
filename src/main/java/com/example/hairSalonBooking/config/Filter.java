@@ -40,7 +40,6 @@ public class Filter extends OncePerRequestFilter {
             "/api/login",
             "/api/login-gg",
             "/api/register",
-            "/api/register",
             "/api/booking",
             "/api/verifyEmail/{email}",
             "/api/verifyOtp/{email}/{otp}",

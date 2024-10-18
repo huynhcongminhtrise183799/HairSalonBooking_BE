@@ -25,10 +25,13 @@ import com.example.hairSalonBooking.model.response.*;
 
 import com.example.hairSalonBooking.repository.*;
 
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.PageImpl;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -76,6 +79,29 @@ public class StylistService {
     private ServiceRepository serviceRepository;
     @Autowired
     private BookingRepository bookingRepository;
+
+    public StylistProfileResponse getProfile(){
+        var context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Account account = (Account) authentication.getPrincipal();
+        StylistProfileResponse profileResponse = new StylistProfileResponse();
+        Set<Skill> skills = skillRepository.getSkillByAccountId(account.getAccountid());
+        Set<Long> skillsId = new HashSet<>();
+        for(Skill skill : skills){
+            skillsId.add(skill.getSkillId());
+        }
+        profileResponse.setAccountid(account.getAccountid());
+        profileResponse.setRole(account.getRole());
+        profileResponse.setGender(account.getGender());
+        profileResponse.setFullname(account.getFullname());
+        profileResponse.setDob(account.getDob());
+        profileResponse.setEmail(account.getEmail());
+        profileResponse.setImage(account.getImage());
+        profileResponse.setPhone(account.getPhone());
+        profileResponse.setSalonId(account.getSalonBranch().getSalonId());
+        profileResponse.setSkillId(skillsId);
+        return profileResponse;
+    }
 
     public StylistResponse create(StylistRequest stylistRequest) {
         // Chuyển từ StylistRequest sang thực thể Account

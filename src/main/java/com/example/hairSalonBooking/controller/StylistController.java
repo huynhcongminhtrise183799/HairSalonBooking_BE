@@ -24,7 +24,12 @@ public class StylistController {
     @Autowired
     StylistService stylistService;
 
-
+    @GetMapping("/profile")
+    public ApiResponse<StylistProfileResponse> getProfile(){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.getProfile());
+        return response;
+    }
     @PostMapping("/create")
     public ApiResponse<StylistResponse> createStylist(@Valid @RequestBody StylistRequest stylistRequest) {
         ApiResponse response = new ApiResponse<>();

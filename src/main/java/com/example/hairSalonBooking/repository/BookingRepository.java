@@ -58,12 +58,6 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "where s.slotid = ?1 and ss.account_id = ?2 and ss.working_day = ?3 and b.status != 'CANCELLED'",nativeQuery = true)
     Booking bookingAtTime(long slotId, long id, LocalDate date);
 
-
-
-
-
-
-
     Booking findBookingByBookingId(long id);
     @Query(value = "select b.* from booking b \n" +
             "inner join stylist_schedule ssch\n" +
@@ -110,4 +104,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
 
     @Query(value = "select b.* from booking b where b.booking_day = ?1 and b.status = 'PENDING'",nativeQuery = true)
     List<Booking> getBookingByDateAndStatusPending(LocalDate date);
+
+
+    List<Booking> findByBookingDayAndAccountAndStatus(LocalDate date, Account account, BookingStatus status);
 }

@@ -35,6 +35,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Account findAccountByEmail(String email);
     Account findAccountByAccountid(Long accountid);
     Account findByPhone(String phone);
+
+
     List<Account> findByRoleAndIsDeletedFalseAndSalonBranchSalonId(Role role, long salonId);
     @Query("SELECT ac FROM Account ac WHERE ac.role = com.example.hairSalonBooking.enums.Role.STAFF")
     @Transactional

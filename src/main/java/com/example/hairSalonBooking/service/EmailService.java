@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Booking;
+import com.example.hairSalonBooking.enums.BookingStatus;
 import com.example.hairSalonBooking.model.request.MailBody;
 
 import com.example.hairSalonBooking.model.request.ReminderBooking;
@@ -8,6 +9,7 @@ import com.example.hairSalonBooking.repository.BookingRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -72,6 +74,7 @@ public class EmailService {
     }
 
     @Scheduled(fixedRate = 60000)
+    @Transactional
     public void sendAutomatic(){
         System.out.println("hello");
         LocalDate date = LocalDate.now();
@@ -90,6 +93,10 @@ public class EmailService {
                         .build();
                 sendReminderMail(reminderBooking);
                 System.out.println("Send mail success");
+            }
+            if(now.isAfter(booking.getSlot().getSlottime().plusMinutes(15)) && booking.getStatus().equals(BookingStatus.PENDING)){
+                booking.setStatus(BookingStatus.CANCELLED);
+                bookingRepository.save(booking);
             }
         }
 
