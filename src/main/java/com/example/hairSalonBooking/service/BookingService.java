@@ -665,19 +665,18 @@ public class BookingService {
         return "Check-out success";
     }
 
-    // Hàm update logic về quản lí thời gian booking
+
+     // Hàm update logic về quản lí thời gian booking
     public BookingRequest updateBookingWithService(Long bookingId, Set<Long> newServiceIds) {
         log.info("Booking ID: {}", bookingId);
         log.info("New Service IDs: {}", newServiceIds);
-
 
         // tìm id booking
         Booking booking = bookingRepository.findBookingById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
-
-        // log xem booking lấy đúng ko
         log.info("Found booking: {}", booking);
+
         // Lấy danh sách service hiện tại của booking
         Set<Long> currentServiceIds = booking.getServices().stream()
                 .map(SalonService::getServiceId)
@@ -687,6 +686,35 @@ public class BookingService {
         if (currentServiceIds.equals(newServiceIds)) {
             throw new AppException(ErrorCode.SERVICES_ALREADY_BOOKED);
         }
+
+        // Tìm kiếm các dịch vụ mới theo ID
+        List<SalonService> newServices = serviceRepository.findByServiceIdIn(new ArrayList<>(newServiceIds));
+
+        // Kiểm tra nếu không tìm thấy bất kỳ dịch vụ nào
+        if (newServices.isEmpty() || newServices.size() != newServiceIds.size()) {
+            log.error("Some services not found with the provided IDs.");
+            throw new AppException(ErrorCode.SERVICES_NOT_FOUND);
+        }
+
+
+        // tính tổng thời gian booking hiện tại
+        LocalTime currentTotalDuration = totalTimeServiceBooking(
+                booking.getServices().stream()
+                        .map(SalonService::getServiceId)
+                        .collect(Collectors.toSet())
+        );
+
+        log.info("Current Total Duration: {}", currentTotalDuration);
+
+        // tính tổng thời gian khi thêm service mới
+        LocalTime newServicesDuration = totalTimeServiceBooking(newServiceIds);
+        log.info("New Services Duration: {}", newServicesDuration);
+
+        // Kết hợp thời lượng của dịch vụ hiện tại và dịch vụ mới
+        LocalTime newTotalDuration = currentTotalDuration
+                .plusHours(newServicesDuration.getHour())
+                .plusMinutes(newServicesDuration.getMinute());
+
         // tìm thằng booking tiếp theo
         Optional<Booking> nextBooking = bookingRepository.findNextBookingSameDay(
                 booking.getStylistSchedule().getAccount().getAccountid(),
@@ -698,24 +726,6 @@ public class BookingService {
         log.info("Booking Day: {}", booking.getBookingDay());
         log.info("Next booking: {}", nextBooking);
 
-        // tính tổng thời gian booking
-        LocalTime currentTotalDuration = totalTimeServiceBooking(
-                booking.getServices().stream()
-                        .map(SalonService::getServiceId)
-                        .collect(Collectors.toSet())
-        );
-
-        log.info(" Total Duration: {}", currentTotalDuration);
-        // tính tổng thời gian khi thêm service mới
-        LocalTime newServicesDuration = totalTimeServiceBooking(newServiceIds);
-        log.info(" Total Duration: {}", newServicesDuration);
-
-
-        // Kết hợp thời lượng của dịch vụ hiện tại và dịch vụ mới
-        LocalTime newTotalDuration = currentTotalDuration
-                .plusHours(newServicesDuration.getHour())
-                .plusMinutes(newServicesDuration.getMinute());
-
         // Kiểm tra lịch đặt trước của stylist , xem coi có xung đột thời gian
         if (nextBooking.isPresent()) {
             LocalTime nextSlotTime = nextBooking.get().getSlot().getSlottime();
@@ -724,24 +734,16 @@ public class BookingService {
             // tính thời gian còn trống cho đến lần đặt booking tiếp theo
             long availableTime = Duration.between(currentSlotTime, nextSlotTime).toMinutes();
 
-
             // Xem tổng thời gian vuọt qua thời gian khả dụng không nếu ko thì update ko thì thông báo stylist unvailable
             if (newTotalDuration.getHour() * 60 + newTotalDuration.getMinute() > availableTime) {
                 throw new AppException(ErrorCode.STYLIST_UNAVAILABLE);
             }
         }
 
+        // Sau khi kiểm tra thời gian thành công, xóa dịch vụ cũ**
         booking.getServices().clear();
 
-        // tìm kiếm servicé mới
-        List<SalonService> newServices = serviceRepository.findByServiceIdIn(new ArrayList<>(newServiceIds));
-
-        if (newServices.isEmpty()) {
-            log.error("No services found with the provided IDs.");
-            throw new AppException(ErrorCode.SERVICES_NOT_FOUND);
-        }
-
-        // sau khi tìm kiếm xong thì add vào
+        // thêm các dịch vụ mới vào booking
         booking.getServices().addAll(newServices);
         log.info("Final Booking before saving: {}", booking);
 
