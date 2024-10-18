@@ -16,20 +16,14 @@ import java.util.Set;
 @Builder
 public class StylistResponse {
     long accountid;
-
     String username;
-
     String email;
-
     String fullname;
-
     String phone;
     String image;
     LocalDate dob;
     String gender;
-
     String salonAddress;
-
     String levelName;
 
     Set<String> skillName;

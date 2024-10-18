@@ -1,22 +1,11 @@
 package com.example.hairSalonBooking.repository;
-
 import com.example.hairSalonBooking.entity.SalonService;
-import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
-import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import java.time.LocalTime;
-
-//import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.entity.SalonService;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Service;
-
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -49,4 +38,14 @@ public interface ServiceRepository extends JpaRepository<SalonService,Long> {
     @Query("SELECT s FROM SalonService s WHERE LOWER(s.serviceName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<SalonService> findByServiceNameContainingIgnoreCase(@Param("keyword") String keyword);
 
+
+    Page<SalonService> findAll(Pageable pageable);
+
+    @Query(value = "select s.* from salon_service s\n" +
+            "inner join specific_skill ss\n" +
+            "on s.skill_id = ss.skill_id\n" +
+            "Where ss.account_id = ?1",nativeQuery = true)
+    List<SalonService> getSalonServiceByAccountId(long accountid);
+
+    List<SalonService> findByServiceIdIn(List<Long> serviceIds);
 }

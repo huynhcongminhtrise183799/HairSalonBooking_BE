@@ -26,19 +26,7 @@ public class SlotService {
     BookingRepository bookingRepository;
     @Autowired
     ServiceRepository serviceRepository;
-//
-//    public Slot create(Slot slot) {
-//        try {
-//            Slot newSlot = slotRepository.save(slot);
-//        }catch(Exception e) {
-//            if(e.getMessage().contains(slot.getSlotid())) {
-//                throw new AppException(ErrorCode.USERNAME_EXISTED);
-//            }else {
-//                throw new AppException(ErrorCode.Phone_EXISTED);
-//            }
-//        }
-//        return newSlot;
-//    }
+
     public Slot create(Slot slot) {
         // Kiểm tra xem slot có ID đã tồn tại không
         if (slot.getSlotid() != 0 && slotRepository.existsById(slot.getSlotid())) {
@@ -55,6 +43,26 @@ public class SlotService {
         return slots;
     }
 
+    public List<Slot> getAllSlotValid(LocalDate date) {
+        List<Slot> slots = slotRepository.findAll();
+        List<Slot> slotToRemove = new ArrayList<>();
+        for(Slot slot : slots){
+            LocalTime now = LocalTime.now();
+            LocalDate dateNow = LocalDate.now();
+            if(dateNow.isEqual(date)){
+                if(now.isAfter(slot.getSlottime())){
+                    slotToRemove.add(slot);
+                }else{
+                    break;
+                }
+            }else{
+                break;
+            }
+
+        }
+        slots.removeAll(slotToRemove);
+        return slots;
+    }
     //Update
     public Slot update(long slotid, Slot slot) {
         //B1: tìm ra thằng student cần đc update thông qua ID
@@ -84,51 +92,7 @@ public Slot delete(long slotid) {
     return slotRepository.save(updeSlot);
 }
 
-    /*public List<Slot> getSlotsForBooking(LocalDate date, long stylistId){
-        // Tìm tất cả các booking có trong ngày của stylist đó
-        List<Booking> bookings = bookingRepository.getBookingsByStylistInDay(date,stylistId);
-        // nếu chưa có booking nào => hiện full slot
-        if(bookings.isEmpty()){
-            return slotRepository.findAll();
-        }
-        List<Slot> slots = new ArrayList<>();
-        List<Slot> slotForRemove = new ArrayList<>();
-        for(Booking booking : bookings){
-            LocalTime totalTime = serviceRepository.getTotalTime(booking.getBookingId());
-            Slot slot = slotRepository.findSlotBySlotid(booking.getSlot().getSlotid());
-            LocalTime newTime = slot.getSlottime().plusHours(totalTime.getHour())
-                    .plusMinutes(totalTime.getMinute());
-            List<Slot> slotCanBooking = slotRepository.getAllSlotCanBooking(newTime);
-            slots.addAll(slotCanBooking);
-            slotForRemove.add(slot);
-        }
-        slots.removeAll(slotForRemove);
-        //if
-        // Tìm ra booking mới nhất trong ngày của stylist đó
-        /*Booking bookingNearest = bookingRepository.bookingNearest(date,stylistId);
-        System.out.println(bookingNearest.getBookingId());
-        // Tính tổng thời gian dự kiến làm cho booking mới nhất đó
-        LocalTime totalTime = serviceRepository.getTotalTime(bookingNearest.getBookingId());
-        System.out.println(totalTime);
-        // Lấy ra được thời gian của slot trong booking mới nhất
-        Slot slot = slotRepository.findSlotBySlotid(bookingNearest.getSlot().getSlotid());
-        System.out.println(slot.getSlotid());
-        // cập nhật giờ mới
-        LocalTime newTime = slot.getSlottime().plusHours(totalTime.getHour())
-                        .plusMinutes(totalTime.getMinute());
-        System.out.println(newTime);
-        // lấy ra những slot còn trống
-        List<Slot> slotCanBooking = slotRepository.getAllSlotCanBooking(newTime);*/
-        //return slots;
-    //}
 
-    public LocalTime test(LocalDate date, long stylistId){
-        Booking bookingNearest = bookingRepository.bookingNearest(date,stylistId);
-        System.out.println(bookingNearest.getBookingId());
-        return serviceRepository.getTotalTime(bookingNearest.getBookingId());
-    }
 
-    /*private int checkLimitBooking(LocalDate date, long stylistId){
 
-    }*/
 }

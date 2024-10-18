@@ -2,16 +2,9 @@ package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.config.VnpayConfig;
 import com.example.hairSalonBooking.controller.PaymentController;
-import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.entity.Transactions;
-import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
-import com.example.hairSalonBooking.repository.AccountRepository;
-import com.example.hairSalonBooking.repository.TransactionsRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.entity.Payment;
@@ -33,10 +26,6 @@ public class PaymentService {
     private BookingRepository bookingRepository;
     @Autowired
     private PaymentRepository paymentRepository;
-    @Autowired
-    private TransactionsRepository transactionsRepository;
-    @Autowired
-    private AccountRepository accountRepository;
 
     public String generatePaymentUrl(Long bookingId, HttpServletRequest req) throws UnsupportedEncodingException {
         Booking booking = bookingRepository.findBookingByBookingId(bookingId);
@@ -109,34 +98,6 @@ public class PaymentService {
         payment.setTransactionId(vnp_TxnRef);
         paymentRepository.save(payment);
         return paymentUrl;
-    }
-    public ResponseEntity<String> checkPaymentSuccess(String vnp_BankCode, String vnp_CardType,
-                                                      String vnp_ResponseCode, String vnp_TxnRef) {
-        Payment payment = paymentRepository.findByTransactionId(vnp_TxnRef);
-
-        // Kiểm tra mã phản hồi từ VNPay
-        if ("00".equals(vnp_ResponseCode)) {
-            // Giao dịch thành công
-            payment.setPaymentMethod("VNPAY-Banking");
-            paymentRepository.save(payment);
-
-            Transactions transactions = new Transactions();
-            transactions.setTransactionIdVNPay(payment.getTransactionId());
-            transactions.setAmount(payment.getPaymentAmount());
-            transactions.setFromAccount(payment.getBooking().getAccount());
-            Account adminAccount = accountRepository.findTopByRole(Role.ADMIN);
-            transactions.setToAccount(adminAccount);
-            transactions.setTransactionDate(payment.getPaymentDate());
-            transactions.setBankCode(vnp_BankCode);
-            transactions.setCardType(vnp_CardType);
-            transactions.setPayment(payment);
-            transactionsRepository.save(transactions);
-
-            return ResponseEntity.ok("Payment success. Transaction ID: " + vnp_TxnRef);
-        } else {
-            // Giao dịch không thành công
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Payment failed with code: " + vnp_ResponseCode);
-        }
     }
 
 

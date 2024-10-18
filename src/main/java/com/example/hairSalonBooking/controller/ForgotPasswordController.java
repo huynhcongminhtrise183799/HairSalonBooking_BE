@@ -3,12 +3,9 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.model.request.ChangePasswordRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.ForgotPasswordResponse;
-import com.example.hairSalonBooking.repository.ForgotPasswordRepository;
 import com.example.hairSalonBooking.service.ForgotPasswordService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,7 +30,10 @@ public class ForgotPasswordController {
         return response;
     }
     @PostMapping("changePassword/{email}")
-    public ApiResponse<ForgotPasswordResponse> changePassword(@PathVariable String email, @RequestBody ChangePasswordRequest request){
+
+    public ApiResponse<ForgotPasswordResponse> changePassword(@PathVariable String email,
+                                                              @RequestBody ChangePasswordRequest request){
+
         ApiResponse response = new ApiResponse();
         response.setResult(forgotPasswordService.changePassword(email,request));
         return response;

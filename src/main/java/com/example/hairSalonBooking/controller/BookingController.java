@@ -1,8 +1,8 @@
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.entity.Booking;
-import com.example.hairSalonBooking.entity.Shift;
 import com.example.hairSalonBooking.entity.Slot;
+import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
 import com.example.hairSalonBooking.model.request.BookingRequest;
 import com.example.hairSalonBooking.model.request.BookingSlots;
 import com.example.hairSalonBooking.model.request.BookingStylits;
@@ -13,7 +13,6 @@ import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +40,13 @@ public class BookingController {
         apiResponse.setResult(bookingService.getListSlot(bookingSlots));
         return apiResponse;
     }
+    @PostMapping("/booking/slots/{bookingId}")
+    public ApiResponse<List<Slot>> getSlotsUpdateByCustomer(@RequestBody BookingSlots bookingSlots,
+                                                            @PathVariable long bookingId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getSlotsUpdateByCustomer(bookingSlots,bookingId));
+        return apiResponse;
+    }
 
     @PostMapping("/booking")
     public ApiResponse<Booking> createBooking(@RequestBody BookingRequest request){
@@ -48,6 +54,15 @@ public class BookingController {
         apiResponse.setResult(bookingService.createNewBooking(request));
         return apiResponse;
     }
+
+
+    @GetMapping("/booking/{bookingId}")
+    public ApiResponse<BookingResponse> createBooking(@PathVariable long bookingId){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getBookingById(bookingId));
+        return apiResponse;
+    }
+
     @PutMapping("/booking/{bookingId}")
     public ApiResponse<Booking> updateBooking(@PathVariable long bookingId,@RequestBody BookingRequest request){
         ApiResponse apiResponse = new ApiResponse<>();
@@ -81,6 +96,7 @@ public class BookingController {
          apiResponse.setResult(bookingService.checkIn(bookingId));
          return apiResponse;
     }
+
     @PutMapping("/checkout")
     public ApiResponse<String> checkOut(@RequestParam(required = false) String transactionId,
                                         @RequestParam(required = false) Long bookingId) {
@@ -95,6 +111,7 @@ public class BookingController {
         apiResponse.setResult(paymentResponse);
         return apiResponse;
     }
+
     @GetMapping("/bookings/stylist/{date}/{accountId}")
     public ApiResponse<List<BookingResponse>> getTodayBookingsForStylist(@PathVariable Long accountId, @PathVariable String date) {
         ApiResponse apiResponse = new ApiResponse<>();
@@ -103,5 +120,19 @@ public class BookingController {
         return apiResponse;
     }
 
+
+    @PostMapping("/booking/stylists/update")
+    public ApiResponse<Set<StylistForBooking>> getListService(@RequestBody AssignNewStylistForBooking bookingStylits){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.getStylistWhenUpdateBookingByManager(bookingStylits));
+        return apiResponse;
+    }
+
+    @PutMapping("/update/service/{bookingId}")
+    public ApiResponse<Booking> updateService(@PathVariable Long bookingId, @RequestBody BookingRequest request) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.updateBookingWithService(bookingId, request.getServiceId()));
+        return apiResponse;
+    }
 
 }

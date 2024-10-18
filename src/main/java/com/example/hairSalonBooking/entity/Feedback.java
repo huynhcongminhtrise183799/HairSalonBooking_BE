@@ -22,7 +22,6 @@ public class Feedback {
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
-
     @OneToOne
     @JoinColumn(name = "booking_id")
     Booking booking;

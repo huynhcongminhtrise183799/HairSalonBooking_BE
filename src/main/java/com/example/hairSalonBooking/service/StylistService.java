@@ -2,29 +2,55 @@ package com.example.hairSalonBooking.service;
 
 
 import com.example.hairSalonBooking.controller.StylistController;
+
 import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
+
+
 import com.example.hairSalonBooking.model.response.AccountResponse;
+
+
+import com.example.hairSalonBooking.model.response.AccountPageResponse;
+
+
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StylistResponse;
+
+import com.example.hairSalonBooking.model.response.*;
+
 import com.example.hairSalonBooking.repository.*;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+
+import java.time.LocalDate;
+import java.util.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import java.util.stream.Collectors;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 public class StylistService {
@@ -49,22 +75,26 @@ public class StylistService {
     private ServiceRepository serviceRepository;
     @Autowired
     private BookingRepository bookingRepository;
+    @Autowired
+    private StylistScheduleRepository stylistScheduleRepository;
+    @Autowired
+    private KpiRepository kpiRepository;
 
     public StylistResponse create(StylistRequest stylistRequest) {
         // Chuyển từ StylistRequest sang thực thể Account
         Account stylist = modelMapper.map(stylistRequest, Account.class);
         stylist.setRole(Role.STYLIST);
-        try{
+        try {
             stylist.setPassword(passwordEncoder.encode(stylistRequest.getPassword()));
             SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonIdAndIsDeleteFalse(stylistRequest.getSalonId());
             stylist.setSalonBranch(salonBranch);
-            Level level  = levelRepository.findLevelByLevelid(stylistRequest.getLevelId());
+            Level level = levelRepository.findLevelByLevelid(stylistRequest.getLevelId());
             stylist.setLevel(level);
             stylist.setRole(Role.STYLIST);
             Set<Skill> skills = new HashSet<>();
             Set<String> skillNames = new HashSet<>();
             // Lưu vào database
-            for(Long id : stylistRequest.getSkillId()){
+            for (Long id : stylistRequest.getSkillId()) {
                 Skill skill = skillRepository.findSkillBySkillId(id);
                 skillNames.add(skill.getSkillName());
                 skills.add(skill);
@@ -86,16 +116,18 @@ public class StylistService {
             stylistResponse.setGender(newStylist.getGender());
             stylistResponse.setSalonAddress(newStylist.getSalonBranch().getAddress());
             stylistResponse.setLevelName(newStylist.getLevel().getLevelname());
-           stylistResponse.setSkillName(skillNames);
+
+            stylistResponse.setSkillName(skillNames);
+
 
             // Chuyển đổi để trả về response
             return stylistResponse;
-        }catch(Exception e) {
-            if(e.getMessage().contains(stylist.getUsername())) {
+        } catch (Exception e) {
+            if (e.getMessage().contains(stylist.getUsername())) {
                 throw new AppException(ErrorCode.USERNAME_EXISTED);
-            }else if(e.getMessage().contains(stylist.getEmail())) {
+            } else if (e.getMessage().contains(stylist.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_EXISTED);
-            }else {
+            } else {
                 throw new AppException(ErrorCode.Phone_EXISTED);
             }
         }
@@ -103,16 +135,145 @@ public class StylistService {
 
     public List<StylistResponse> getAllStylist() {
         List<Account> stylists = accountRepository.findByRole(Role.STYLIST);
-        return stylists.stream() // Chuyển đổi sang danh sách StylistResponse
-                .map(account -> modelMapper.map(account, StylistResponse.class))
-                .collect(Collectors.toList()); // Thu thập kết quả vào danh sách
+
+        // Chuyển đổi sang danh sách StylistResponse
+        return stylists.stream()
+                .map(account -> {
+                    StylistResponse stylistResponse = new StylistResponse();
+
+                    // Map basic fields
+                    stylistResponse.setUsername(account.getUsername());
+                    stylistResponse.setAccountid(account.getAccountid());
+                    stylistResponse.setEmail(account.getEmail());
+                    stylistResponse.setFullname(account.getFullname());
+                    stylistResponse.setPhone(account.getPhone());
+                    stylistResponse.setImage(account.getImage());
+                    stylistResponse.setDob(account.getDob());
+                    stylistResponse.setGender(account.getGender());
+
+                    // Map salon address
+                    String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
+                    stylistResponse.setSalonAddress(salonAddress);
+
+                    // Map level name
+                    String levelName = (account.getLevel() != null) ? account.getLevel().getLevelname() : null;
+                    stylistResponse.setLevelName(levelName);
+
+                    // Map skill names
+                    Set<String> skillNames = account.getSkills().stream()
+                            .map(Skill::getSkillName)
+                            .collect(Collectors.toSet());
+                    stylistResponse.setSkillName(skillNames);
+
+                    return stylistResponse;
+                })
+                .collect(Collectors.toList()); // Collect the results into a list
     }
 
+
+    public StylistResponse getSpecificStylist(long accountId) {
+        Account stylist = accountRepository.findByAccountidAndRole(accountId, Role.STYLIST);
+        Set<Skill> skills = skillRepository.getSkillByAccountId(accountId);
+        Set<String> skillName = new HashSet<>();
+        for (Skill skill : skills) {
+            skillName.add(skill.getSkillName());
+        }
+        StylistResponse response = new StylistResponse();
+        response.setAccountid(stylist.getAccountid());
+        response.setImage(stylist.getImage());
+        response.setFullname(stylist.getFullname());
+        response.setDob(stylist.getDob());
+        response.setEmail(stylist.getEmail());
+        response.setPhone(stylist.getPhone());
+        response.setGender(stylist.getGender());
+        response.setSkillName(skillName);
+        response.setSalonAddress(stylist.getSalonBranch().getAddress());
+        response.setLevelName(stylist.getLevel().getLevelname());
+        return response;
+    }
+
+    public StylistPageResponse getAllAccountStylist(int page, int size, long salonId) {
+        Page<Account> accountPage = accountRepository.findAccountByRoleAndSalonBranchSalonId(Role.STYLIST, PageRequest.of(page, size), salonId);
+
+        List<StyPageResponse> styPageResponses = new ArrayList<>();
+        for (Account account : accountPage) {
+            Set<Skill> skills = skillRepository.getSkillByAccountId(account.getAccountid());
+            Set<String> skillName = new HashSet<>();
+            for (Skill skill : skills) {
+                skillName.add(skill.getSkillName());
+            }
+            StyPageResponse styPageResponse = new StyPageResponse();
+            styPageResponse.setAccountid(account.getAccountid());
+            styPageResponse.setEmail(account.getEmail());
+            styPageResponse.setFullname(account.getFullname());
+            styPageResponse.setPhone(account.getPhone());
+            styPageResponse.setImage(account.getImage());
+            styPageResponse.setDob(account.getDob());
+            styPageResponse.setGender(account.getGender());
+            styPageResponse.setGetAddress(account.getSalonBranch().getAddress());
+            styPageResponse.setLevelName(account.getLevel().getLevelname());
+            styPageResponse.setSkillsName(skillName);
+            styPageResponses.add(styPageResponse);
+        }
+        Page<StyPageResponse> stylistPage = new PageImpl<>(styPageResponses, PageRequest.of(page, size), accountPage.getTotalElements());
+        // Build and return the StylistPageResponse
+        StylistPageResponse stylistPageResponse = new StylistPageResponse();
+        stylistPageResponse.setPageNumber(stylistPage.getNumber());
+        stylistPageResponse.setTotalPages(stylistPage.getTotalPages());
+        stylistPageResponse.setTotalElements(stylistPage.getTotalElements());
+        stylistPageResponse.setContent(stylistPage.getContent());
+
+        return stylistPageResponse;
+    }
+
+    public List<StylistForCreateSchedule> getStylistsBySalon(long salonId) {
+        List<Account> accounts = accountRepository.getStylistsBySalo(salonId);
+        List<StylistForCreateSchedule> stylist = new ArrayList<>();
+        for (Account account : accounts) {
+            StylistForCreateSchedule stylistForCreateSchedule = new StylistForCreateSchedule();
+            stylistForCreateSchedule.setId(account.getAccountid());
+            stylistForCreateSchedule.setFullname(account.getFullname());
+            stylistForCreateSchedule.setImage(account.getImage());
+            stylist.add(stylistForCreateSchedule);
+        }
+        return stylist;
+    }
+
+
     public List<StylistResponse> getStylistByStatus() {
-        List<Account> StylistStatus = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
-        return StylistStatus.stream()
-                .map(account -> modelMapper.map(account, StylistResponse.class))
-                .collect(Collectors.toList());
+        List<Account> stylists = accountRepository.findByRoleAndIsDeletedFalse(Role.STYLIST);
+        // Chuyển đổi sang danh sách StylistResponse
+        return stylists.stream()
+                .map(account -> {
+                    StylistResponse stylistResponse = new StylistResponse();
+
+                    // Map basic fields
+                    stylistResponse.setUsername(account.getUsername());
+                    stylistResponse.setAccountid(account.getAccountid());
+                    stylistResponse.setEmail(account.getEmail());
+                    stylistResponse.setFullname(account.getFullname());
+                    stylistResponse.setPhone(account.getPhone());
+                    stylistResponse.setImage(account.getImage());
+                    stylistResponse.setDob(account.getDob());
+                    stylistResponse.setGender(account.getGender());
+
+                    // Map salon address
+                    String salonAddress = (account.getSalonBranch() != null) ? account.getSalonBranch().getAddress() : null;
+                    stylistResponse.setSalonAddress(salonAddress);
+
+                    // Map level name
+                    String levelName = (account.getLevel() != null) ? account.getLevel().getLevelname() : null;
+                    stylistResponse.setLevelName(levelName);
+
+                    // Map skill names
+                    Set<String> skillNames = account.getSkills().stream()
+                            .map(Skill::getSkillName)
+                            .collect(Collectors.toSet());
+                    stylistResponse.setSkillName(skillNames);
+
+                    return stylistResponse;
+                })
+                .collect(Collectors.toList()); // Collect the results into a list
     }
 
     public StylistResponse updateStylist(long accountid, UpdateStylistRequest stylistRequest) {
@@ -126,12 +287,12 @@ public class StylistService {
         accountRepository.deleteSpecificSkills(accountid);
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonIdAndIsDeleteFalse(stylistRequest.getSalonId());
         updeStylist.setSalonBranch(salonBranch);
-        Level level  = levelRepository.findLevelByLevelid(stylistRequest.getLevelId());
+        Level level = levelRepository.findLevelByLevelid(stylistRequest.getLevelId());
         updeStylist.setLevel(level);
         Set<Skill> skills = new HashSet<>();
         Set<String> skillNames = new HashSet<>();
         // Lưu vào database
-        for(Long id : stylistRequest.getSkillId()){
+        for (Long id : stylistRequest.getSkillId()) {
             Skill skill = skillRepository.findSkillBySkillId(id);
             skillNames.add(skill.getSkillName());
             skills.add(skill);
@@ -175,6 +336,7 @@ public class StylistService {
         Account deleteStylist = accountRepository.save(updeStylist);
         return modelMapper.map(deleteStylist, StylistResponse.class);
     }
+
     public List<BookingResponse> getBookingsForStylistOnDate(Long stylistId, LocalDate date) {
         // Kiểm tra xem account có phải là Stylist không
         Account stylist = accountRepository.findById(stylistId)
@@ -188,7 +350,7 @@ public class StylistService {
         List<Booking> bookings = bookingRepository.findAllByAccountInAndSalonBranch(stylistId, date);
         // Chuyển đổi lúc trả ra từ Booking sang BookingResponse
         List<BookingResponse> responses = new ArrayList<>();
-        for(Booking booking : bookings){
+        for (Booking booking : bookings) {
             Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
             BookingResponse bookingResponse = new BookingResponse();
             bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
@@ -201,4 +363,74 @@ public class StylistService {
         return responses;
     }
 
+    public List<StylistServiceResponse> getAllServiceByStylistId(long accountid) {
+        // Truy vấn danh sách các đối tượng SalonService
+        List<SalonService> services = serviceRepository.getSalonServiceByAccountId(accountid);
+
+        if (services.isEmpty()) {
+            // Ném ngoại lệ tùy chỉnh nếu không tìm thấy dịch vụ nào
+            throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
+        }
+
+        // Chuyển đổi danh sách SalonService thành StylistServiceResponse
+        List<StylistServiceResponse> responses = services.stream().map(service -> {
+            StylistServiceResponse stylistServiceResponse = new StylistServiceResponse();
+            stylistServiceResponse.setServiceId(service.getServiceId());
+            stylistServiceResponse.setServiceName(service.getServiceName());
+            stylistServiceResponse.setDeleted(false);
+            return stylistServiceResponse;
+        }).collect(Collectors.toList());
+
+        return responses;
+    }
+
+    public List<StylistPerformanceResponse> getStylistsWithFeedbackAndRevenue(LocalDate startDate, LocalDate endDate) {
+        List<StylistSchedule> stylists = stylistScheduleRepository.findAllStylists();
+        return stylists.stream().map(stylist -> {
+            // Lấy tất cả các booking của stylist trong khoảng thời gian
+            List<Booking> bookings = stylist.getBookings().stream()
+                    .filter(booking -> !booking.getBookingDay().isBefore(startDate) && !booking.getBookingDay().isAfter(endDate))
+                    .collect(Collectors.toList());
+
+            // Tính tổng tiền kiếm được
+            double totalRevenue = bookings.stream()
+                    .filter(booking -> booking.getPayment() != null)  // Chỉ tính booking có payment
+                    .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
+                    .sum();
+
+            // Tính điểm feedback trung bình
+            double totalFeedbackScore = bookings.stream()
+                    .filter(booking -> booking.getFeedback() != null)  // Chỉ tính booking có feedback
+                    .mapToDouble(booking -> booking.getFeedback().getScore())
+                    .sum();
+
+            long feedbackCount = bookings.stream()
+                    .filter(booking -> booking.getFeedback() != null)
+                    .count();
+
+            double avgFeedback = (feedbackCount > 0) ? totalFeedbackScore / feedbackCount : 0.0;
+            String yearAndMonth = startDate.getYear() + "-" + startDate.getMonthValue()  + startDate.getMonthValue(); // Ví dụ: "2024-09"
+            Kpi kpi = kpiRepository.findByLevelAndYearAndMonth(stylist.getAccount().getLevel(), yearAndMonth);
+            // Trả về DTO chứa thông tin stylist và các kết quả tính toán
+            if(kpi != null && avgFeedback >= kpi.getPerformanceScore() && totalRevenue >= kpi.getRevenueGenerated()) {
+                return new StylistPerformanceResponse(
+                        stylist.getStylistScheduleId(),
+                        stylist.getAccount().getFullname(),
+                        avgFeedback,
+                        totalRevenue
+                );
+            } else {
+                return null;
+            }
+        }).collect(Collectors.toList());
+
+    }
 }
+
+
+
+
+
+
+
+

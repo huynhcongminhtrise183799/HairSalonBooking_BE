@@ -15,7 +15,9 @@ import java.util.Set;
 public class PaymentResponse {
      long bookingId;
      LocalDate bookingDate;
+     String customerName;
      String stylistName;
+     String salonAddress;
      Set<PaymentServiceResponse> services;
      String voucher;
      double totalAmount;
