@@ -1,7 +1,6 @@
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.model.response.ApiResponse;
-import com.example.hairSalonBooking.model.response.LevelResponse;
 import com.example.hairSalonBooking.model.response.SkillResponse;
 import com.example.hairSalonBooking.service.SkillService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

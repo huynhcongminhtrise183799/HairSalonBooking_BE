@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.model.response;
 
 
+import com.example.hairSalonBooking.entity.Skill;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -25,5 +26,6 @@ public class ServiceResponse {
     LocalTime duration;
     String image;
     String skillName;
+    boolean isDelete;
 
 }

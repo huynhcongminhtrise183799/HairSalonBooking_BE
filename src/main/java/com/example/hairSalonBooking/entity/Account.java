@@ -72,8 +72,6 @@ public class Account implements UserDetails {
     @Column(unique = true)
     String phone;
     String image;
-    String googleid;
-    String googlename;
 
     //    @JsonIgnore // ẩn delete status không cho người dùng nhập
     boolean isDeleted = false;

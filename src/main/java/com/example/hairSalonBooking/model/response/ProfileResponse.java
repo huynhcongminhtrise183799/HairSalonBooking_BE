@@ -21,5 +21,6 @@ public class ProfileResponse {
     String phone;
     String gender;
     String image;
+    long salonId;
     Role role;
 }

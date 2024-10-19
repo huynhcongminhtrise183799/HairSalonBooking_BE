@@ -25,6 +25,7 @@ public class CusBookingResponse {
     LocalDate date;
     LocalTime time;
     Set<SalonServiceCusResponse> serviceName;
+    //String voucherCode;
     @Enumerated(EnumType.STRING)
     BookingStatus status;
 }

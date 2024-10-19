@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.model.response;
 
 import com.example.hairSalonBooking.entity.SalonService;
+import com.example.hairSalonBooking.enums.BookingStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,9 +15,18 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingResponse {
+    long id;
+    long customerId;
+    String customerName;
+
     String salonName;
     String stylistName;
     LocalDate date;
     LocalTime time;
+
+
+    String voucherCode;
+
     Set<String> serviceName;
+    BookingStatus status;
 }

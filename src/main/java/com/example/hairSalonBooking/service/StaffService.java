@@ -1,22 +1,24 @@
 package com.example.hairSalonBooking.service;
 
-import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.entity.SalonBranch;
+import com.example.hairSalonBooking.entity.*;
+import com.example.hairSalonBooking.enums.BookingStatus;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateStaffRequest;
+import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
 import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
 import com.example.hairSalonBooking.model.response.StaffResponse;
-import com.example.hairSalonBooking.repository.AccountRepository;
-import com.example.hairSalonBooking.repository.SalonBranchRepository;
+import com.example.hairSalonBooking.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class StaffService {
@@ -25,13 +27,21 @@ public class StaffService {
     @Autowired
     private SalonBranchRepository salonBranchRepository;
     @Autowired
+    private ServiceRepository serviceRepository;
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private SlotRepository slotRepository;
+    @Autowired
+    private StylistScheduleRepository stylistScheduleRepository;
+    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
     public StaffResponse createStaff(CreateStaffRequest request){
         Account account = modelMapper.map(request,Account.class);
         try {
-            SalonBranch salonBranch = salonBranchRepository.findSalonBranchByAddressIsDeleteFalse(request.getSalonAddress());
+            SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
             account.setSalonBranch(salonBranch);
             account.setPassword(passwordEncoder.encode(request.getPassword()));
             account.setRole(Role.STAFF);
@@ -75,13 +85,25 @@ public class StaffService {
         }
         return staffResponses;
     }
-
+    public StaffResponse getSpecificStaff(long accountId){
+        Account account = accountRepository.findAccountByAccountid(accountId);
+        StaffResponse staffResponse = new StaffResponse();
+        staffResponse.setAccountid(account.getAccountid());
+        staffResponse.setGender(account.getGender());
+        staffResponse.setEmail(account.getEmail());
+        staffResponse.setDob(account.getDob());
+        staffResponse.setPhone(account.getPhone());
+        staffResponse.setFullName(account.getFullname());
+        staffResponse.setSalonAddress(account.getSalonBranch().getAddress());
+        return staffResponse;
+    }
     public StaffResponse updateStaff(UpdateStaffRequest request, long id){
         Account account = accountRepository.findAccountByAccountid(id);
         if(account == null){
             throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
         }
-        SalonBranch salonBranch = salonBranchRepository.findSalonBranchByAddressIsDeleteFalse(request.getSalonAddress());
+
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         account.setEmail(request.getEmail());
         account.setDob(request.getDob());
         account.setPhone(request.getPhone());
@@ -103,7 +125,6 @@ public class StaffService {
                 .build();
         return staffResponse;
     }
-
     public StaffResponse deleteStaff(long id){
         Account account = accountRepository.findAccountByAccountid(id);
         if(account == null){
@@ -123,5 +144,42 @@ public class StaffService {
                 .isDelete(account.isDeleted())
                 .build();
         return staffResponse;
+    }
+    public List<StaffResponse> getAllStaffBySalonId(long salonId){
+        List<Account> accounts = accountRepository.findByRoleAndIsDeletedFalseAndSalonBranchSalonId(Role.STAFF,salonId);
+        List<StaffResponse> staffResponses = new ArrayList<>();
+        for(Account account : accounts){
+            StaffResponse staffResponse = new StaffResponse();
+            staffResponse.setSalonAddress(account.getSalonBranch().getAddress());
+            staffResponse.setDob(account.getDob());
+            staffResponse.setGender(account.getGender());
+            staffResponse.setEmail(account.getEmail());
+            staffResponse.setPhone(account.getPhone());
+            staffResponse.setAccountid(account.getAccountid());
+            staffResponse.setFullName(account.getFullname());
+            staffResponses.add(staffResponse);
+        }
+        return staffResponses;
+    }
+    public StaffCreateBookingRequest createBookingByStaff(StaffCreateBookingRequest request){
+        Account account = accountRepository.findByPhone(request.getPhoneNumber());
+        Set<SalonService> serviceSet = new HashSet<>();
+        for(Long id: request.getServiceId()){
+            SalonService service = serviceRepository.getServiceById(id);
+            serviceSet.add(service);
+        }
+        Slot slot = slotRepository.findSlotBySlotid(request.getSlotId());
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
+        StylistSchedule stylistSchedule = stylistScheduleRepository.getScheduleId(request.getStylistId(), request.getBookingDate());
+        Booking booking = new Booking();
+        booking.setServices(serviceSet);
+        booking.setBookingDay(request.getBookingDate());
+        booking.setStatus(BookingStatus.PENDING);
+        booking.setAccount(account);
+        booking.setSlot(slot);
+        booking.setSalonBranch(salonBranch);
+        booking.setStylistSchedule(stylistSchedule);
+        bookingRepository.save(booking);
+        return request;
     }
 }

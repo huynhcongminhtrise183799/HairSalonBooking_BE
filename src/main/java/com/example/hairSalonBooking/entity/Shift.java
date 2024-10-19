@@ -22,11 +22,8 @@ public class Shift {
     LocalTime endTime;
     int limitBooking;
 
-    @ManyToMany
-    @JoinTable(name = "specific_stylist_schedule",
-            joinColumns = @JoinColumn(name = "shift_id"),
-            inverseJoinColumns = @JoinColumn(name = "stylist_schedule_id")
-    )
-    @JsonIgnore
+
+
+    @ManyToMany(mappedBy = "shifts")
     Set<StylistSchedule> stylistSchedules;
 }
