@@ -114,5 +114,13 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
 
     @Query("SELECT b FROM Booking b JOIN b.stylistSchedule ss WHERE ss.account.accountid = :stylistId")
     List<Booking> findBookingByStylistId(@Param("stylistId") Long stylistId);
+    @Query("SELECT b FROM Booking b " +
+            "JOIN b.stylistSchedule ss " +
+            "WHERE ss.account.accountid = :stylistId " +
+            "AND FUNCTION('YEAR', b.bookingDay) = :year " +
+            "AND FUNCTION('MONTH', b.bookingDay) = :month")
+    List<Booking> findBookingByStylistIdAndMonthYear(@Param("stylistId") Long stylistId,
+                                         @Param("month") int month,
+                                         @Param("year") int year);
 
 }

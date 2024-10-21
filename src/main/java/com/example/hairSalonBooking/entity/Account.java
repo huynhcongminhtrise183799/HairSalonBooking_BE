@@ -118,4 +118,5 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "toAccount")
     Set<Transactions> transactionsTo;
 
+    int balance;
 }

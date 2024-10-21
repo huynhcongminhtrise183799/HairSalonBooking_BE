@@ -385,20 +385,34 @@ public class StylistService {
         return responses;
     }
 
-    private double calculateTotalRevenue(Long stylistId) {
-      List<Booking> bookings = bookingRepository.findBookingByStylistId(stylistId);
-      log.info("Bookings for stylist ID {}: {}", stylistId, bookings);
-      double totalPayment = bookings.stream()
-              .filter(booking -> booking.getPayment() != null)
-              .mapToDouble(booking -> booking.getPayment().getPaymentAmount() )
-              .sum();
-      log.info("total payment: {}", totalPayment);
-      return totalPayment;
-    }
-      private double calculateAverageFeedback(Long stylistId) {
-            // Lấy danh sách bookings của stylist theo stylistId
-            List<Booking> bookings = bookingRepository.findBookingByStylistId(stylistId);
+    private double calculateTotalRevenue(Long stylistId, String yearAndMonth) {
+        // Extract year and month from the yearAndMonth string
+        String[] parts = yearAndMonth.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
 
+        // Fetch bookings for the given stylist and month/year
+        List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
+        log.info("Bookings for stylist ID {} in month {} of year {}: {}", stylistId, month, year, bookings);
+
+        // Calculate total payment
+        double totalPayment = bookings.stream()
+                .filter(booking -> booking.getPayment() != null)
+                .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
+                .sum();
+
+        log.info("Total payment: {}", totalPayment);
+        return totalPayment;
+    }
+      private double calculateAverageFeedback(Long stylistId, String yearAndMonth) {
+            // Lấy danh sách bookings của stylist theo stylistId
+
+          String[] parts = yearAndMonth.split("-");
+          int year = Integer.parseInt(parts[0]);
+          int month = Integer.parseInt(parts[1]);
+
+          List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId,month,year);
+          log.info("Bookings for stylist ID {} in month {} of year {}: {}", stylistId, month, year, bookings);
             // Tính tổng điểm feedback và đếm số lượng feedback
             double totalFeedbackScore = bookings.stream()
                     .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
@@ -423,8 +437,8 @@ public class StylistService {
             Long stylistId = stylist.getAccountid();
 
             // Tính tổng doanh thu và trung bình feedback
-            double totalRevenue = calculateTotalRevenue(stylistId);
-            double averageFeedback = calculateAverageFeedback(stylistId);
+            double totalRevenue = calculateTotalRevenue(stylistId,yearAndMonth);
+            double averageFeedback = calculateAverageFeedback(stylistId,yearAndMonth);
             Kpi stylistKpi = kpiRepository.findByStylistIdAndYearAndMonth(stylistId, yearAndMonth);
             log.info("Searching KPI for Stylist ID: {} and Year-Month: {}", stylistId, yearAndMonth);
             log.info("KPI for Stylist ID: {}: {}", stylistId, stylistKpi);
