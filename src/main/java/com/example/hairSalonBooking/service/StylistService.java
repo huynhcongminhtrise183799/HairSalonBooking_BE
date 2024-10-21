@@ -400,11 +400,47 @@ public class StylistService {
                 .filter(booking -> booking.getPayment() != null)
                 .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
                 .sum();
-
         log.info("Total payment: {}", totalPayment);
-        return totalPayment;
+        return totalPayment ;
     }
-      private double calculateAverageFeedback(Long stylistId, String yearAndMonth) {
+    private int countBooking(Long stylistId, String yearAndMonth) {
+        // Tách tháng và năm từ yearAndMonth
+        String[] parts = yearAndMonth.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+
+        // Gọi hàm để lấy danh sách booking
+        List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
+        // Đếm số lượng booking
+        int sizeBookings = bookings.size(); // Số lượng booking
+
+        log.info("Total bookings: {}", sizeBookings);
+        return sizeBookings; // Trả về số lượng booking
+    }
+    public StylistRevenueResponse getStylistRevenue(long stylistId, String yearAndMonth) {
+        String[] parts = yearAndMonth.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+
+        double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
+        int sizeBookings = countBooking(stylistId, yearAndMonth);
+
+        // Lấy thông tin về stylist
+        Account name = accountRepository.findAccountByAccountid(stylistId);
+        if (name == null) { // Kiểm tra nếu stylist không tồn tại
+            throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
+        }
+        String stylistName = name.getFullname();
+
+        // Tạo đối tượng StylistRevenueResponse
+        return StylistRevenueResponse.builder()
+                .stylistId(stylistId)
+                .stylistName(stylistName)
+                .bookingQuantity(sizeBookings) // Đảm bảo bookingQuantity được định nghĩa trong StylistRevenueResponse
+                .totalRevenue(totalRevenue)
+                .build();
+    }
+      public double calculateAverageFeedback(Long stylistId, String yearAndMonth) {
             // Lấy danh sách bookings của stylist theo stylistId
 
           String[] parts = yearAndMonth.split("-");
@@ -428,7 +464,27 @@ public class StylistService {
 
             return averageFeedbackScore;
         }
+    public StylistRevenueResponse getStylistFeedback(long stylistId, String yearAndMonth) {
+        String[] parts = yearAndMonth.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+        List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
+        double totalRevenue = calculateTotalRevenue(stylistId,yearAndMonth);
+        Account Name =  accountRepository.findAccountByAccountid(stylistId);
+        if (Name != null){
+            throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
+        }
+        String  StylistName = Name.getFullname();
+//        String stylistName = (stylistId); // Giả sử bạn có phương thức này
 
+        // Tạo đối tượng StylistRevenueResponse
+
+        return StylistRevenueResponse.builder()
+                .stylistId(stylistId)
+                .stylistName(StylistName)
+                .totalRevenue(totalRevenue)
+                .build();
+    }
 
     public List<StylistPerformanceResponse> getStylistsWithFeedbackAndRevenue(String yearAndMonth) {
         List<Account> stylists = accountRepository.getAccountsByRoleStylist();

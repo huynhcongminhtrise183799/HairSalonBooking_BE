@@ -97,4 +97,15 @@ public class StylistController {
         apiResponse.setResult(stylists);
         return apiResponse;
     }
+    @GetMapping("/stylists/{accountId}/revenue")
+    public ApiResponse<StylistRevenueResponse> getStylistsRevenue(@PathVariable long accountId,
+                                                                  @RequestParam String yearAndMonth) {
+        ApiResponse<StylistRevenueResponse> apiResponse = new ApiResponse<>();
+            // Tính tổng doanh thu cho stylist
+        StylistRevenueResponse totalRevenue = stylistService.getStylistRevenue(accountId, yearAndMonth);
+            // Tạo đối tượng StylistRevenueResponse để trả về
+            apiResponse.setResult(totalRevenue);
+            return apiResponse;
+    }
+
 }
