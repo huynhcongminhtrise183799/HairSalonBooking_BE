@@ -386,16 +386,16 @@ public class StylistService {
     }
 
     private double calculateTotalRevenue(Long stylistId, String yearAndMonth) {
-        // Extract year and month from the yearAndMonth string
+        // lay month year tu ham
         String[] parts = yearAndMonth.split("-");
         int year = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]);
 
-        // Fetch bookings for the given stylist and month/year
+        // goi ham
         List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
         log.info("Bookings for stylist ID {} in month {} of year {}: {}", stylistId, month, year, bookings);
 
-        // Calculate total payment
+        // tinh tong
         double totalPayment = bookings.stream()
                 .filter(booking -> booking.getPayment() != null)
                 .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
