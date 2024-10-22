@@ -7,6 +7,7 @@ import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
+import com.example.hairSalonBooking.model.request.SalaryRecordRequest;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 
@@ -24,6 +25,7 @@ import com.example.hairSalonBooking.model.response.*;
 
 import com.example.hairSalonBooking.repository.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,6 +54,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
+@Slf4j
 @Service
 public class StylistService {
 
@@ -79,6 +82,8 @@ public class StylistService {
     private StylistScheduleRepository stylistScheduleRepository;
     @Autowired
     private KpiRepository kpiRepository;
+    @Autowired
+    private SalaryRecordRepository salaryRecordRepository;
 
     public StylistResponse create(StylistRequest stylistRequest) {
         // Chuyển từ StylistRequest sang thực thể Account
@@ -423,7 +428,134 @@ public class StylistService {
                 return null;
             }
         }).collect(Collectors.toList());
+    }
 
+    private double calculateTotalRevenue(Long stylistId, String yearAndMonth) {
+        String[] parts = yearAndMonth.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+
+        List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
+        log.info("Bookings for stylist ID {} in month {} of year {}: {}", stylistId, month, year, bookings);
+        log.info("Number of bookings for stylist ID {}: {}", stylistId, bookings.size());
+
+
+
+        double totalPayment = bookings.stream()
+                .filter(booking -> booking.getPayment() != null && booking.getPayment().getPaymentStatus().equals("Completed"))
+                .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
+                .sum();
+
+        log.info("Total payment: {}", totalPayment);
+        return totalPayment;
+    }
+
+    private double calculateBonus(double totalPayment, double baseSalary, long levelId) {
+        double bonus = 0.0;
+
+
+        if (levelId == 1) { // Level 1
+            if (totalPayment > 3000000 && totalPayment <= 5000000) {
+                bonus = baseSalary * 0.10; // 10% bonus
+            } else if (totalPayment > 5000000 && totalPayment <= 10000000) {
+                bonus = baseSalary * 0.20; // 20% bonus
+            } else if (totalPayment > 10000000 && totalPayment <= 15000000) {
+                bonus = baseSalary * 0.25; // 25% bonus
+            } else if (totalPayment > 15000000) {
+                bonus = baseSalary * 0.30; // 30% bonus
+            }
+        } else if (levelId == 2) { // Level 2
+            if (totalPayment > 5000000 && totalPayment <= 10000000) {
+                bonus = baseSalary * 0.10; // 10% bonus
+            } else if (totalPayment > 10000000 && totalPayment <= 20000000) {
+                bonus = baseSalary * 0.20; // 20% bonus
+            } else if (totalPayment > 20000000 && totalPayment <= 30000000) {
+                bonus = baseSalary * 0.25; // 25% bonus
+            } else if (totalPayment > 30000000) {
+                bonus = baseSalary * 0.30; // 30% bonus
+            }
+        }
+
+        log.info("Bonus calculated: {}", bonus);
+        return bonus;
+    }
+
+    public List<SalaryResponse> calculateTotalSalary(Long salonId, String yearAndMonth) {
+        List<Account> stylists = accountRepository.getAccountsBySalonAndRole(salonId, Role.STYLIST);
+        List<SalaryResponse> salaryResponses = new ArrayList<>();
+
+        for (Account stylist : stylists) {
+            Long stylistId = stylist.getAccountid();
+            Long levelId = stylist.getLevel().getLevelid();
+
+            double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
+            double baseSalary = stylist.getLevel().getSalary(); // Get the stylist's base salary
+            log.info("Total Revenue for {}: {}, Base Salary: {}", stylist.getFullname(), totalRevenue, baseSalary);
+
+            double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+            double totalSalary = baseSalary + bonus;
+
+            log.info("Bonus for Stylist {}: {}, Total Salary: {}", stylist.getFullname(), bonus, totalSalary);
+
+            SalaryResponse response = new SalaryResponse();
+            response.setStylistName(stylist.getFullname());
+            response.setMonth(yearAndMonth);
+            response.setSalary(baseSalary);
+            response.setBonus(bonus);
+            response.setTotalSalary(totalSalary);
+
+            salaryResponses.add(response);
+        }
+
+        return salaryResponses.stream()
+                .sorted(Comparator.comparing(SalaryResponse::getTotalSalary).reversed())
+                .collect(Collectors.toList());
+    }
+
+    public SalaryResponse calculateTotalSalaryByOneStylist(Long salonId, String yearAndMonth, Long stylistId) {
+        Account stylist = accountRepository.findByIdAndSalonIdAndRole(stylistId, salonId,Role.STYLIST)
+                .orElseThrow(() -> new AppException(ErrorCode.STYLIST_NOT_FOUND));
+
+        Long levelId = stylist.getLevel().getLevelid();
+        double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
+        double baseSalary = stylist.getLevel().getSalary();
+        double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+        double totalSalary = baseSalary + bonus;
+
+        SalaryResponse response = new SalaryResponse();
+        response.setStylistName(stylist.getFullname());
+        response.setMonth(yearAndMonth);
+        response.setSalary(baseSalary);
+        response.setBonus(bonus);
+        response.setTotalSalary(totalSalary);
+
+        return response;
+    }
+
+    public List<SalaryRecordRequest> saveSalaryRecords(List<SalaryRecordRequest> salaryRecordRequests) {
+        List<SalaryRecordRequest> savedRecords = new ArrayList<>();
+
+        for (SalaryRecordRequest request : salaryRecordRequests) {
+            Account account = accountRepository.findById(request.getStylistId())
+                    .orElseThrow(() -> new AppException(ErrorCode.STYLIST_NOT_FOUND));
+
+            // Check if the account has the Role.STYLIST
+            if (!account.getRole().equals(Role.STYLIST)) {
+                throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
+            }
+
+            SalaryRecord salaryRecord = new SalaryRecord();
+            salaryRecord.setBonusSalary(request.getBonusSalary());
+            salaryRecord.setMonthAndYear(request.getMonthAndYear());
+            salaryRecord.setTotalSalary(request.getTotalSalary());
+            salaryRecord.setAccount(account);
+
+            salaryRecordRepository.save(salaryRecord);
+
+            savedRecords.add(request);
+        }
+
+        return savedRecords;
     }
 }
 

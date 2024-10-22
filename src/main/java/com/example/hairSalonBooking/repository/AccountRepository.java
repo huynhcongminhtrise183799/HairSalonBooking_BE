@@ -15,12 +15,12 @@ import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-
+import org.springframework.data.repository.query.Param;
 
 
 import java.util.List;
@@ -75,8 +75,14 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Page<Account> findAccountByRoleAndSalonBranchSalonId(Role role, Pageable pageable, long salonId);
     Account  findTopByRole(Role role);
 
-    Set<Account> getStylistForBooking(Role role);
-
+    @Query("SELECT a FROM Account a WHERE a.salonBranch.salonId = :salonId AND a.role = :role")
+    List<Account> getAccountsBySalonAndRole(@Param("salonId") Long salonId, @Param("role") Role role);
+    @Query("SELECT a FROM Account a JOIN a.salonBranch sb WHERE sb.salonId = :branchId AND a.role = :role")
+    List<Account> getStylistsBySalonId(@Param("branchId") Long branchId, @Param("role") Role role);
+    @Query("SELECT a FROM Account a WHERE a.accountid = :stylistId AND a.salonBranch.salonId = :salonId AND a.role = :role")
+    Optional<Account> findByIdAndSalonIdAndRole(@Param("stylistId") Long stylistId,
+                                                @Param("salonId") Long salonId,
+                                                @Param("role") Role role);
 
 }
 

@@ -2,10 +2,7 @@ package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.model.request.CreateManagerRequest;
 import com.example.hairSalonBooking.model.request.UpdateManagerRequest;
-import com.example.hairSalonBooking.model.response.ApiResponse;
-import com.example.hairSalonBooking.model.response.BookingResponse;
-import com.example.hairSalonBooking.model.response.ManagerResponse;
-import com.example.hairSalonBooking.model.response.ProfileResponse;
+import com.example.hairSalonBooking.model.response.*;
 import com.example.hairSalonBooking.service.BranchManagerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -67,6 +64,47 @@ public class BranchManagerController {
     public ApiResponse<List<BookingResponse>> getAllBookingsForStylistInBranch(@PathVariable Long branchId, @PathVariable LocalDate date) {
         ApiResponse<List<BookingResponse>> response = new ApiResponse<>();
         response.setResult(branchManagerService.getAllBookingsForStylistsInBranch(branchId,date));
+        return response;
+    }
+
+    @GetMapping("/manager/stylists/booking/pending/{page}/{size}/{branchId}/{date}")
+    public ApiResponse<BookingPageResponse> getAllBookingsForStylistInBranchByPending(
+            @PathVariable int page,
+            @PathVariable int size,
+            @PathVariable long branchId,
+            @PathVariable LocalDate date) {
+        ApiResponse<BookingPageResponse> response = new ApiResponse<>();
+        response.setResult(branchManagerService.getAllBookingsForStylistInBranchByPending(page, size, branchId, date));
+        return response;
+    }
+    @GetMapping("/manager/stylists/booking/complete/{page}/{size}/{branchId}/{date}")
+    public ApiResponse<BookingPageResponse> getAllBookingsForStylistInBranchByComplete(
+            @PathVariable int page,
+            @PathVariable int size,
+            @PathVariable long branchId,
+            @PathVariable LocalDate date) {
+        ApiResponse<BookingPageResponse> response = new ApiResponse<>();
+        response.setResult(branchManagerService.getAllBookingsForStylistInBranchByComplete(page, size, branchId, date));
+        return response;
+    }
+    @GetMapping("/manager/stylists/booking/inprocess/{page}/{size}/{branchId}/{date}")
+    public ApiResponse<BookingPageResponse> getAllBookingsForStylistInBranchByInprocess(
+            @PathVariable int page,
+            @PathVariable int size,
+            @PathVariable long branchId,
+            @PathVariable LocalDate date) {
+        ApiResponse<BookingPageResponse> response = new ApiResponse<>();
+        response.setResult(branchManagerService.getAllBookingsForStylistInBranchByInprocess(page, size, branchId, date));
+        return response;
+    }
+    @GetMapping("/manager/stylists/booking/cancel/{page}/{size}/{branchId}/{date}")
+    public ApiResponse<BookingPageResponse> getAllBookingsForStylistInBranchByCancel(
+            @PathVariable int page,
+            @PathVariable int size,
+            @PathVariable long branchId,
+            @PathVariable LocalDate date) {
+        ApiResponse<BookingPageResponse> response = new ApiResponse<>();
+        response.setResult(branchManagerService.getAllBookingsForStylistInBranchByCancel(page, size, branchId, date));
         return response;
     }
 }

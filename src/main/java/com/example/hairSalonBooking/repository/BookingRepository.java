@@ -128,4 +128,13 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
 
     @Query(value = "SELECT * FROM booking b WHERE b.booking_id = :bookingId", nativeQuery = true)
     Optional<Booking> findBookingById(@Param("bookingId") Long bookingId);
+
+    @Query("SELECT b FROM Booking b " +
+            "JOIN b.stylistSchedule ss " +
+            "WHERE ss.account.accountid = :stylistId " +
+            "AND FUNCTION('YEAR', b.bookingDay) = :year " +
+            "AND FUNCTION('MONTH', b.bookingDay) = :month")
+    List<Booking> findBookingByStylistIdAndMonthYear(@Param("stylistId") Long stylistId,
+                                                     @Param("month") int month,
+                                                     @Param("year") int year);
 }
