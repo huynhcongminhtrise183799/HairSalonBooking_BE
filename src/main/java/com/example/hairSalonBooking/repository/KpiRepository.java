@@ -10,7 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface KpiRepository extends JpaRepository<Kpi, Long> {
-    @Query("SELECT k FROM Kpi k JOIN k.level.accounts a WHERE k.yearAndMonth = :yearAndMonth AND a.accountid = :stylistId")
-    Kpi findByStylistIdAndYearAndMonth(@Param("stylistId") Long stylistId, @Param("yearAndMonth") String yearAndMonth);
+//     @Query("SELECT k FROM Kpi k JOIN k.level.accounts a WHERE a.accountid = :stylistId AND k.level.levelid = :levelId")
+//     Kpi findByStylistIdAndLevel(@Param("stylistId") Long stylistId, @Param("levelId") Long levelId);
+
+     @Query("SELECT k FROM Kpi k JOIN k.level l JOIN l.accounts a WHERE a.accountid = :stylistId AND l.levelid = :levelId")
+     List<Kpi> findByStylistIdAndLevel(@Param("stylistId") Long stylistId, @Param("levelId") Long levelId);
+
+
+     @Query("SELECT MAX(k.revenueFrom) FROM Kpi k JOIN k.level.accounts a WHERE a.accountid = :stylistId AND k.level.levelid = :levelId")
+     Double findMaxRevenueByStylistIdAndLevel(@Param("stylistId") Long stylistId, @Param("levelId") Long levelId);
 
 }

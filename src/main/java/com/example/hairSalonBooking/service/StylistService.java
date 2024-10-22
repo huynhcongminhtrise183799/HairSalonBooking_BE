@@ -397,7 +397,7 @@ public class StylistService {
 
         // tinh tong
         double totalPayment = bookings.stream()
-                .filter(booking -> booking.getPayment() != null)
+                .filter(booking -> booking.getPayment() != null && booking.getPayment().getPaymentStatus().equals("Completed")  )
                 .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
                 .sum();
         log.info("Total payment: {}", totalPayment);
@@ -411,12 +411,37 @@ public class StylistService {
 
         // Gọi hàm để lấy danh sách booking
         List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
-        // Đếm số lượng booking
+
         int sizeBookings = bookings.size(); // Số lượng booking
 
         log.info("Total bookings: {}", sizeBookings);
-        return sizeBookings; // Trả về số lượng booking
+        return sizeBookings;
     }
+
+      public double calculateAverageFeedback(Long stylistId, String yearAndMonth) {
+            // Lấy danh sách bookings của stylist theo stylistId
+
+          String[] parts = yearAndMonth.split("-");
+          int year = Integer.parseInt(parts[0]);
+          int month = Integer.parseInt(parts[1]);
+
+          List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId,month,year);
+            // Tính tổng điểm feedback và đếm số lượng feedback
+            double totalFeedbackScore = bookings.stream()
+                    .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
+                    .mapToDouble(booking -> booking.getFeedback().getScore()) // Lấy điểm từ feedback
+                    .sum(); // Cộng dồn tất cả điểm lại
+            long feedbackCount = bookings.stream()
+                    .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
+                    .count();
+            double averageFeedbackScore = feedbackCount > 0 ? totalFeedbackScore / feedbackCount : 0.0;
+
+            // Ghi log thông tin
+            log.info("Stylist ID: {}, Total Feedback Score: {}, Average Feedback Score: {}", stylistId, totalFeedbackScore, averageFeedbackScore);
+
+            return averageFeedbackScore;
+        }
+
     public StylistRevenueResponse getStylistRevenue(long stylistId, String yearAndMonth) {
         String[] parts = yearAndMonth.split("-");
         int year = Integer.parseInt(parts[0]);
@@ -440,38 +465,14 @@ public class StylistService {
                 .totalRevenue(totalRevenue)
                 .build();
     }
-      public double calculateAverageFeedback(Long stylistId, String yearAndMonth) {
-            // Lấy danh sách bookings của stylist theo stylistId
-
-          String[] parts = yearAndMonth.split("-");
-          int year = Integer.parseInt(parts[0]);
-          int month = Integer.parseInt(parts[1]);
-
-          List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId,month,year);
-          log.info("Bookings for stylist ID {} in month {} of year {}: {}", stylistId, month, year, bookings);
-            // Tính tổng điểm feedback và đếm số lượng feedback
-            double totalFeedbackScore = bookings.stream()
-                    .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
-                    .mapToDouble(booking -> booking.getFeedback().getScore()) // Lấy điểm từ feedback
-                    .sum(); // Cộng dồn tất cả điểm lại
-            long feedbackCount = bookings.stream()
-                    .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
-                    .count();
-            double averageFeedbackScore = feedbackCount > 0 ? totalFeedbackScore / feedbackCount : 0.0;
-
-            // Ghi log thông tin
-            log.info("Stylist ID: {}, Total Feedback Score: {}, Average Feedback Score: {}", stylistId, totalFeedbackScore, averageFeedbackScore);
-
-            return averageFeedbackScore;
-        }
-    public StylistRevenueResponse getStylistFeedback(long stylistId, String yearAndMonth) {
+    public  StylistFeedBackResponse getStylistFeedback(long stylistId, String yearAndMonth) {
         String[] parts = yearAndMonth.split("-");
         int year = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]);
         List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
-        double totalRevenue = calculateTotalRevenue(stylistId,yearAndMonth);
+        double totalRevenue = calculateAverageFeedback(stylistId,yearAndMonth);
         Account Name =  accountRepository.findAccountByAccountid(stylistId);
-        if (Name != null){
+        if (Name == null){
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
         }
         String  StylistName = Name.getFullname();
@@ -479,39 +480,56 @@ public class StylistService {
 
         // Tạo đối tượng StylistRevenueResponse
 
-        return StylistRevenueResponse.builder()
+        return StylistFeedBackResponse.builder()
                 .stylistId(stylistId)
                 .stylistName(StylistName)
-                .totalRevenue(totalRevenue)
+                .averageFeedback(totalRevenue)
                 .build();
     }
 
     public List<StylistPerformanceResponse> getStylistsWithFeedbackAndRevenue(String yearAndMonth) {
         List<Account> stylists = accountRepository.getAccountsByRoleStylist();
         List<StylistPerformanceResponse> bestStylists = new ArrayList<>();
+
         for (Account stylist : stylists) {
             Long stylistId = stylist.getAccountid();
+            Long levelId = stylist.getLevel().getLevelid();
 
             // Tính tổng doanh thu và trung bình feedback
-            double totalRevenue = calculateTotalRevenue(stylistId,yearAndMonth);
-            double averageFeedback = calculateAverageFeedback(stylistId,yearAndMonth);
-            Kpi stylistKpi = kpiRepository.findByStylistIdAndYearAndMonth(stylistId, yearAndMonth);
-            log.info("Searching KPI for Stylist ID: {} and Year-Month: {}", stylistId, yearAndMonth);
-            log.info("KPI for Stylist ID: {}: {}", stylistId, stylistKpi);
+            double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
+            double averageFeedback = calculateAverageFeedback(stylistId, yearAndMonth);
 
-            if (stylistKpi != null && totalRevenue >= stylistKpi.getRevenueGenerated() && averageFeedback >= stylistKpi.getPerformanceScore()) {
-                StylistPerformanceResponse response = StylistPerformanceResponse.builder()
-                        .stylistId(stylistId)
-                        .stylistName(stylist.getFullname())
-                        .totalRevenue(totalRevenue)
-                        .averageFeedback(averageFeedback)
-                        .build();
+            // Lấy KPI cho stylist
+            List<Kpi> stylistKpis = kpiRepository.findByStylistIdAndLevel(stylistId, levelId);
 
-                bestStylists.add(response);
+            if (stylistKpis != null && !stylistKpis.isEmpty()) {
+                // Tìm KPI cao nhất
+                Kpi highestKpi = stylistKpis.stream()
+                        .max(Comparator.comparing(Kpi::getRevenueFrom))
+                        .orElse(null);
+
+                if (highestKpi != null) {
+                    double revenueFrom = highestKpi.getRevenueFrom();
+                    double performanceScore = highestKpi.getPerformanceScore();
+
+                    // Kiểm tra doanh thu và điểm hiệu suất
+                    if (totalRevenue >= revenueFrom && averageFeedback >= performanceScore) {
+                        StylistPerformanceResponse response = StylistPerformanceResponse.builder()
+                                .stylistId(stylistId)
+                                .stylistName(stylist.getFullname())
+                                .totalRevenue(totalRevenue)
+                                .averageFeedback(averageFeedback)
+                                .build();
+
+                        bestStylists.add(response);
+                    }
+                }
             }
         }
+
+        // Sắp xếp danh sách theo doanh thu giảm dần
         return bestStylists.stream()
-                .sorted(Comparator.comparing(StylistPerformanceResponse::getTotalRevenue).reversed()) // Sắp xếp theo doanh thu
+                .sorted(Comparator.comparing(StylistPerformanceResponse::getTotalRevenue).reversed())
                 .collect(Collectors.toList());
     }
     }

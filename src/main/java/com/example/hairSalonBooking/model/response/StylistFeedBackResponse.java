@@ -11,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class StylistFeedBackResponse {
     Long stylistId;
     String stylistName;
-    Double  averageFeedback;
+//    int FeedBackQuantity;
+    Double averageFeedback;
 }
