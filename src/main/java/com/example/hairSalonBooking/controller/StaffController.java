@@ -3,6 +3,7 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.model.request.CreateStaffRequest;
 
+
 import com.example.hairSalonBooking.model.request.FindBookingByPhoneRequest;
 
 import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
@@ -39,12 +40,14 @@ public class StaffController {
         return response;
     }
 
+
     @PostMapping("staff/booking/{date}")
     public ApiResponse<Booking> getBookingByPhoneNumber(@PathVariable LocalDate date, @RequestBody FindBookingByPhoneRequest request){
         ApiResponse response = new ApiResponse<>();
         response.setResult(staffService.getBookingByPhoneNumber(date,request.getPhone()));
         return response;
     }
+
 
     @GetMapping("/staffs")
     public ApiResponse<StaffResponse> getAllStaff(){

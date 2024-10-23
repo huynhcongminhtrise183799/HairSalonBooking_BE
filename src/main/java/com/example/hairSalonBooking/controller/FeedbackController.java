@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 
 @RestController
@@ -41,6 +42,7 @@ public class FeedbackController {
 
     }
 
+
     @GetMapping("/feedback/stylist/{accountId}")
     public ApiResponse<List<FeedbackResponse>> getFeedbackByStylist(@PathVariable long accountId){
         ApiResponse response = new ApiResponse<>();
@@ -49,4 +51,5 @@ public class FeedbackController {
         return response;
 
     }
+
 }

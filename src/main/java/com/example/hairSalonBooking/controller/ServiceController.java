@@ -2,13 +2,12 @@ package com.example.hairSalonBooking.controller;
 
 
 
+
 import com.cloudinary.Api;
 import com.example.hairSalonBooking.entity.Account;
 
 import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.model.request.CreateServiceRequest;
-
-
 
 import com.example.hairSalonBooking.model.request.CreateServiceRequest;
 import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
@@ -16,6 +15,10 @@ import com.example.hairSalonBooking.model.request.ServiceUpdateRequest;
 
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
+
+
+
+import com.example.hairSalonBooking.model.response.*;
 
 
 import com.example.hairSalonBooking.model.response.*;
@@ -57,8 +60,6 @@ public class ServiceController {
         apiResponse.setResult(hairSalonServiceService.createService(Request));
         return apiResponse;
     }
-
-
 
     @GetMapping
     ApiResponse<List<ServiceResponse>> getAllServices() {

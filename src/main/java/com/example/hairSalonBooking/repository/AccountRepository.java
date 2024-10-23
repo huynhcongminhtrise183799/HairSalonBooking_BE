@@ -36,7 +36,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Account findAccountByAccountid(Long accountid);
     Account findByPhone(String phone);
 
-
     List<Account> findByRoleAndIsDeletedFalseAndSalonBranchSalonId(Role role, long salonId);
     @Query("SELECT ac FROM Account ac WHERE ac.role = com.example.hairSalonBooking.enums.Role.STAFF")
     @Transactional
@@ -59,7 +58,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "on ac.accountid = ssch.account_id\n" +
             "where ss.skill_id = ?1 and ac.salon_id = ?2 ",nativeQuery = true)
     Set<Account> getAccountBySkill(long skillId,long salonId);
-
     List<Account> findByRoleAndIsDeletedFalse(Role role);
 
     @Query(value = "select distinct a.* from account a\n" +
@@ -79,13 +77,16 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
 
 
+
+
     Page<Account> findAccountByRole(Role role, Pageable pageable);
-
     Page<Account> findAccountByRoleAndSalonBranchSalonId(Role role, Pageable pageable, long salonId);
-
-
-
     Account  findTopByRole(Role role);
+
+    @Query("SELECT ac FROM Account ac WHERE ac.role = com.example.hairSalonBooking.enums.Role.STYLIST")
+    @Transactional
+    List<Account> getAccountsByRoleStylist();
+
 
 }
 

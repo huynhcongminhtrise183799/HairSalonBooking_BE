@@ -5,7 +5,9 @@ import com.example.hairSalonBooking.model.request.AddShiftRequest;
 import com.example.hairSalonBooking.model.request.SpecificStylistScheduleRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.SpecificStylistScheduleResponse;
+
 import com.example.hairSalonBooking.model.response.StylistScheduleResponse;
+
 import com.example.hairSalonBooking.service.StylistScheduleService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
@@ -20,6 +22,7 @@ import java.util.List;
 //@CrossOrigin("http://localhost:3000/")
 @CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
+
 public class StylistScheduleController {
 
     @Autowired
@@ -41,12 +44,14 @@ public class StylistScheduleController {
         return apiResponse;
     }
 
+
     @GetMapping("/stylist/schedule/month/{accountId}/{month}")
     public ApiResponse<List<StylistScheduleResponse>> getStylistScheduleByMonth(@PathVariable long accountId, @PathVariable int month ){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(stylistScheduleService.getStylistScheduleInMonth(accountId,month));
         return apiResponse;
     }
+
 
     @GetMapping("/stylist/schedule/{id}")
     public ApiResponse<SpecificStylistScheduleResponse> getStylistSchedule(@PathVariable long id){

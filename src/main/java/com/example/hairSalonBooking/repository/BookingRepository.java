@@ -59,6 +59,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "where s.slotid = ?1 and ss.account_id = ?2 and ss.working_day = ?3 and b.status != 'CANCELLED'",nativeQuery = true)
     Booking bookingAtTime(long slotId, long id, LocalDate date);
 
+
     Booking findBookingByBookingId(long id);
     @Query(value = "select b.* from booking b \n" +
             "inner join stylist_schedule ssch\n" +
@@ -110,6 +111,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
 
 
 
+
     List<Booking> findByBookingDayAndAccountAndStatus(LocalDate date, Account account, BookingStatus status);
 
 
@@ -141,5 +143,19 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "on b.booking_id = p.booking_id\n" +
             "where month(b.booking_day) = ?1 and b.salon_id = ?2",nativeQuery = true)
     double getTotalMoneyBySalonIdInMonth(int month, long salonId);
+
+
+
+    @Query("SELECT b FROM Booking b JOIN b.stylistSchedule ss WHERE ss.account.accountid = :stylistId")
+    List<Booking> findBookingByStylistId(@Param("stylistId") Long stylistId);
+    @Query("SELECT b FROM Booking b " +
+            "JOIN b.stylistSchedule ss " +
+            "WHERE ss.account.accountid = :stylistId " +
+            "AND FUNCTION('YEAR', b.bookingDay) = :year " +
+            "AND FUNCTION('MONTH', b.bookingDay) = :month")
+    List<Booking> findBookingByStylistIdAndMonthYear(@Param("stylistId") Long stylistId,
+                                         @Param("month") int month,
+                                         @Param("year") int year);
+
 }
 

@@ -162,9 +162,9 @@ public class BranchManagerService {
         List<BookingResponse> responses = new ArrayList<>();
         for(Booking booking : bookings){
             Set<SalonService> services = serviceRepository.getServiceForBooking(booking.getBookingId());
-            Set<Long> serviceId = new HashSet<>();
+            Set<String> serviceNames = new HashSet<>();
             for(SalonService service : services){
-                serviceId.add(service.getServiceId());
+                serviceNames.add(service.getServiceName());
             }
 
             BookingResponse bookingResponse = new BookingResponse();
@@ -176,7 +176,9 @@ public class BranchManagerService {
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-            bookingResponse.setServiceId(serviceId);
+
+            bookingResponse.setServiceName(serviceNames);
+
             bookingResponse.setStatus(booking.getStatus());
             bookingResponse.setCustomerName(booking.getAccount().getFullname());
             if(booking.getVoucher() != null){

@@ -45,9 +45,11 @@ public enum ErrorCode {
     BOOKING_NOT_FOUND(1031,"Booking not found"),
     VOUCHER_NOT_AVAILABLE(1032,"Voucher not available"),
     INVALID_PAYMENT_AMOUNT(1033,"Invalid payment amount"),
+
     SERVICES_NOT_FOUND(1034,"Service Not Found"),
     SERVICES_ALREADY_BOOKED(1035,"Service already booked"),
     STYLIST_UNAVAILABLE(1036, "Stylist is unavailable"),
+
 
     ;
     int code;

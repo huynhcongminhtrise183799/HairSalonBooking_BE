@@ -32,7 +32,4 @@ public class StylistSchedule {
     @JsonIgnore
     Set<Shift> shifts;
 
-    @OneToMany(mappedBy = "stylistSchedule")
-    @JsonIgnore
-    Set<Booking> bookings;
 }

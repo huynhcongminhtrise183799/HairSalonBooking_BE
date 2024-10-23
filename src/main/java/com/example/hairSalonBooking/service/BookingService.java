@@ -13,7 +13,9 @@ import com.example.hairSalonBooking.repository.*;
 
 
 import com.example.hairSalonBooking.model.response.*;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.hibernate.sql.Update;
 import org.modelmapper.ModelMapper;
 
@@ -23,7 +25,11 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
 import java.util.*;
+
+import java.util.Collections;
+
 
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -67,7 +73,9 @@ public class BookingService {
         Set<Account> accounts = new HashSet<>();
         // duyệt qua từng skill trong list skills
         for(Skill skill : skills){ // vd: skill 1 2
-
+            // lấy ra hết những thằng stylist có skill đó và trong chi nhánh đưa vào
+            // 2 3 5
+            //   3 5
             Set<Account> allAccountHaveSkill = accountRepository.getAccountBySkill(skill.getSkillId(),bookingStylits.getSalonId());
             // nếu accounts đó đang trống thì add toàn bộ allAccountHaveSkill vào
             if(accounts.isEmpty()){
@@ -133,6 +141,7 @@ public class BookingService {
             allSlot.removeAll(slotToRemove);
             return allSlot;
         }
+
 
         // duyệt qua từng booking có trong list allBookingInDay
         for(Booking booking : allBookingInDay){
@@ -272,6 +281,12 @@ public class BookingService {
         // tìm xem có ca làm nào đạt limitBooking chưa
         List<Shift> shiftsReachedBookingLimit = shiftReachedBookingLimit(shifts);
         for(Shift shift : shiftsReachedBookingLimit){
+            // đếm xem có bao nhiêu booking complete trong ca làm đó
+            int countTotalBookingCompleteInShift = bookingRepository.countTotalBookingCompleteInShift(shift.getShiftId(),bookingSlots.getAccountId(),bookingSlots.getDate());
+            // nếu có đủ số lượng booking complete với limitBooking mà còn dư slot vẫn hiện ra
+            if(countTotalBookingCompleteInShift == shift.getLimitBooking()){
+                break;
+            }
             // Tìm ra đc các slots thuộc về ca làm đó
             List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
             // add list vừa tìm đc vào slotToRemove
@@ -280,6 +295,7 @@ public class BookingService {
         allSlot.removeAll(slotToRemove);
         return allSlot;
     }
+
     private Set<StylistForBooking> getStylistsBySkillAndDateWorkingAndShift(AssignNewStylistForBooking newStylistForBooking){
         Set<SalonService> services = new HashSet<>();
         for(Long id : newStylistForBooking.getServiceId()){
@@ -311,6 +327,7 @@ public class BookingService {
         }
         return stylistForBookings;
     }
+
     public Set<StylistForBooking> getStylistWhenUpdateBookingByManager(AssignNewStylistForBooking newStylistForBooking){
 
         // lay dc tat ca stylist co the lam list service do theo ca lam va ngay lam
@@ -449,6 +466,7 @@ public class BookingService {
         for(SalonService service : services){
             serviceId.add(service.getServiceId());
         }
+        Set<String> serviceName = serviceRepository.getServiceNameByBooking(bookingId);
         Account account = accountRepository.findAccountByAccountid(booking.getStylistSchedule().getAccount().getAccountid());
         BookingResponse bookingResponse = new BookingResponse();
         bookingResponse.setId(booking.getBookingId());
@@ -457,7 +475,8 @@ public class BookingService {
         bookingResponse.setCustomerId(booking.getAccount().getAccountid());
         bookingResponse.setCustomerName(booking.getAccount().getFullname());
         bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-        bookingResponse.setServiceId(serviceId);
+        bookingResponse.setServiceName(serviceName);
+
         bookingResponse.setStylistName(account.getFullname());
         if(booking.getVoucher() != null){
             bookingResponse.setVoucherCode(booking.getVoucher().getCode());
@@ -597,6 +616,7 @@ public class BookingService {
         if (booking == null) {
             throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
         }
+
         Set<SalonService> services = booking.getServices();
         double totalAmount = 0;
         Set<PaymentServiceResponse> serviceResponses = new HashSet<>();
@@ -610,7 +630,13 @@ public class BookingService {
             totalAmount -= totalAmount * discount / 100;
             voucherCode = booking.getVoucher().getCode();
         }
+        Payment existingPayment = paymentRepository.findPaymentByBooking(booking);
+        if (existingPayment != null) {
+            // Delete the existing payment
+            paymentRepository.delete(existingPayment);
+        }
         String stylistName = booking.getStylistSchedule().getAccount().getFullname();
+
 
         Payment payment = Payment.builder()
                 .paymentAmount(totalAmount)
@@ -659,7 +685,7 @@ public class BookingService {
         // Update payment status
         booking.getPayment().setPaymentStatus("Completed");
         if(booking.getPayment().getPaymentMethod() == null){
-            booking.getPayment().setPaymentMethod("Tra tien mat");
+            booking.getPayment().setPaymentMethod("Cash");
             booking.getPayment().setTransactionId(null);
         }
         paymentRepository.save(payment);
@@ -788,4 +814,5 @@ public class BookingService {
         TotalMoneyByBookingDay responses = new TotalMoneyByBookingDay(null,totalMoney);
         return responses;
     }
+
 }

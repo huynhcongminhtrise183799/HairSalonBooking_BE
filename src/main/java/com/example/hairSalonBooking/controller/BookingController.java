@@ -4,6 +4,7 @@ import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.entity.Slot;
 
 
+
 import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
 
 import com.example.hairSalonBooking.model.request.BookingRequest;
@@ -16,7 +17,6 @@ import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -134,6 +134,7 @@ public class BookingController {
     }
 
 
+
     @PutMapping("/update/service/{bookingId}")
     public ApiResponse<Booking> updateService(@PathVariable Long bookingId, @RequestBody BookingRequest request) {
         ApiResponse apiResponse = new ApiResponse<>();
@@ -154,4 +155,5 @@ public class BookingController {
         apiResponse.setResult(bookingService.totalMoneyBySalonInMonth(month,salonId));
         return apiResponse;
     }
+
 }

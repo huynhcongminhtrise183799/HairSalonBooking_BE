@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -85,15 +86,47 @@ public class StylistController {
         response.setResult(stylistService.deleteStylist(accountid));
         return response;// Trả về StylistResponse
     }
-
-    // lấy service của stylist đó
     @GetMapping("/service/{accountId}")
-    public ApiResponse<List<StylistServiceResponse>> getAllServiceByStylistId(@PathVariable long accountId) {
+    public ApiResponse<List<StylistServiceResponse>> getAllServiceByStylistId(@RequestParam long accountid) {
         ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(stylistService.getAllServiceByStylistId(accountId));
+        apiResponse.setResult(stylistService.getAllServiceByStylistId(accountid));
+        return apiResponse;
+    }
+    @GetMapping("/stylists/feedback-revenue")
+    public ApiResponse<List<StylistPerformanceResponse>> getStylistsWithFeedbackAndRevenue(
+            @RequestParam String yearAndMonth) {
+        ApiResponse<List<StylistPerformanceResponse>> apiResponse = new ApiResponse<>();
+        // Truyền yearAndMonth trực tiếp vào phương thức service
+        List<StylistPerformanceResponse> stylists = stylistService.getStylistsWithFeedbackAndRevenue(yearAndMonth);
+
+
+        apiResponse.setResult(stylists);
         return apiResponse;
     }
 
 
+
+
+
+    @GetMapping("/stylists/{accountId}/revenue")
+    public ApiResponse<StylistRevenueResponse> getStylistsRevenue(@PathVariable long accountId,
+                                                                  @RequestParam String yearAndMonth) {
+        ApiResponse<StylistRevenueResponse> apiResponse = new ApiResponse<>();
+            // Tính tổng doanh thu cho stylist
+        StylistRevenueResponse totalRevenue = stylistService.getStylistRevenue(accountId, yearAndMonth);
+            // Tạo đối tượng StylistRevenueResponse để trả về
+            apiResponse.setResult(totalRevenue);
+            return apiResponse;
+    }
+    @GetMapping("/stylists/{accountId}/feedBack")
+    public ApiResponse<StylistFeedBackResponse> getStylistsFeedback(@PathVariable long accountId,
+                                                                  @RequestParam String yearAndMonth) {
+        ApiResponse<StylistFeedBackResponse> apiResponse = new ApiResponse<>();
+        // Tính tổng doanh thu cho stylist
+        StylistFeedBackResponse AvgFeedback = stylistService.getStylistFeedback(accountId, yearAndMonth);
+        // Tạo đối tượng StylistRevenueResponse để trả về
+        apiResponse.setResult(AvgFeedback);
+        return apiResponse;
+    }
 
 }

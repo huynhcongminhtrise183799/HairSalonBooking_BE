@@ -2,6 +2,7 @@ package com.example.hairSalonBooking.repository;
 import com.example.hairSalonBooking.entity.SalonService;
 
 
+
 import com.example.hairSalonBooking.model.request.SearchServiceNameRequest;
 import jakarta.transaction.Transactional;
 
@@ -19,6 +20,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalTime;
+
 
 
 //import com.example.hairSalonBooking.entity.Account;
@@ -73,6 +75,7 @@ public interface ServiceRepository extends JpaRepository<SalonService,Long> {
             "on s.skill_id = ss.skill_id\n" +
             "Where ss.account_id = ?1",nativeQuery = true)
     List<SalonService> getSalonServiceByAccountId(long accountid);
+
 
     List<SalonService> findByServiceIdIn(List<Long> serviceIds);
 
