@@ -5,6 +5,9 @@ import com.example.hairSalonBooking.model.request.AddShiftRequest;
 import com.example.hairSalonBooking.model.request.SpecificStylistScheduleRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.SpecificStylistScheduleResponse;
+
+import com.example.hairSalonBooking.model.response.StylistScheduleResponse;
+
 import com.example.hairSalonBooking.service.StylistScheduleService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
@@ -16,15 +19,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("http://localhost:3000/")
+@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
+
 public class StylistScheduleController {
+
     @Autowired
     private StylistScheduleService stylistScheduleService;
     @Autowired
     private ModelMapper modelMapper;
     @PostMapping("/stylist/schedule")
-    public ApiResponse<List<SpecificStylistScheduleRequest>> createStylistSchedule(@RequestBody AddShiftRequest request){
+    public ApiResponse<List<SpecificStylistScheduleRequest>> createStylistSchedule(@RequestBody SpecificStylistScheduleRequest request){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(stylistScheduleService.createStylistSchedule(request));
         return apiResponse;
@@ -37,6 +43,16 @@ public class StylistScheduleController {
         apiResponse.setResult(stylistScheduleService.getStylistScheduleByDay(date,salonId));
         return apiResponse;
     }
+
+
+    @GetMapping("/stylist/schedule/month/{accountId}/{month}")
+    public ApiResponse<List<StylistScheduleResponse>> getStylistScheduleByMonth(@PathVariable long accountId, @PathVariable int month ){
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(stylistScheduleService.getStylistScheduleInMonth(accountId,month));
+        return apiResponse;
+    }
+
+
     @GetMapping("/stylist/schedule/{id}")
     public ApiResponse<SpecificStylistScheduleResponse> getStylistSchedule(@PathVariable long id){
         ApiResponse apiResponse = new ApiResponse<>();

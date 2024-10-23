@@ -3,17 +3,15 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.model.request.ChangePasswordRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.ForgotPasswordResponse;
-import com.example.hairSalonBooking.repository.ForgotPasswordRepository;
 import com.example.hairSalonBooking.service.ForgotPasswordService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/")
-@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("http://localhost:3000/")
+@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class ForgotPasswordController {
     @Autowired

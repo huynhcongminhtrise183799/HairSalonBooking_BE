@@ -24,10 +24,12 @@ public class StylistSchedule {
     @JoinColumn(name = "account_id")
     Account account;
 
-    @ManyToMany(mappedBy = "stylistSchedules")
+    @ManyToMany
+    @JoinTable(name = "specific_stylist_schedule",
+            joinColumns = @JoinColumn(name = "stylist_schedule_id"),
+            inverseJoinColumns = @JoinColumn(name = "shift_id")
+    )
+    @JsonIgnore
     Set<Shift> shifts;
 
-    @OneToMany(mappedBy = "stylistSchedule")
-    @JsonIgnore
-    Set<Booking> bookings;
 }

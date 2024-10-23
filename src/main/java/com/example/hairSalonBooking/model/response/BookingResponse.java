@@ -27,6 +27,8 @@ public class BookingResponse {
 
     String voucherCode;
 
+
     Set<String> serviceName;
+
     BookingStatus status;
 }

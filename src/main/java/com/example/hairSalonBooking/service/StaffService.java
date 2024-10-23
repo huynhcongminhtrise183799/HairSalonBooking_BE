@@ -8,6 +8,7 @@ import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateStaffRequest;
 import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
 import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
+import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StaffResponse;
 import com.example.hairSalonBooking.repository.*;
 import org.modelmapper.ModelMapper;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -182,4 +184,33 @@ public class StaffService {
         bookingRepository.save(booking);
         return request;
     }
+
+
+    public List<BookingResponse> getBookingByPhoneNumber(LocalDate date, String phone){
+        Account account  = accountRepository.findByPhone(phone);
+        List<Booking> bookings = bookingRepository.findByBookingDayAndAccountAndStatus(date,account,BookingStatus.PENDING);
+        List<BookingResponse> responses = new ArrayList<>();
+        Set<String> servicesName = new HashSet<>();
+        for(Booking booking : bookings){
+            for(SalonService service : booking.getServices()){
+                servicesName.add(service.getServiceName());
+            }
+            BookingResponse bookingResponse = new BookingResponse();
+            bookingResponse.setStatus(booking.getStatus());
+            bookingResponse.setId(booking.getBookingId());
+            bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+            bookingResponse.setServiceName(servicesName);
+            bookingResponse.setDate(booking.getBookingDay());
+            bookingResponse.setTime(booking.getSlot().getSlottime());
+            bookingResponse.setCustomerName(booking.getAccount().getFullname());
+            if(booking.getVoucher() != null){
+                bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+            }
+            bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+            bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+            responses.add(bookingResponse);
+        }
+        return responses;
+    }
+
 }

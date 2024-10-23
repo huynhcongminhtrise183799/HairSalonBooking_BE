@@ -27,4 +27,14 @@ public interface StylistScheduleRepository extends JpaRepository<StylistSchedule
     @Modifying
     @Transactional
     void deleteSpecificSchedule(long id);
+
+
+    @Query("SELECT ss FROM StylistSchedule ss")
+    List<StylistSchedule> findAllStylists();
+
+    @Query(value = "select ss.* from stylist_schedule ss\n" +
+            "where ss.account_id = ?1 and month(ss.working_day) = ?2\n" +
+            "order by ss.working_day asc",nativeQuery = true)
+    List<StylistSchedule> getStylistSchedule(long accountId, int month);
+
 }
