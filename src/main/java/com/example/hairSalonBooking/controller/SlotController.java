@@ -4,8 +4,11 @@ package com.example.hairSalonBooking.controller;
 import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.entity.Slot;
 //import com.example.hairSalonBooking.service.SlotService;
+import com.example.hairSalonBooking.model.request.UpdateSlotRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.SalonResponse;
+import com.example.hairSalonBooking.model.response.SlotResponse;
+import com.example.hairSalonBooking.model.response.SlotTimeResponse;
 import com.example.hairSalonBooking.service.SlotService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -62,4 +65,17 @@ public class SlotController {
         return response;
     }
 
+    @PostMapping()
+    public ApiResponse<List<SlotResponse>> updateSlotWithTime(@RequestBody UpdateSlotRequest request){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(slotService.updateSlotTime(request));
+        return response;
+    }
+
+    @GetMapping("/time/between")
+    public ApiResponse<SlotTimeResponse> getSlotTimeBetween(){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(slotService.getSlotTimeBetween());
+        return response;
+    }
 }

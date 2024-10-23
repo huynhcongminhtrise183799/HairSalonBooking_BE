@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.repository;
 
 import com.example.hairSalonBooking.entity.Shift;
+import com.example.hairSalonBooking.entity.Slot;
 import com.example.hairSalonBooking.model.response.ShiftResponse;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,4 +44,8 @@ public interface ShiftRepository extends JpaRepository<Shift,Long> {
             "on s.shift_id = sss.shift_id\n" +
             "where sss.stylist_schedule_id = ?1 ", nativeQuery = true)
     Set<Long> getShiftIdByStylistSchedule(long id);
+    @Query(value = "select * from shift s order by s.end_time desc limit ?1",nativeQuery = true)
+    Shift getShiftByEndTimeDesc(int limit);
+
+
 }

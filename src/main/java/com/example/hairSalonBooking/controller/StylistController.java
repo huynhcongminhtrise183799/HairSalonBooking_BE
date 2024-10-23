@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.controller;
 
 
+import com.example.hairSalonBooking.model.request.SalaryRecordRequest;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 
@@ -98,10 +99,31 @@ public class StylistController {
         ApiResponse<List<StylistPerformanceResponse>> apiResponse = new ApiResponse<>();
         // Truyền yearAndMonth trực tiếp vào phương thức service
         List<StylistPerformanceResponse> stylists = stylistService.getStylistsWithFeedbackAndRevenue(yearAndMonth);
-
-
         apiResponse.setResult(stylists);
         return apiResponse;
+    }
+    @GetMapping("/salaries/{salonId}/{yearAndMonth}")
+    public ApiResponse<SalaryResponse> getSalaries(
+            @PathVariable Long salonId,
+            @PathVariable String yearAndMonth) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.calculateTotalSalary(salonId, yearAndMonth));
+        return response;
+    }
+    @GetMapping("/salaries/{salonId}/{yearAndMonth}/{stylistId}")
+    public ApiResponse<SalaryResponse> getSalaries(
+            @PathVariable Long salonId,
+            @PathVariable String yearAndMonth,
+            @PathVariable Long stylistId) { // Make stylistId optional
+        ApiResponse<SalaryResponse> response = new ApiResponse<>();
+        response.setResult(stylistService.calculateTotalSalaryByOneStylist(salonId, yearAndMonth, stylistId));
+        return response;
+    }
+    @PostMapping("/salaryRecords/save")
+    public ApiResponse<SalaryRecordRequest> saveSalaryRecords(@RequestBody List<SalaryRecordRequest> salaryRecordRequests) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.saveSalaryRecords(salaryRecordRequests));
+        return response;
     }
 
 

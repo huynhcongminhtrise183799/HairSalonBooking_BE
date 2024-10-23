@@ -190,16 +190,16 @@ public class StaffService {
         Account account  = accountRepository.findByPhone(phone);
         List<Booking> bookings = bookingRepository.findByBookingDayAndAccountAndStatus(date,account,BookingStatus.PENDING);
         List<BookingResponse> responses = new ArrayList<>();
-        Set<String> servicesName = new HashSet<>();
+        Set<Long> serviceId = new HashSet<>();
         for(Booking booking : bookings){
             for(SalonService service : booking.getServices()){
-                servicesName.add(service.getServiceName());
+                serviceId.add(service.getServiceId());
             }
             BookingResponse bookingResponse = new BookingResponse();
             bookingResponse.setStatus(booking.getStatus());
             bookingResponse.setId(booking.getBookingId());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-            bookingResponse.setServiceName(servicesName);
+            bookingResponse.setServiceId(serviceId);
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setCustomerName(booking.getAccount().getFullname());

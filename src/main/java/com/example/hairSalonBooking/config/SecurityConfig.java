@@ -48,8 +48,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowCredentials(true);
-//                    configuration.addAllowedOrigin("http://localhost:3000"); // Adjust this to your front-end URL
-                    configuration.addAllowedOrigin("https://f-salon.vercel.app/");
+                   configuration.addAllowedOrigin("http://localhost:3000"); // Adjust this to your front-end URL
+//                    configuration.addAllowedOrigin("https://f-salon.vercel.app/");
                     configuration.addAllowedHeader("*");
                     configuration.addAllowedMethod("*");
                     return configuration;

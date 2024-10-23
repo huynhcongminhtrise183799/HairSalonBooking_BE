@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/")
-//@CrossOrigin("http://localhost:3000/")
-@CrossOrigin("https://f-salon.vercel.app/")
+@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class ForgotPasswordController {
     @Autowired

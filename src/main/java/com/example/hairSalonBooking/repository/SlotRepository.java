@@ -26,6 +26,30 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
             "FROM slot s\n" +
             "JOIN specific_stylist_schedule sss ON sss.shift_id = ?1\n" +
             "JOIN shift sh ON sss.shift_id = sh.shift_id\n" +
-            "WHERE s.slottime >= sh.start_time AND s.slottime < sh.end_time;",nativeQuery = true)
+            "WHERE s.slottime >= sh.start_time AND s.deleted = false and s.slottime < sh.end_time;",nativeQuery = true)
     List<Slot> getSlotsInShift(long id);
+
+    @Query(value = "select * from slot where minute(slot.slottime) = 0 and slot.slottime > ?1\n" +
+            "order by slottime asc\n" +
+            "limit 1 ",nativeQuery = true)
+    Slot getSlotAfter(LocalTime time);
+
+    Slot findBySlottime(LocalTime time);
+    @Query(value = "select * from slot s where minute(s.slottime) = 0", nativeQuery = true)
+    List<Slot> getSlotsWithoutMinute();
+    @Query(value = "select * from slot s where s.deleted = false \n" +
+            "order by s.slottime asc limit 1 ",nativeQuery = true)
+    Slot slotBeginActive();
+
+    @Query(value = "select * from slot s where s.deleted = false and s.slottime > ?1 \n" +
+            "order by s.slottime asc limit 1 ",nativeQuery = true)
+    Slot slotAfterBeginActive(LocalTime time);
+    @Query(value = "select * from slot s where s.deleted = false \n" +
+            "order by s.slottime desc limit 1 ",nativeQuery = true)
+    Slot slotEndActive();
+    @Query(value = "select * from slot s where s.deleted = false and s.slottime != '23:00:00'\n" +
+            "order by s.slottime asc",nativeQuery = true)
+    List<Slot> getAllSlotActive();
+
+
 }

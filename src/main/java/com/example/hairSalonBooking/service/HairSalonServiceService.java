@@ -162,5 +162,24 @@ public class HairSalonServiceService {
 
         return responses;
     }
+    public List<ServiceResponse> getNewestService() {
+        // Lấy tất cả dịch vụ từ cơ sở dữ liệu
+        List<SalonService> services = serviceRepository.getTopNewestServices(6);
 
+        List<ServiceResponse> responses = new ArrayList<>();
+        for(SalonService service : services){
+            ServiceResponse serviceResponse = new ServiceResponse();
+            serviceResponse.setId(service.getServiceId());
+            serviceResponse.setServiceName(service.getServiceName());
+            serviceResponse.setDescription(service.getDescription());
+            serviceResponse.setImage(service.getImage());
+            serviceResponse.setPrice(service.getPrice());
+            serviceResponse.setDuration(service.getDuration());
+            serviceResponse.setSkillName(service.getSkill().getSkillName());
+            responses.add(serviceResponse);
+        }
+
+
+        return responses;
+    }
 }

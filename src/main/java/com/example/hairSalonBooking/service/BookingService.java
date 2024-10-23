@@ -2,6 +2,7 @@ package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.BookingStatus;
+import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
@@ -22,6 +23,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import java.sql.Date;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -98,7 +101,7 @@ public class BookingService {
     }
 
     public List<Slot> getListSlot(BookingSlots bookingSlots){
-        List<Slot> allSlot = slotRepository.findAll();
+        List<Slot> allSlot = slotRepository.getAllSlotActive();
         List<Slot> slotToRemove = new ArrayList<>();
         List<Shift> shifts = new ArrayList<>();
         List<Shift> shiftsFromSpecificStylistSchedule = shiftRepository.getShiftsFromSpecificStylistSchedule(bookingSlots.getAccountId(),bookingSlots.getDate());
@@ -194,7 +197,7 @@ public class BookingService {
         return allSlot;
     }
     public List<Slot> getSlotsUpdateByCustomer(BookingSlots bookingSlots, long bookingId){
-        List<Slot> allSlot = slotRepository.findAll();
+        List<Slot> allSlot = slotRepository.getAllSlotActive();
         List<Slot> slotToRemove = new ArrayList<>();
         List<Shift> shifts = new ArrayList<>();
         List<Shift> shiftsFromSpecificStylistSchedule = shiftRepository.getShiftsFromSpecificStylistSchedule(bookingSlots.getAccountId(),bookingSlots.getDate());
@@ -466,7 +469,6 @@ public class BookingService {
         for(SalonService service : services){
             serviceId.add(service.getServiceId());
         }
-        Set<String> serviceName = serviceRepository.getServiceNameByBooking(bookingId);
         Account account = accountRepository.findAccountByAccountid(booking.getStylistSchedule().getAccount().getAccountid());
         BookingResponse bookingResponse = new BookingResponse();
         bookingResponse.setId(booking.getBookingId());
@@ -475,7 +477,7 @@ public class BookingService {
         bookingResponse.setCustomerId(booking.getAccount().getAccountid());
         bookingResponse.setCustomerName(booking.getAccount().getFullname());
         bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-        bookingResponse.setServiceName(serviceName);
+        bookingResponse.setServiceId(serviceId);
 
         bookingResponse.setStylistName(account.getFullname());
         if(booking.getVoucher() != null){
@@ -802,7 +804,7 @@ public class BookingService {
         List<Object[]> objects = bookingRepository.getTotalMoneyByBookingDay(month, salonId);
         List<TotalMoneyByBookingDay> responses = new ArrayList<>();
         for(Object[] object : objects){
-            LocalDate date = ((java.sql.Date) object[0]).toLocalDate();
+            LocalDate date = ((Date) object[0]).toLocalDate();
             double totalMoney = (double) object[1];
             TotalMoneyByBookingDay totalMoneyByBookingDay = new TotalMoneyByBookingDay(date,totalMoney);
             responses.add(totalMoneyByBookingDay);
@@ -814,5 +816,200 @@ public class BookingService {
         TotalMoneyByBookingDay responses = new TotalMoneyByBookingDay(null,totalMoney);
         return responses;
     }
+    public BookingPageResponse getAllBookingsForStylistInBranchByPending(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
 
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.PENDING)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
+    public BookingPageResponse getAllBookingsForStylistInBranchByComplete(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.COMPLETED)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
+    public BookingPageResponse getAllBookingsForStylistInBranchByInprocess(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.IN_PROGRESS)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
+    public BookingPageResponse getAllBookingsForStylistInBranchByCancel(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.CANCELLED)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
 }

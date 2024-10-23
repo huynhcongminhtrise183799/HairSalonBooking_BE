@@ -106,5 +106,10 @@ public class ServiceController {
         List<ServiceResponse> services = hairSalonServiceService.getAllServices();
         return ResponseEntity.ok(services);
     }
-
+    @GetMapping("/newest")
+    public ApiResponse<List<ServiceResponse>> getNewestService() {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(hairSalonServiceService.getNewestService());
+        return response;
+    }
 }
