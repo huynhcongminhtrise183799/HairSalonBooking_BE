@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -160,7 +161,12 @@ public class BranchManagerService {
         }
         List<BookingResponse> responses = new ArrayList<>();
         for(Booking booking : bookings){
-            Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
+            Set<SalonService> services = serviceRepository.getServiceForBooking(booking.getBookingId());
+            Set<Long> serviceId = new HashSet<>();
+            for(SalonService service : services){
+                serviceId.add(service.getServiceId());
+            }
+
             BookingResponse bookingResponse = new BookingResponse();
 
             bookingResponse.setId(booking.getBookingId());
@@ -170,7 +176,7 @@ public class BranchManagerService {
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-            bookingResponse.setServiceName(serviceNames);
+            bookingResponse.setServiceId(serviceId);
             bookingResponse.setStatus(booking.getStatus());
             bookingResponse.setCustomerName(booking.getAccount().getFullname());
             if(booking.getVoucher() != null){

@@ -9,9 +9,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("http://localhost:3000/")
+@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class FeedbackController {
 
@@ -34,6 +37,15 @@ public class FeedbackController {
         }else{
             response.setResult(feedbackResponse);
         }
+        return response;
+
+    }
+
+    @GetMapping("/feedback/stylist/{accountId}")
+    public ApiResponse<List<FeedbackResponse>> getFeedbackByStylist(@PathVariable long accountId){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(feedbackService.getFeedbacksByStylist(accountId));
+
         return response;
 
     }

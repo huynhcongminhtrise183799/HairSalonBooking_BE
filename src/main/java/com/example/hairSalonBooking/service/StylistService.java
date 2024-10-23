@@ -72,14 +72,16 @@ public class StylistService {
     private LevelRepository levelRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    @Autowired
+    private KpiRepository kpiRepository;
     @Autowired
     private SkillRepository skillRepository;
     @Autowired
     private ServiceRepository serviceRepository;
     @Autowired
     private BookingRepository bookingRepository;
-
+    @Autowired
+    private StylistScheduleRepository stylistScheduleRepository;
     public StylistProfileResponse getProfile(){
         var context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -100,6 +102,7 @@ public class StylistService {
         profileResponse.setPhone(account.getPhone());
         profileResponse.setSalonId(account.getSalonBranch().getSalonId());
         profileResponse.setSkillId(skillsId);
+        profileResponse.setLevelId(account.getLevel().getLevelid());
         return profileResponse;
     }
 
@@ -374,18 +377,92 @@ public class StylistService {
         // Chuyển đổi lúc trả ra từ Booking sang BookingResponse
         List<BookingResponse> responses = new ArrayList<>();
         for(Booking booking : bookings){
-            Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
+            //Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
+            Set<SalonService> services = serviceRepository.getServiceForBooking(booking.getBookingId());
+            Set<Long> serviceId = new HashSet<>();
+            for(SalonService service : services){
+                serviceId.add(service.getServiceId());
+            }
+
             BookingResponse bookingResponse = new BookingResponse();
+            bookingResponse.setId(booking.getBookingId());
             bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-            bookingResponse.setServiceName(serviceNames);
+            bookingResponse.setServiceId(serviceId);
+            bookingResponse.setStatus(booking.getStatus());
+            bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+            bookingResponse.setCustomerName(booking.getAccount().getFullname());
+            if(booking.getVoucher() != null){
+                bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+            }
             responses.add(bookingResponse);
         }
         return responses;
     }
+    public List<StylistServiceResponse> getAllServiceByStylistId(long accountid) {
+        // Truy vấn danh sách các đối tượng SalonService
+        List<SalonService> services = serviceRepository.getSalonServiceByAccountId(accountid);
 
+        if (services.isEmpty()) {
+            // Ném ngoại lệ tùy chỉnh nếu không tìm thấy dịch vụ nào
+            throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
+        }
+
+        // Chuyển đổi danh sách SalonService thành StylistServiceResponse
+        List<StylistServiceResponse> responses = services.stream().map(service -> {
+            StylistServiceResponse stylistServiceResponse = new StylistServiceResponse();
+            stylistServiceResponse.setServiceId(service.getServiceId());
+            stylistServiceResponse.setServiceName(service.getServiceName());
+            stylistServiceResponse.setDeleted(false);
+            return stylistServiceResponse;
+        }).collect(Collectors.toList());
+
+        return responses;
+    }
+
+    /*public List<StylistPerformanceResponse> getStylistsWithFeedbackAndRevenue(LocalDate startDate, LocalDate endDate) {
+        List<StylistSchedule> stylists = stylistScheduleRepository.findAllStylists();
+        return stylists.stream().map(stylist -> {
+            // Lấy tất cả các booking của stylist trong khoảng thời gian
+            List<Booking> bookings = stylist.getBookings().stream()
+                    .filter(booking -> !booking.getBookingDay().isBefore(startDate) && !booking.getBookingDay().isAfter(endDate))
+                    .collect(Collectors.toList());
+
+            // Tính tổng tiền kiếm được
+            double totalRevenue = bookings.stream()
+                    .filter(booking -> booking.getPayment() != null)  // Chỉ tính booking có payment
+                    .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
+                    .sum();
+
+            // Tính điểm feedback trung bình
+            double totalFeedbackScore = bookings.stream()
+                    .filter(booking -> booking.getFeedback() != null)  // Chỉ tính booking có feedback
+                    .mapToDouble(booking -> booking.getFeedback().getScore())
+                    .sum();
+
+            long feedbackCount = bookings.stream()
+                    .filter(booking -> booking.getFeedback() != null)
+                    .count();
+
+            double avgFeedback = (feedbackCount > 0) ? totalFeedbackScore / feedbackCount : 0.0;
+            String yearAndMonth = startDate.getYear() + "-" + startDate.getMonthValue()  + startDate.getMonthValue(); // Ví dụ: "2024-09"
+            Kpi kpi = kpiRepository.findByLevelAndYearAndMonth(stylist.getAccount().getLevel(), yearAndMonth);
+            // Trả về DTO chứa thông tin stylist và các kết quả tính toán
+            if(kpi != null && avgFeedback >= kpi.getPerformanceScore() && totalRevenue >= kpi.getRevenueGenerated()) {
+                return new StylistPerformanceResponse(
+                        stylist.getStylistScheduleId(),
+                        stylist.getAccount().getFullname(),
+                        avgFeedback,
+                        totalRevenue
+                );
+            } else {
+                return null;
+            }
+        }).collect(Collectors.toList());
+
+    }*/
 
 
 

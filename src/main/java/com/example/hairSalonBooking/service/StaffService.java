@@ -185,20 +185,21 @@ public class StaffService {
         return request;
     }
 
+
     public List<BookingResponse> getBookingByPhoneNumber(LocalDate date, String phone){
         Account account  = accountRepository.findByPhone(phone);
         List<Booking> bookings = bookingRepository.findByBookingDayAndAccountAndStatus(date,account,BookingStatus.PENDING);
         List<BookingResponse> responses = new ArrayList<>();
-        Set<String> servicesName = new HashSet<>();
+        Set<Long> servicesId = new HashSet<>();
         for(Booking booking : bookings){
             for(SalonService service : booking.getServices()){
-                servicesName.add(service.getServiceName());
+                servicesId.add(service.getServiceId());
             }
             BookingResponse bookingResponse = new BookingResponse();
             bookingResponse.setStatus(booking.getStatus());
             bookingResponse.setId(booking.getBookingId());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-            bookingResponse.setServiceName(servicesName);
+            bookingResponse.setServiceId(servicesId);
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setCustomerName(booking.getAccount().getFullname());
@@ -211,4 +212,5 @@ public class StaffService {
         }
         return responses;
     }
+
 }

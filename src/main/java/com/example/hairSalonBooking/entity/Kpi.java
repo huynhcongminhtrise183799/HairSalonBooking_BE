@@ -14,9 +14,9 @@ public class Kpi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long kipId;
-    String yearAndMonth;
-    double revenueGenerated;
     double performanceScore;
+    double revenueFrom;
+    double revenueTo;
     @ManyToOne
     @JoinColumn(name = "level_id")
     Level level;

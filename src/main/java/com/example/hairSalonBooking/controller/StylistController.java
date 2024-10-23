@@ -17,7 +17,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/stylist")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class StylistController {
 
@@ -85,6 +86,13 @@ public class StylistController {
         return response;// Trả về StylistResponse
     }
 
+    // lấy service của stylist đó
+    @GetMapping("/service/{accountId}")
+    public ApiResponse<List<StylistServiceResponse>> getAllServiceByStylistId(@PathVariable long accountId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(stylistService.getAllServiceByStylistId(accountId));
+        return apiResponse;
+    }
 
 
 

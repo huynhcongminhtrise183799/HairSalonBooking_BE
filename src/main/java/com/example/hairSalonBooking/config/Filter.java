@@ -43,7 +43,10 @@ public class Filter extends OncePerRequestFilter {
             "/api/booking",
             "/api/verifyEmail/{email}",
             "/api/verifyOtp/{email}/{otp}",
-            "/api/changePassword/{email}"
+            "/api/changePassword/{email}",
+            "/api/Pay/{bookingId}",
+            "/api/payment/response",
+            "/api/checkout"
     );
 
     public boolean checkIsPublic(String uri){
