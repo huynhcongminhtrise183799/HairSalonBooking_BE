@@ -1,5 +1,7 @@
 package com.example.hairSalonBooking.model.response;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,9 +10,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class StylistForBooking {
-    long id;
-    String fullname;
-    String image;
-    double feedbackScore;
+public class StylistServiceResponse {
+
+    long serviceId;
+    String serviceName;
+    @JsonIgnore
+    boolean isDeleted = false;
+
 }

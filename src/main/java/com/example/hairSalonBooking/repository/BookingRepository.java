@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface BookingRepository extends JpaRepository<Booking,Long> {
@@ -58,6 +59,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "where s.slotid = ?1 and ss.account_id = ?2 and ss.working_day = ?3 and b.status != 'CANCELLED'",nativeQuery = true)
     Booking bookingAtTime(long slotId, long id, LocalDate date);
 
+
     Booking findBookingByBookingId(long id);
     @Query(value = "select b.* from booking b \n" +
             "inner join stylist_schedule ssch\n" +
@@ -76,6 +78,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     @Query(value = "select * from booking b\n" +
             "where b.account_id = ?1 and b.status = ?2;",nativeQuery = true)
     List<Booking> getBookingsByIdAndSatus(long id, String status);
+
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM booking_detail WHERE booking_id = ?1 ",nativeQuery = true)
@@ -86,7 +89,8 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     @Query(value = "select b.* from booking b\n" +
             "inner join stylist_schedule ss\n" +
             "on b.stylist_schedule_id = ss.stylist_schedule_id\n" +
-            "where ss.account_id = ?1 and b.booking_day = ?2",nativeQuery = true)
+            "where ss.account_id = ?1 and b.booking_day = ?2\n" +
+            "order by b.status desc, b.slot_id asc",nativeQuery = true)
     List<Booking> findAllByAccountInAndSalonBranch(long stylistId, LocalDate date);
 
     @Query(value = "select count(*) from booking b\n" +
@@ -106,5 +110,74 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     List<Booking> getBookingByDateAndStatusPending(LocalDate date);
 
 
+
+
     List<Booking> findByBookingDayAndAccountAndStatus(LocalDate date, Account account, BookingStatus status);
+
+
+    @Query(value = "SELECT b.*, ss.account_id AS stylist_account_id FROM booking b " +
+            "JOIN stylist_schedule ss ON b.stylist_schedule_id = ss.stylist_schedule_id " +
+            "WHERE ss.account_id = :stylistId " +
+            "AND b.booking_day = :bookingDay " +
+            "AND b.slot_id > :slotId " +
+            "ORDER BY b.slot_id ASC LIMIT 1", nativeQuery = true)
+    Optional<Booking> findNextBookingSameDay(@Param("stylistId") Long stylistId,
+                                             @Param("slotId") Long slotId,
+                                             @Param("bookingDay") LocalDate bookingDay);
+
+
+    @Query(value = "SELECT * FROM booking b WHERE b.booking_id = :bookingId", nativeQuery = true)
+    Optional<Booking> findBookingById(@Param("bookingId") Long bookingId);
+    @Query(value = "UPDATE booking_detail SET price = ?1 WHERE booking_id = ?2  and service_id= ?3;", nativeQuery = true)
+    @Transactional
+    @Modifying
+    void updateBookingDetail(double price,long bookingId, long serviceId);
+    @Query(value = "select b.booking_day, sum(p.payment_amount) from booking b\n" +
+            "inner join payment p\n" +
+            "on b.booking_id = p.booking_id\n" +
+            "where month(b.booking_day) = ?1 and b.salon_id = ?2\n" +
+            "group by b.booking_day",nativeQuery = true)
+    List<Object[]> getTotalMoneyByBookingDay(int month, long salonId);
+    @Query(value = "select sum(p.payment_amount) from booking b\n" +
+            "inner join payment p\n" +
+            "on b.booking_id = p.booking_id\n" +
+            "where month(b.booking_day) = ?1 and b.salon_id = ?2",nativeQuery = true)
+    double getTotalMoneyBySalonIdInMonth(int month, long salonId);
+
+    @Query(value = "select sum(p.payment_amount) from booking b\n" +
+            "inner join payment p\n" +
+            "on b.booking_id = p.booking_id\n" +
+            "where month(b.booking_day) = ?1",nativeQuery = true)
+    double getTotalMoneyAllSalonIdInMonth(int month);
+
+    @Query(value = "select count(*) from booking b where month(b.booking_day) = ?1",nativeQuery = true)
+    long countAllBookingsInMonth(int month);
+
+    @Query("SELECT b FROM Booking b JOIN b.stylistSchedule ss WHERE ss.account.accountid = :stylistId")
+    List<Booking> findBookingByStylistId(@Param("stylistId") Long stylistId);
+    @Query("SELECT b FROM Booking b " +
+            "JOIN b.stylistSchedule ss " +
+            "WHERE ss.account.accountid = :stylistId " +
+            "AND FUNCTION('YEAR', b.bookingDay) = :year " +
+            "AND FUNCTION('MONTH', b.bookingDay) = :month")
+    List<Booking> findBookingByStylistIdAndMonthYear(@Param("stylistId") Long stylistId,
+                                                     @Param("month") int month,
+                                                     @Param("year") int year);
+    @Query(value = "select distinct b.* from booking b\n" +
+            "inner join specific_stylist_schedule sssch\n" +
+            "on b.stylist_schedule_id = sssch.stylist_schedule_id\n" +
+            "inner join shift s \n" +
+            "on sssch.shift_id = s.shift_id\n" +
+            "inner join slot sl\n" +
+            "on b.slot_id = sl.slotid\n" +
+            "where b.stylist_schedule_id = ?1 and b.slot_id = ?2  and b.status = 'PENDING';",nativeQuery = true)
+    List<Booking> getBookingsByStylistScheduleAndShiftId(long stylistScheduleId, long slotId);
+    @Query(value = "select b.* from booking b \n" +
+            "inner join payment p \n" +
+            "on b.booking_id = p.booking_id\n" +
+            "where p.payment_status = 'Completed' and b.booking_id = ?1",nativeQuery = true)
+    Booking checkBookingStatus(long bookingId);
+
+    Booking findBySlotSlotidAndBookingDayAndStylistScheduleStylistScheduleId(long slotId, LocalDate date, long stylistScheduleId);
 }
+

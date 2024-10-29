@@ -25,4 +25,5 @@ public class CusPageResponse {
     String gender;
     String phone;
     String image;
+    boolean isDelete;
 }

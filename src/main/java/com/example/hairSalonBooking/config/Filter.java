@@ -20,7 +20,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -40,10 +39,14 @@ public class Filter extends OncePerRequestFilter {
             "/api/login",
             "/api/login-gg",
             "/api/register",
-            "/api/booking",
             "/api/verifyEmail/{email}",
             "/api/verifyOtp/{email}/{otp}",
-            "/api/changePassword/{email}"
+            "/api/changePassword/{email}",
+            "/api/Pay/{bookingId}",
+            "/api/payment/response",
+            "/api/checkout",
+            "/api/service/newest",
+            "/api/stylist/stylists/feedback-revenue"
     );
 
     public boolean checkIsPublic(String uri){

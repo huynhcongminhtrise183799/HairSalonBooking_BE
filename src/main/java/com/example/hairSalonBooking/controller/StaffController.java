@@ -1,10 +1,9 @@
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.entity.Booking;
-import com.example.hairSalonBooking.model.request.CreateStaffRequest;
-import com.example.hairSalonBooking.model.request.FindBookingByPhoneRequest;
-import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
-import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
+import com.example.hairSalonBooking.model.request.*;
+
+
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.StaffResponse;
 import com.example.hairSalonBooking.service.StaffService;
@@ -18,6 +17,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/")
 @CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class StaffController {
     @Autowired
@@ -35,12 +35,16 @@ public class StaffController {
         response.setResult(staffService.createBookingByStaff(request));
         return response;
     }
+
+
     @PostMapping("staff/booking/{date}")
     public ApiResponse<Booking> getBookingByPhoneNumber(@PathVariable LocalDate date, @RequestBody FindBookingByPhoneRequest request){
         ApiResponse response = new ApiResponse<>();
         response.setResult(staffService.getBookingByPhoneNumber(date,request.getPhone()));
         return response;
     }
+
+
     @GetMapping("/staffs")
     public ApiResponse<StaffResponse> getAllStaff(){
         ApiResponse response = new ApiResponse<>();
@@ -71,6 +75,13 @@ public class StaffController {
     public ApiResponse<StaffResponse> deleteStaff(@PathVariable long id){
         ApiResponse response = new ApiResponse<>();
         response.setResult(staffService.deleteStaff(id));
+        return response;
+    }
+
+    @PostMapping("staff/customer")
+    public ApiResponse<StaffCreateCustomerRequest> staffCreateCustomer(@Valid @RequestBody StaffCreateCustomerRequest request){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(staffService.staffCreateCustomer(request));
         return response;
     }
 }

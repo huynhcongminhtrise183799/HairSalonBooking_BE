@@ -8,9 +8,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class StylistForBooking {
-    long id;
-    String fullname;
-    String image;
-    double feedbackScore;
+public class StylistRevenueResponse {
+    Long stylistId;
+    String stylistName;
+    int bookingQuantity;
+    Double totalRevenue;
 }

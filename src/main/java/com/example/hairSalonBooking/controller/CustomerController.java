@@ -8,12 +8,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/customer")
 @CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class CustomerController {
 
@@ -36,4 +38,19 @@ public class CustomerController {
         return response;
 
     }
+
+    @DeleteMapping("/{accountId}")
+    public ApiResponse<String> deActiveUser(@PathVariable long accountId){
+        ApiResponse response = new ApiResponse();
+        response.setResult(customerService.deActiveUser(accountId));
+        return response;
+    }
+    @PutMapping("/active/{accountId}")
+    public ApiResponse<String> activeUser(@PathVariable long accountId){
+        ApiResponse response = new ApiResponse();
+        response.setResult(customerService.activeUser(accountId));
+        return response;
+    }
+
+
 }

@@ -25,17 +25,17 @@ public class CustomerService {
     @Autowired
     private ImagesService imagesService;
     public UpdateCustomerRequest updateCustomer(UpdateCustomerRequest request, long AccountId){
-            Account account = customerRepository.findAccountByAccountid(AccountId);
-            if(account == null){
-                throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
-            }
-            account.setFullname(request.getFullname());
-            account.setPhone(request.getPhone());
-            account.setDob(request.getDob());
-            account.setEmail(request.getEmail());
-            account.setImage(request.getImage());
-            customerRepository.save(account);
-            return request;
+        Account account = customerRepository.findAccountByAccountid(AccountId);
+        if(account == null){
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
+        }
+        account.setFullname(request.getFullname());
+        account.setPhone(request.getPhone());
+        account.setDob(request.getDob());
+        account.setEmail(request.getEmail());
+        account.setImage(request.getImage());
+        customerRepository.save(account);
+        return request;
 
     }
 
@@ -60,4 +60,26 @@ public class CustomerService {
         return profileResponse;
     }
 
+    public String deActiveUser(long accountId){
+        Account account  = customerRepository.findAccountByAccountid(accountId);
+        if(account == null){
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
+        }
+        account.setDeleted(true);
+        customerRepository.save(account);
+        return "Delete successfully";
+    }
+    public String activeUser(long accountId){
+        Account account  = customerRepository.findAccountByAccountid(accountId);
+        if(account == null){
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
+        }
+        account.setDeleted(false);
+        customerRepository.save(account);
+        return "Active successfully";
+    }
+
+    public Long countAllCustomers(){
+        return customerRepository.countAllCustomers();
+    }
 }

@@ -89,9 +89,7 @@ public class Account implements UserDetails {
     @JsonIgnore
     Set<Feedback> feedbacks;
 
-    @OneToMany(mappedBy = "account")
-    @JsonIgnore
-    Set<Collections> collections;
+
 
     @ManyToMany
     @JoinTable(name = "specific_skill",

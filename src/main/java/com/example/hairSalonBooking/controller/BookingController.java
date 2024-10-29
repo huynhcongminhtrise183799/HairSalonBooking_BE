@@ -1,8 +1,9 @@
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.entity.Booking;
-import com.example.hairSalonBooking.entity.Shift;
 import com.example.hairSalonBooking.entity.Slot;
+
+
 
 import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
 
@@ -16,7 +17,6 @@ import com.example.hairSalonBooking.service.StylistService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +24,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class BookingController {
     @Autowired
@@ -61,7 +62,7 @@ public class BookingController {
 
 
     @GetMapping("/booking/{bookingId}")
-    public ApiResponse<BookingResponse> createBooking(@PathVariable long bookingId){
+    public ApiResponse<BookingResponse> getBookingById(@PathVariable long bookingId){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getBookingById(bookingId));
         return apiResponse;
@@ -74,7 +75,7 @@ public class BookingController {
         return apiResponse;
     }
     @DeleteMapping("/booking/{bookingId}")
-    public ApiResponse createBooking(@PathVariable Long bookingId){
+    public ApiResponse deleteBooking(@PathVariable Long bookingId){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.deleteBooking(bookingId));
         return apiResponse;
@@ -96,9 +97,9 @@ public class BookingController {
     // controller checkin
     @PutMapping("/{bookingId}/checkin")
     public ApiResponse<String> checkIn(@PathVariable Long bookingId) {
-         ApiResponse apiResponse = new ApiResponse<>();
-         apiResponse.setResult(bookingService.checkIn(bookingId));
-         return apiResponse;
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.checkIn(bookingId));
+        return apiResponse;
     }
 
     @PutMapping("/checkout")
@@ -132,5 +133,34 @@ public class BookingController {
         return apiResponse;
     }
 
+
+
+    @PutMapping("/update/service/{bookingId}")
+    public ApiResponse<Booking> updateService(@PathVariable Long bookingId, @RequestBody BookingRequest request) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.updateBookingWithService(bookingId, request.getServiceId()));
+        return apiResponse;
+    }
+
+    @GetMapping("/booking/total-money/day/month/{month}/salon/{salonId}")
+    public ApiResponse<List<TotalMoneyByBookingDay>> totalMoneyByBookingDay(@PathVariable int month, @PathVariable long salonId ) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.totalMoneyByBookingDayInMonth(month,salonId));
+        return apiResponse;
+    }
+
+    @GetMapping("/booking/total-money/month/{month}/salon/{salonId}")
+    public ApiResponse<TotalMoneyByBookingDay> totalMoneyBySalonInMonth(@PathVariable int month, @PathVariable long salonId ) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.totalMoneyBySalonInMonth(month,salonId));
+        return apiResponse;
+    }
+
+    @GetMapping("/booking/status/{bookingId}")
+    public ApiResponse<String> checkBookingStatus(@PathVariable long bookingId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.checkBookingStatus(bookingId));
+        return apiResponse;
+    }
 
 }

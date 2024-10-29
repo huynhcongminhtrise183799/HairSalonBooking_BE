@@ -7,6 +7,7 @@ import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateStaffRequest;
 import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
+import com.example.hairSalonBooking.model.request.StaffCreateCustomerRequest;
 import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StaffResponse;
@@ -165,14 +166,26 @@ public class StaffService {
     }
     public StaffCreateBookingRequest createBookingByStaff(StaffCreateBookingRequest request){
         Account account = accountRepository.findByPhone(request.getPhoneNumber());
+        if(account == null){
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
+        }
         Set<SalonService> serviceSet = new HashSet<>();
         for(Long id: request.getServiceId()){
             SalonService service = serviceRepository.getServiceById(id);
             serviceSet.add(service);
         }
         Slot slot = slotRepository.findSlotBySlotid(request.getSlotId());
+        if(slot == null){
+            throw new AppException(ErrorCode.SLOT_NOT_FOUND);
+        }
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
+        if(salonBranch == null){
+            throw new AppException(ErrorCode.SALON_NOT_FOUND);
+        }
         StylistSchedule stylistSchedule = stylistScheduleRepository.getScheduleId(request.getStylistId(), request.getBookingDate());
+        if(stylistSchedule == null){
+            throw new AppException(ErrorCode.STYLIST_UNAVAILABLE);
+        }
         Booking booking = new Booking();
         booking.setServices(serviceSet);
         booking.setBookingDay(request.getBookingDate());
@@ -181,24 +194,28 @@ public class StaffService {
         booking.setSlot(slot);
         booking.setSalonBranch(salonBranch);
         booking.setStylistSchedule(stylistSchedule);
-        bookingRepository.save(booking);
+        Booking newBooking =  bookingRepository.save(booking);
+        for(SalonService service : serviceSet){
+            bookingRepository.updateBookingDetail(service.getPrice(),newBooking.getBookingId(),service.getServiceId());
+        }
         return request;
     }
+
 
     public List<BookingResponse> getBookingByPhoneNumber(LocalDate date, String phone){
         Account account  = accountRepository.findByPhone(phone);
         List<Booking> bookings = bookingRepository.findByBookingDayAndAccountAndStatus(date,account,BookingStatus.PENDING);
         List<BookingResponse> responses = new ArrayList<>();
-        Set<String> servicesName = new HashSet<>();
+        Set<Long> serviceId = new HashSet<>();
         for(Booking booking : bookings){
             for(SalonService service : booking.getServices()){
-                servicesName.add(service.getServiceName());
+                serviceId.add(service.getServiceId());
             }
             BookingResponse bookingResponse = new BookingResponse();
             bookingResponse.setStatus(booking.getStatus());
             bookingResponse.setId(booking.getBookingId());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-            bookingResponse.setServiceName(servicesName);
+            bookingResponse.setServiceId(serviceId);
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setCustomerName(booking.getAccount().getFullname());
@@ -207,8 +224,26 @@ public class StaffService {
             }
             bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
             bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+            bookingResponse.setCustomerPhone(booking.getAccount().getPhone());
             responses.add(bookingResponse);
         }
         return responses;
+    }
+
+
+    public StaffCreateCustomerRequest staffCreateCustomer(StaffCreateCustomerRequest request){
+        Account account = accountRepository.findByPhone(request.getPhone());
+        if(account != null){
+            throw new AppException(ErrorCode.ACCOUNT_EXIST);
+        }
+        Account newAccount = new Account();
+        newAccount.setPhone(request.getPhone());
+        newAccount.setFullname(request.getFullName());
+        newAccount.setUsername(request.getPhone());
+        newAccount.setPassword(passwordEncoder.encode(request.getPhone()));
+        newAccount.setRole(Role.CUSTOMER);
+        accountRepository.save(newAccount);
+        return request;
+
     }
 }

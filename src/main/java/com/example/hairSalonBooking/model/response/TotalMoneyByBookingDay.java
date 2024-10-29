@@ -12,11 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FeedbackResponse {
-    String content;
-    LocalDate date;
-    double score;
-    String customerImage;
-    String customerName;
-    long bookingId;
+public class TotalMoneyByBookingDay {
+    LocalDate day;
+    double totalMoney;
 }

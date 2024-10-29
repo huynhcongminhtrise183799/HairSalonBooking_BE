@@ -5,6 +5,7 @@ import com.example.hairSalonBooking.entity.Account;
 import com.example.hairSalonBooking.entity.Booking;
 import com.example.hairSalonBooking.entity.Payment;
 import com.example.hairSalonBooking.entity.Transactions;
+
 import com.example.hairSalonBooking.enums.BookingStatus;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
@@ -12,17 +13,24 @@ import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.response.ResponseObject;
 import com.example.hairSalonBooking.repository.AccountRepository;
 import com.example.hairSalonBooking.repository.BookingRepository;
+
+import com.example.hairSalonBooking.enums.Role;
+import com.example.hairSalonBooking.repository.AccountRepository;
+
 import com.example.hairSalonBooking.repository.PaymentRepository;
 import com.example.hairSalonBooking.repository.TransactionsRepository;
 import com.example.hairSalonBooking.service.PaymentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import com.example.hairSalonBooking.config.VnpayConfig;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -34,7 +42,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin("http://localhost:3000/")
-//@CrossOrigin("http://localhost:8080/payment/response")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class PaymentController {
     @Autowired

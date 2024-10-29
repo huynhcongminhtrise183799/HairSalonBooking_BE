@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.repository;
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.entity.Shift;
 import com.example.hairSalonBooking.entity.Slot;
 import com.example.hairSalonBooking.enums.Role;
 import jakarta.transaction.Transactional;
@@ -15,12 +16,12 @@ import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-
+import org.springframework.data.repository.query.Param;
 
 
 import java.util.List;
@@ -32,10 +33,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     //ORM  : object realationship mapping
 
     Account findAccountByUsername(String username);
+    Account findAccountByUsernameAndIsDeletedFalse(String username);
     Account findAccountByEmail(String email);
     Account findAccountByAccountid(Long accountid);
     Account findByPhone(String phone);
-
 
     List<Account> findByRoleAndIsDeletedFalseAndSalonBranchSalonId(Role role, long salonId);
     @Query("SELECT ac FROM Account ac WHERE ac.role = com.example.hairSalonBooking.enums.Role.STAFF")
@@ -59,7 +60,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "on ac.accountid = ssch.account_id\n" +
             "where ss.skill_id = ?1 and ac.salon_id = ?2 ",nativeQuery = true)
     Set<Account> getAccountBySkill(long skillId,long salonId);
-
     List<Account> findByRoleAndIsDeletedFalse(Role role);
 
     @Query(value = "select distinct a.* from account a\n" +
@@ -79,13 +79,30 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
 
 
+
+
     Page<Account> findAccountByRole(Role role, Pageable pageable);
-
     Page<Account> findAccountByRoleAndSalonBranchSalonId(Role role, Pageable pageable, long salonId);
-
-
-
     Account  findTopByRole(Role role);
+
+    @Query("SELECT ac FROM Account ac WHERE ac.role = com.example.hairSalonBooking.enums.Role.STYLIST")
+    @Transactional
+    List<Account> getAccountsByRoleStylist();
+
+    @Query("SELECT a FROM Account a WHERE a.salonBranch.salonId = :salonId AND a.role = :role")
+    List<Account> getAccountsBySalonAndRole(@Param("salonId") Long salonId, @Param("role") Role role);
+    @Query("SELECT a FROM Account a JOIN a.salonBranch sb WHERE sb.salonId = :branchId AND a.role = :role")
+    List<Account> getStylistsBySalonId(@Param("branchId") Long branchId, @Param("role") Role role);
+    @Query("SELECT a FROM Account a WHERE a.accountid = :stylistId AND a.salonBranch.salonId = :salonId AND a.role = :role")
+    Optional<Account> findByIdAndSalonIdAndRole(@Param("stylistId") Long stylistId,
+                                                @Param("salonId") Long salonId,
+                                                @Param("role") Role role);
+
+    @Query(value = "select count(*) from account a where a.salon_id = ?1 and a.role = ?2",nativeQuery = true)
+    long totalEmployeeByRoleInSalon(long salonId, String role);
+
+    @Query(value = "select count(*) from account a where a.role = ?1",nativeQuery = true)
+    long totalEmployeeByRole(String role);
 
 }
 

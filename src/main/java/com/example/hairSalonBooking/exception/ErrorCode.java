@@ -25,7 +25,6 @@ public enum ErrorCode {
     Phone_EXISTED(1013,"Phone already existed"),
     INVALID_USERNAME(1014,"Username can not be blank"),
     INVALID_DOB(1015,"Date of birth is not valid"),
-
     INVALID_HOTLINE(1016,"Invalid salon hotline"),
     INVALID_ADDRESS(1017,"Salon address can not be blank"),
     HOTLINE_EXISTED(1018,"Salon hotline already existed"),
@@ -36,24 +35,25 @@ public enum ErrorCode {
     INVALID_VOUCHER_NAME(1022,"Voucher name can not be blank"),
     DUPLICATE_VOUCHER_CODE(1023,"Voucher code already existed"),
     VOUCHER_NOT_FOUND(1024,"Voucher not found"),
-
-
-
     STYLIST_NOT_FOUND(1025, " Stylist not found"),
-
     SLOT_NOT_FOUND(1026,"Slot not found"),
     SLOT_ID_EXISTED(1027,"Slot id existed"),
-
     SERVICE_NO_BLANK(1028, "SalonService name can not be blank"),
     PRICE_NO_BLANK(1029, "Price can not be blank"),
-
-
     CAN_NOT_UPLOAD_IMAGE(1030,"Can't not upload image"),
 
     BOOKING_NOT_FOUND(1031,"Booking not found"),
     VOUCHER_NOT_AVAILABLE(1032,"Voucher not available"),
     INVALID_PAYMENT_AMOUNT(1033,"Invalid payment amount"),
 
+    SERVICES_NOT_FOUND(1034,"Service Not Found"),
+    SERVICES_ALREADY_BOOKED(1035,"Service already booked"),
+    STYLIST_UNAVAILABLE(1036, "Stylist is unavailable"),
+
+    CUSTOMER_DE_ACTIVE(1037, "Account has been blocked"),
+    ACCOUNT_EXIST(1038, "Account already existed"),
+
+    BOOKING_EXIST(1039,"Booking is exist")
     ;
     int code;
     String message;

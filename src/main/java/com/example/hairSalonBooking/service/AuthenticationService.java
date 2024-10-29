@@ -133,7 +133,9 @@ public class AuthenticationService implements UserDetailsService {
         } catch (Exception e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
-
+        if(account.isDeleted()){
+            throw new AppException(ErrorCode.CUSTOMER_DE_ACTIVE);
+        }
         AuthenticationResponse response = modelMapper.map(account, AuthenticationResponse.class);
         response.setToken(tokenService.generateToken(account));
         //response.setSuccess(true);
@@ -225,7 +227,8 @@ public class AuthenticationService implements UserDetailsService {
                         account.getDob(),
                         account.getGender(),
                         account.getPhone(),
-                        account.getImage())
+                        account.getImage(),
+                        account.isDeleted())
         );
 
 

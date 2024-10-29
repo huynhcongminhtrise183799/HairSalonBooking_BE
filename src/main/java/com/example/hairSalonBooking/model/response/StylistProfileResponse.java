@@ -24,6 +24,7 @@ public class StylistProfileResponse {
     String gender;
     String image;
     long salonId;
+    long levelId;
     Set<Long> skillId;
     Role role;
 }

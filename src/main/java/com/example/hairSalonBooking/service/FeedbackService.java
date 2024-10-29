@@ -13,6 +13,10 @@ import com.example.hairSalonBooking.repository.FeedbackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class FeedbackService {
 
@@ -58,4 +62,22 @@ public class FeedbackService {
         response.setBookingId(feedback.getBooking().getBookingId());
         return response;
     }
+
+    public List<FeedbackResponse> getFeedbacksByStylist(long accountId){
+        List<Feedback> feedbacks = feedbackRepository.getListFeedbackByStylist(accountId);
+        List<FeedbackResponse> responses = new ArrayList<>();
+        for(Feedback feedback : feedbacks){
+            FeedbackResponse response = new FeedbackResponse();
+            response.setScore(feedback.getScore());
+            response.setContent(feedback.getContent());
+            response.setDate(feedback.getDay());
+            response.setCustomerImage(feedback.getAccount().getImage());
+            response.setCustomerName(feedback.getAccount().getFullname());
+            response.setBookingId(feedback.getBooking().getBookingId());
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
 }
