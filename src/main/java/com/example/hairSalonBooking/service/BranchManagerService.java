@@ -234,6 +234,7 @@ public class BranchManagerService {
 
                     return bookingResponse;
                 })
+                .sorted(Comparator.comparing(BookingResponse::getTime))
                 .collect(Collectors.toList());
 
         // Create a Page object for bookings
@@ -283,6 +284,7 @@ public class BranchManagerService {
 
                     return bookingResponse;
                 })
+                .sorted(Comparator.comparing(BookingResponse::getTime))
                 .collect(Collectors.toList());
 
         // Create a Page object for bookings
@@ -332,6 +334,7 @@ public class BranchManagerService {
 
                     return bookingResponse;
                 })
+                .sorted(Comparator.comparing(BookingResponse::getTime)) 
                 .collect(Collectors.toList());
 
         // Create a Page object for bookings
@@ -381,6 +384,7 @@ public class BranchManagerService {
 
                     return bookingResponse;
                 })
+                .sorted(Comparator.comparing(BookingResponse::getTime))
                 .collect(Collectors.toList());
 
         // Create a Page object for bookings
