@@ -13,5 +13,5 @@ public interface KpiRepository extends JpaRepository<Kpi, Long> {
             "WHERE k.level.levelid = :levelId " +
             "AND :totalRevenue >= k.revenueFrom " +
             "AND :totalRevenue <= k.revenueTo")
-    Optional<Double> findBonusPercentageByRevenueAndLevel(@Param("levelId") long levelId, @Param("totalRevenue") double totalRevenue);
+    Optional<Double> findBonusPercentageByRevenueAndLevel(long levelId, double totalRevenue);
 }
