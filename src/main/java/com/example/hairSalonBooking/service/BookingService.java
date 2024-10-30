@@ -330,6 +330,7 @@ public class BookingService {
             stylist.setId(account.getAccountid());
             stylist.setFullname(account.getFullname());
             stylist.setImage(account.getImage());
+            stylist.setFeedbackScore(stylistService.calculateAverageFeedback(account.getAccountid(),"2024-10"));
             stylistForBookings.add(stylist);
         }
         return stylistForBookings;

@@ -156,6 +156,9 @@ public class AuthenticationService implements UserDetailsService {
                 user2.setRole(Role.CUSTOMER);
                 user = accountRepository.save(user2);
             }
+            if(user.isDeleted()){
+                throw new AppException(ErrorCode.CUSTOMER_DE_ACTIVE);
+            }
             AuthenticationResponse response = new AuthenticationResponse();
             response.setToken(tokenService.generateToken(user));
             response.setRole(user.getRole());
@@ -164,6 +167,7 @@ public class AuthenticationService implements UserDetailsService {
         {
             e.printStackTrace();
         }
+
         return null;
     }
     //tạo token

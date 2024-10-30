@@ -120,6 +120,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "WHERE ss.account_id = :stylistId " +
             "AND b.booking_day = :bookingDay " +
             "AND b.slot_id > :slotId " +
+            "AND b.status = 'PENDING'" +
             "ORDER BY b.slot_id ASC LIMIT 1", nativeQuery = true)
     Optional<Booking> findNextBookingSameDay(@Param("stylistId") Long stylistId,
                                              @Param("slotId") Long slotId,

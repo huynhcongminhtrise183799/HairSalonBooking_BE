@@ -428,6 +428,7 @@ public class StylistService {
             StylistServiceResponse stylistServiceResponse = new StylistServiceResponse();
             stylistServiceResponse.setServiceId(service.getServiceId());
             stylistServiceResponse.setServiceName(service.getServiceName());
+            stylistServiceResponse.setPrice(service.getPrice());
             stylistServiceResponse.setDeleted(false);
             return stylistServiceResponse;
         }).collect(Collectors.toList());

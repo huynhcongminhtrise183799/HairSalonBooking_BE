@@ -1,6 +1,8 @@
 package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.*;
+import com.example.hairSalonBooking.exception.AppException;
+import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.AddShiftRequest;
 import com.example.hairSalonBooking.model.request.SpecificStylistScheduleRequest;
 import com.example.hairSalonBooking.model.response.SpecificStylistScheduleResponse;
@@ -31,9 +33,10 @@ public class StylistScheduleService {
 
     List<Booking> bookingByShiftNotWorking = new ArrayList<>();
     public SpecificStylistScheduleRequest createStylistSchedule(SpecificStylistScheduleRequest list){
-
-
-
+        StylistSchedule schedule = stylistScheduleRepository.getScheduleId(list.getStylistId(), list.getWorkingDate());
+        if(schedule != null){
+            throw  new AppException(ErrorCode.STYLIST_SCHEDULE_EXIST);
+        }
         Set<Shift> shiftSet = new HashSet<>();
         for(Long id: list.getShiftId()){
             Shift shift = shiftRepository.findByShiftId(id);

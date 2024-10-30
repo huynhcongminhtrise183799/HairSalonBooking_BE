@@ -46,7 +46,8 @@ public class Filter extends OncePerRequestFilter {
             "/api/payment/response",
             "/api/checkout",
             "/api/service/newest",
-            "/api/stylist/stylists/feedback-revenue"
+            "/api/stylist/stylists/feedback-revenue",
+            "/api/service/{serviceId}"
     );
 
     public boolean checkIsPublic(String uri){
