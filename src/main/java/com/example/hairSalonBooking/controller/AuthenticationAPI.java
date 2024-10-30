@@ -29,7 +29,6 @@ public class AuthenticationAPI {
     AuthenticationService authenticationService;
 
 
-
     @PostMapping("/register")
     public ResponseEntity register(@Valid @RequestBody RegisterRequest registerRequest) {
         AccountResponse newAccount = authenticationService.register(registerRequest);
