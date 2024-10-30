@@ -12,6 +12,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalTime;
+import java.util.Set;
 
 @Data
 @Builder
@@ -27,5 +28,6 @@ public class CreateServiceRequest {
     LocalTime duration;
     String image;
     long skillId;
+    Set<String> collectionsImage;
 
 }

@@ -12,4 +12,5 @@ public class StylistForBooking {
     long id;
     String fullname;
     String image;
+    double feedbackScore;
 }

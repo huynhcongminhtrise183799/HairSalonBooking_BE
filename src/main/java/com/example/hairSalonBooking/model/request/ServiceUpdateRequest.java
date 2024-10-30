@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalTime;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -22,5 +23,6 @@ public class ServiceUpdateRequest {
     String description;
     LocalTime duration;
     String image;
+    Set<String> collectionsImage;
     boolean isDelelte = false;
 }

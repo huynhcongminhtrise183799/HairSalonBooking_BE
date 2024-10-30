@@ -8,6 +8,7 @@ import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
+import com.example.hairSalonBooking.model.request.SalaryRecordRequest;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 
@@ -87,15 +88,17 @@ public class StylistService {
     private BookingRepository bookingRepository;
     @Autowired
     private StylistScheduleRepository stylistScheduleRepository;
+    @Autowired
+    private SalaryRecordRepository salaryRecordRepository;
 
-    public StylistProfileResponse getProfile(){
+    public StylistProfileResponse getProfile() {
         var context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         Account account = (Account) authentication.getPrincipal();
         StylistProfileResponse profileResponse = new StylistProfileResponse();
         Set<Skill> skills = skillRepository.getSkillByAccountId(account.getAccountid());
         Set<Long> skillsId = new HashSet<>();
-        for(Skill skill : skills){
+        for (Skill skill : skills) {
             skillsId.add(skill.getSkillId());
         }
         profileResponse.setAccountid(account.getAccountid());
@@ -111,8 +114,6 @@ public class StylistService {
         profileResponse.setLevelId(account.getLevel().getLevelid());
         return profileResponse;
     }
-
-
 
 
     public StylistResponse create(StylistRequest stylistRequest) {
@@ -206,13 +207,11 @@ public class StylistService {
     }
 
 
-
-
-    public StylistResponse getSpecificStylist(long accountId){
-        Account  stylist = accountRepository.findByAccountidAndRole(accountId,Role.STYLIST);
+    public StylistResponse getSpecificStylist(long accountId) {
+        Account stylist = accountRepository.findByAccountidAndRole(accountId, Role.STYLIST);
         Set<Skill> skills = skillRepository.getSkillByAccountId(accountId);
         Set<String> skillName = new HashSet<>();
-        for(Skill skill : skills){
+        for (Skill skill : skills) {
             skillName.add(skill.getSkillName());
         }
         StylistResponse response = new StylistResponse();
@@ -231,13 +230,13 @@ public class StylistService {
 
     public StylistPageResponse getAllAccountStylist(int page, int size, long salonId) {
 
-        Page<Account> accountPage = accountRepository.findAccountByRoleAndSalonBranchSalonId(Role.STYLIST, PageRequest.of(page, size),salonId);
+        Page<Account> accountPage = accountRepository.findAccountByRoleAndSalonBranchSalonId(Role.STYLIST, PageRequest.of(page, size), salonId);
 
         List<StyPageResponse> styPageResponses = new ArrayList<>();
-        for(Account account : accountPage){
+        for (Account account : accountPage) {
             Set<Skill> skills = skillRepository.getSkillByAccountId(account.getAccountid());
             Set<String> skillName = new HashSet<>();
-            for(Skill skill : skills){
+            for (Skill skill : skills) {
                 skillName.add(skill.getSkillName());
             }
             StyPageResponse styPageResponse = new StyPageResponse();
@@ -255,7 +254,6 @@ public class StylistService {
         }
 
 
-
         Page<StyPageResponse> stylistPage = new PageImpl<>(styPageResponses, PageRequest.of(page, size), accountPage.getTotalElements());
 
         // Build and return the StylistPageResponse
@@ -269,10 +267,10 @@ public class StylistService {
     }
 
 
-    public List<StylistForCreateSchedule> getStylistsBySalon(long salonId){
+    public List<StylistForCreateSchedule> getStylistsBySalon(long salonId) {
         List<Account> accounts = accountRepository.getStylistsBySalo(salonId);
         List<StylistForCreateSchedule> stylist = new ArrayList<>();
-        for(Account account : accounts){
+        for (Account account : accounts) {
             StylistForCreateSchedule stylistForCreateSchedule = new StylistForCreateSchedule();
             stylistForCreateSchedule.setId(account.getAccountid());
             stylistForCreateSchedule.setFullname(account.getFullname());
@@ -394,9 +392,9 @@ public class StylistService {
         // Chuyển đổi lúc trả ra từ Booking sang BookingResponse
         List<BookingResponse> responses = new ArrayList<>();
 
-        for(Booking booking : bookings){
+        for (Booking booking : bookings) {
             //Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
-            Set<String> serviceNames = serviceRepository.getServiceNameByBooking(booking.getBookingId());
+            Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
 
             BookingResponse bookingResponse = new BookingResponse();
             bookingResponse.setId(booking.getBookingId());
@@ -404,17 +402,18 @@ public class StylistService {
             bookingResponse.setTime(booking.getSlot().getSlottime());
             bookingResponse.setDate(booking.getBookingDay());
             bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-            bookingResponse.setServiceName(serviceNames);
+            bookingResponse.setServiceId(serviceId);
             bookingResponse.setStatus(booking.getStatus());
             bookingResponse.setCustomerId(booking.getAccount().getAccountid());
             bookingResponse.setCustomerName(booking.getAccount().getFullname());
-            if(booking.getVoucher() != null){
+            if (booking.getVoucher() != null) {
                 bookingResponse.setVoucherCode(booking.getVoucher().getCode());
             }
             responses.add(bookingResponse);
         }
         return responses;
     }
+
     public List<StylistServiceResponse> getAllServiceByStylistId(long accountid) {
         // Truy vấn danh sách các đối tượng SalonService
         List<SalonService> services = serviceRepository.getSalonServiceByAccountId(accountid);
@@ -429,6 +428,7 @@ public class StylistService {
             StylistServiceResponse stylistServiceResponse = new StylistServiceResponse();
             stylistServiceResponse.setServiceId(service.getServiceId());
             stylistServiceResponse.setServiceName(service.getServiceName());
+            stylistServiceResponse.setPrice(service.getPrice());
             stylistServiceResponse.setDeleted(false);
             return stylistServiceResponse;
         }).collect(Collectors.toList());
@@ -479,34 +479,6 @@ public class StylistService {
     }*/
 
 
-
-
-
-
-
-
-
-
-
-
-    private double calculateTotalRevenue(Long stylistId, String yearAndMonth) {
-        // lay month year tu ham
-        String[] parts = yearAndMonth.split("-");
-        int year = Integer.parseInt(parts[0]);
-        int month = Integer.parseInt(parts[1]);
-
-        // goi ham
-        List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
-        log.info("Bookings for stylist ID {} in month {} of year {}: {}", stylistId, month, year, bookings);
-
-        // tinh tong
-        double totalPayment = bookings.stream()
-                .filter(booking -> booking.getPayment() != null && booking.getPayment().getPaymentStatus().equals("Completed")  )
-                .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
-                .sum();
-        log.info("Total payment: {}", totalPayment);
-        return totalPayment ;
-    }
     private int countBooking(Long stylistId, String yearAndMonth) {
         // Tách tháng và năm từ yearAndMonth
         String[] parts = yearAndMonth.split("-");
@@ -522,29 +494,29 @@ public class StylistService {
         return sizeBookings;
     }
 
-      public double calculateAverageFeedback(Long stylistId, String yearAndMonth) {
-            // Lấy danh sách bookings của stylist theo stylistId
+    public double calculateAverageFeedback(Long stylistId, String yearAndMonth) {
+        // Lấy danh sách bookings của stylist theo stylistId
 
-          String[] parts = yearAndMonth.split("-");
-          int year = Integer.parseInt(parts[0]);
-          int month = Integer.parseInt(parts[1]);
+        String[] parts = yearAndMonth.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
 
-          List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId,month,year);
-            // Tính tổng điểm feedback và đếm số lượng feedback
-            double totalFeedbackScore = bookings.stream()
-                    .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
-                    .mapToDouble(booking -> booking.getFeedback().getScore()) // Lấy điểm từ feedback
-                    .sum(); // Cộng dồn tất cả điểm lại
-            long feedbackCount = bookings.stream()
-                    .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
-                    .count();
-            double averageFeedbackScore = feedbackCount > 0 ? totalFeedbackScore / feedbackCount : 0.0;
+        List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
+        // Tính tổng điểm feedback và đếm số lượng feedback
+        double totalFeedbackScore = bookings.stream()
+                .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
+                .mapToDouble(booking -> booking.getFeedback().getScore()) // Lấy điểm từ feedback
+                .sum(); // Cộng dồn tất cả điểm lại
+        long feedbackCount = bookings.stream()
+                .filter(booking -> booking.getFeedback() != null) // Chỉ tính booking có feedback
+                .count();
+        double averageFeedbackScore = feedbackCount > 0 ? totalFeedbackScore / feedbackCount : 0.0;
 
-            // Ghi log thông tin
-            log.info("Stylist ID: {}, Total Feedback Score: {}, Average Feedback Score: {}", stylistId, totalFeedbackScore, averageFeedbackScore);
+        // Ghi log thông tin
+        log.info("Stylist ID: {}, Total Feedback Score: {}, Average Feedback Score: {}", stylistId, totalFeedbackScore, averageFeedbackScore);
 
-            return averageFeedbackScore;
-        }
+        return averageFeedbackScore;
+    }
 
     public StylistRevenueResponse getStylistRevenue(long stylistId, String yearAndMonth) {
         String[] parts = yearAndMonth.split("-");
@@ -569,17 +541,18 @@ public class StylistService {
                 .totalRevenue(totalRevenue)
                 .build();
     }
-    public  StylistFeedBackResponse getStylistFeedback(long stylistId, String yearAndMonth) {
+
+    public StylistFeedBackResponse getStylistFeedback(long stylistId, String yearAndMonth) {
         String[] parts = yearAndMonth.split("-");
         int year = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]);
         List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
-        double totalRevenue = calculateAverageFeedback(stylistId,yearAndMonth);
-        Account Name =  accountRepository.findAccountByAccountid(stylistId);
-        if (Name == null){
+        double totalRevenue = calculateAverageFeedback(stylistId, yearAndMonth);
+        Account Name = accountRepository.findAccountByAccountid(stylistId);
+        if (Name == null) {
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
         }
-        String  StylistName = Name.getFullname();
+        String StylistName = Name.getFullname();
 //        String stylistName = (stylistId); // Giả sử bạn có phương thức này
 
         // Tạo đối tượng StylistRevenueResponse
@@ -621,6 +594,7 @@ public class StylistService {
                         StylistPerformanceResponse response = StylistPerformanceResponse.builder()
                                 .stylistId(stylistId)
                                 .stylistName(stylist.getFullname())
+                                .image(stylist.getImage())
                                 .totalRevenue(totalRevenue)
                                 .averageFeedback(averageFeedback)
                                 .build();
@@ -637,5 +611,151 @@ public class StylistService {
                 .collect(Collectors.toList());
     }
 
+    private double calculateTotalRevenue(Long stylistId, String yearAndMonth) {
+        String[] parts = yearAndMonth.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+
+        List<Booking> bookings = bookingRepository.findBookingByStylistIdAndMonthYear(stylistId, month, year);
+        log.info("Bookings for stylist ID {} in month {} of year {}: {}", stylistId, month, year, bookings);
+        log.info("Number of bookings for stylist ID {}: {}", stylistId, bookings.size());
+
+
+        double totalPayment = bookings.stream()
+                .filter(booking -> booking.getPayment() != null && booking.getPayment().getPaymentStatus().equals("Completed"))
+                .mapToDouble(booking -> booking.getPayment().getPaymentAmount())
+                .sum();
+
+        log.info("Total payment: {}", totalPayment);
+        return totalPayment;
+    }
+
+    private double calculateBonus(double totalPayment, double baseSalary, long levelId) {
+        double bonus = 0.0;
+
+
+        if (levelId == 1) { // Level 1
+            if (totalPayment > 3000000 && totalPayment <= 5000000) {
+                bonus = baseSalary * 0.10; // 10% bonus
+            } else if (totalPayment > 5000000 && totalPayment <= 10000000) {
+                bonus = baseSalary * 0.20; // 20% bonus
+            } else if (totalPayment > 10000000 && totalPayment <= 15000000) {
+                bonus = baseSalary * 0.25; // 25% bonus
+            } else if (totalPayment > 15000000) {
+                bonus = baseSalary * 0.30; // 30% bonus
+            }
+        } else if (levelId == 2) { // Level 2
+            if (totalPayment > 5000000 && totalPayment <= 10000000) {
+                bonus = baseSalary * 0.10; // 10% bonus
+            } else if (totalPayment > 10000000 && totalPayment <= 20000000) {
+                bonus = baseSalary * 0.20; // 20% bonus
+            } else if (totalPayment > 20000000 && totalPayment <= 30000000) {
+                bonus = baseSalary * 0.25; // 25% bonus
+            } else if (totalPayment > 30000000) {
+                bonus = baseSalary * 0.30; // 30% bonus
+            }
+        }
+
+        log.info("Bonus calculated: {}", bonus);
+        return bonus;
+    }
+
+    public List<SalaryResponse> calculateTotalSalary(Long salonId, String yearAndMonth) {
+        List<Account> stylists = accountRepository.getAccountsBySalonAndRole(salonId, Role.STYLIST);
+        List<SalaryResponse> salaryResponses = new ArrayList<>();
+
+        for (Account stylist : stylists) {
+            Long stylistId = stylist.getAccountid();
+            Long levelId = stylist.getLevel().getLevelid();
+
+            double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
+            double baseSalary = stylist.getLevel().getSalary(); // Get the stylist's base salary
+            log.info("Total Revenue for {}: {}, Base Salary: {}", stylist.getFullname(), totalRevenue, baseSalary);
+
+            double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+            double totalSalary = baseSalary + bonus;
+
+            log.info("Bonus for Stylist {}: {}, Total Salary: {}", stylist.getFullname(), bonus, totalSalary);
+
+            SalaryResponse response = new SalaryResponse();
+            response.setStylistId(stylist.getAccountid());
+            response.setStylistName(stylist.getFullname());
+            response.setMonth(yearAndMonth);
+            response.setSalary(baseSalary);
+            response.setBonus(bonus);
+            response.setTotalSalary(totalSalary);
+
+            salaryResponses.add(response);
+        }
+
+        return salaryResponses.stream()
+                .sorted(Comparator.comparing(SalaryResponse::getTotalSalary).reversed())
+                .collect(Collectors.toList());
+    }
+
+    public SalaryResponse calculateTotalSalaryByOneStylist(Long salonId, String yearAndMonth, Long stylistId) {
+        Account stylist = accountRepository.findByIdAndSalonIdAndRole(stylistId, salonId, Role.STYLIST)
+                .orElseThrow(() -> new AppException(ErrorCode.STYLIST_NOT_FOUND));
+
+        Long levelId = stylist.getLevel().getLevelid();
+        double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
+        double baseSalary = stylist.getLevel().getSalary();
+        double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+        double totalSalary = baseSalary + bonus;
+
+        SalaryResponse response = new SalaryResponse();
+        response.setStylistName(stylist.getFullname());
+        response.setMonth(yearAndMonth);
+        response.setSalary(baseSalary);
+        response.setBonus(bonus);
+        response.setTotalSalary(totalSalary);
+
+        return response;
+    }
+
+    public List<SalaryRecordRequest> saveSalaryRecords(List<SalaryRecordRequest> salaryRecordRequests) {
+        List<SalaryRecordRequest> savedRecords = new ArrayList<>();
+
+        for (SalaryRecordRequest request : salaryRecordRequests) {
+            Account account = accountRepository.findById(request.getStylistId())
+                    .orElseThrow(() -> new AppException(ErrorCode.STYLIST_NOT_FOUND));
+
+            // Check if the account has the Role.STYLIST
+            if (!account.getRole().equals(Role.STYLIST)) {
+                throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
+            }
+
+            SalaryRecord salaryRecord = new SalaryRecord();
+            salaryRecord.setBonusSalary(request.getBonusSalary());
+            salaryRecord.setMonthAndYear(request.getMonthAndYear());
+            salaryRecord.setTotalSalary(request.getTotalSalary());
+            salaryRecord.setAccount(account);
+
+            salaryRecordRepository.save(salaryRecord);
+
+            savedRecords.add(request);
+        }
+
+        return savedRecords;
+    }
+
+    public List<SalaryRecordRequest> getSalaryRecords(Long salonId, String monthAndYear) {
+        // Fetch SalaryRecords for the salon
+        List<SalaryRecord> salaryRecords = salaryRecordRepository.findSalaryRecordsBySalonIdAndYearMonth(salonId, monthAndYear);
+
+        // Map the SalaryRecords to SalaryRecordRequest
+        List<SalaryRecordRequest> responses = salaryRecords.stream()
+                .map(record -> {
+                    SalaryRecordRequest response = new SalaryRecordRequest();
+                    response.setBonusSalary(record.getBonusSalary());
+                    response.setTotalSalary(record.getTotalSalary());
+                    response.setMonthAndYear(record.getMonthAndYear());
+                    response.setStylistId(record.getAccount().getAccountid());
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        return responses;
+    }
 }
 

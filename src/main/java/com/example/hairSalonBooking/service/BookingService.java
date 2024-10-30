@@ -2,12 +2,10 @@ package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.*;
 import com.example.hairSalonBooking.enums.BookingStatus;
+import com.example.hairSalonBooking.enums.Role;
 import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
-import com.example.hairSalonBooking.model.request.AssignNewStylistForBooking;
-import com.example.hairSalonBooking.model.request.BookingRequest;
-import com.example.hairSalonBooking.model.request.BookingSlots;
-import com.example.hairSalonBooking.model.request.BookingStylits;
+import com.example.hairSalonBooking.model.request.*;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.repository.*;
 
@@ -22,6 +20,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import java.sql.Date;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -60,6 +60,10 @@ public class BookingService {
     private ShiftRepository shiftRepository;
     @Autowired
     private PaymentRepository paymentRepository;
+    @Autowired
+    private StylistService stylistService;
+    @Autowired
+    private StylistScheduleService stylistScheduleService;
     public Set<StylistForBooking> getStylistForBooking(BookingStylits bookingStylits){
         // tao 1 danh sach skills rong
         Set<Skill> skills = new HashSet<>();
@@ -89,6 +93,7 @@ public class BookingService {
         Set<StylistForBooking> stylistForBookings = new HashSet<>();
         for(Account account : accounts){
             StylistForBooking response = new StylistForBooking();
+            response.setFeedbackScore(stylistService.calculateAverageFeedback(account.getAccountid(),"2024-10"));
             response.setId(account.getAccountid());
             response.setFullname(account.getFullname());
             response.setImage(account.getImage());
@@ -98,7 +103,7 @@ public class BookingService {
     }
 
     public List<Slot> getListSlot(BookingSlots bookingSlots){
-        List<Slot> allSlot = slotRepository.findAll();
+        List<Slot> allSlot = slotRepository.getAllSlotActive();
         List<Slot> slotToRemove = new ArrayList<>();
         List<Shift> shifts = new ArrayList<>();
         List<Shift> shiftsFromSpecificStylistSchedule = shiftRepository.getShiftsFromSpecificStylistSchedule(bookingSlots.getAccountId(),bookingSlots.getDate());
@@ -157,8 +162,8 @@ public class BookingService {
                 // lấy ra list các slot booking ko hợp lệ
                 // vd: 8:00:00 bắt đầu và thời gian hoàn thành là 9:30:00 thì
                 // slot bắt đầu 9:00:00 là ko hợp lệ sẽ bị add vào list slotToRemove
-                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
-                    slotToRemove.addAll(list); // 9
+                List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),TimeFinishBooking);
+                slotToRemove.addAll(list); // 9
 
             }
             // tính ra thời gian
@@ -168,7 +173,7 @@ public class BookingService {
             LocalTime minimunTimeToBooking = slot.getSlottime().minusHours(totalTimeServiceNewBooking.getHour())
                     .minusMinutes(totalTimeServiceNewBooking.getMinute());
             // tìm ra list chứa các slot ko thỏa và add vào list slotToRemove
-            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,totalTimeServiceNewBooking.getHour());
+            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,TimeFinishBooking);
             slotToRemove.addAll(list);
             slotToRemove.add(slot);// 10 11
             // tìm ra list ca làm mà cái booking đó thuộc về
@@ -194,7 +199,7 @@ public class BookingService {
         return allSlot;
     }
     public List<Slot> getSlotsUpdateByCustomer(BookingSlots bookingSlots, long bookingId){
-        List<Slot> allSlot = slotRepository.findAll();
+        List<Slot> allSlot = slotRepository.getAllSlotActive();
         List<Slot> slotToRemove = new ArrayList<>();
         List<Shift> shifts = new ArrayList<>();
         List<Shift> shiftsFromSpecificStylistSchedule = shiftRepository.getShiftsFromSpecificStylistSchedule(bookingSlots.getAccountId(),bookingSlots.getDate());
@@ -255,13 +260,15 @@ public class BookingService {
                 // lấy ra list các slot booking ko hợp lệ
                 // vd: 8:00:00 bắt đầu và thời gian hoàn thành là 9:30:00 thì
                 // slot bắt đầu 9:00:00 là ko hợp lệ sẽ bị add vào list slotToRemove
-                if(totalTimeServiceForBooking.getMinute() == 0 ){
-                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour() - 1 );
-                    slotToRemove.addAll(list); // 9
-                }else{
-                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
-                    slotToRemove.addAll(list); // 9
-                }
+//                if(totalTimeServiceForBooking.getMinute() == 0 ){
+//                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour() - 1 );
+//                    slotToRemove.addAll(list); // 9
+//                }else{
+//                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
+//                    slotToRemove.addAll(list); // 9
+//                }
+                List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),TimeFinishBooking );
+                slotToRemove.addAll(list);
             }
             // tính ra thời gian
             // vd: slot 10h có ng đặt r, tổng thời gian service cho booking mới là 1h30p
@@ -270,7 +277,7 @@ public class BookingService {
             LocalTime minimunTimeToBooking = slot.getSlottime().minusHours(totalTimeServiceNewBooking.getHour())
                     .minusMinutes(totalTimeServiceNewBooking.getMinute());
             // tìm ra list chứa các slot ko thỏa và add vào list slotToRemove
-            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,totalTimeServiceNewBooking.getHour());
+            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,TimeFinishBooking);
             slotToRemove.addAll(list);
             slotToRemove.add(slot);// 10 11
             // tìm ra list ca làm mà cái booking đó thuộc về
@@ -323,6 +330,7 @@ public class BookingService {
             stylist.setId(account.getAccountid());
             stylist.setFullname(account.getFullname());
             stylist.setImage(account.getImage());
+            stylist.setFeedbackScore(stylistService.calculateAverageFeedback(account.getAccountid(),"2024-10"));
             stylistForBookings.add(stylist);
         }
         return stylistForBookings;
@@ -396,6 +404,10 @@ public class BookingService {
             voucher.setQuantity(voucher.getQuantity() - 1 );
         }
         StylistSchedule stylistSchedule = stylistScheduleRepository.getScheduleId(request.getStylistId(), request.getBookingDate());
+        Booking checkBookingExist = bookingRepository.findBySlotSlotidAndBookingDayAndStylistScheduleStylistScheduleId(slot.getSlotid(),request.getBookingDate(),stylistSchedule.getStylistScheduleId());
+        if(checkBookingExist != null){
+            throw new AppException(ErrorCode.BOOKING_EXIST);
+        }
         Booking booking = new Booking();
         booking.setBookingDay(request.getBookingDate());
         booking.setAccount(account);
@@ -443,6 +455,13 @@ public class BookingService {
         for(SalonService service : services){
             bookingRepository.updateBookingDetail(service.getPrice(),booking.getBookingId(),service.getServiceId());
         }
+        if(!stylistScheduleService.bookingByShiftNotWorking.isEmpty()){
+            for(Booking booking1 : stylistScheduleService.bookingByShiftNotWorking){
+                if(booking.getBookingId() == booking1.getBookingId()){
+                    stylistScheduleService.bookingByShiftNotWorking.remove(booking1);
+                }
+            }
+        }
         return request;
     }
     public String deleteBooking(long id){
@@ -466,7 +485,6 @@ public class BookingService {
         for(SalonService service : services){
             serviceId.add(service.getServiceId());
         }
-        Set<String> serviceName = serviceRepository.getServiceNameByBooking(bookingId);
         Account account = accountRepository.findAccountByAccountid(booking.getStylistSchedule().getAccount().getAccountid());
         BookingResponse bookingResponse = new BookingResponse();
         bookingResponse.setId(booking.getBookingId());
@@ -475,7 +493,7 @@ public class BookingService {
         bookingResponse.setCustomerId(booking.getAccount().getAccountid());
         bookingResponse.setCustomerName(booking.getAccount().getFullname());
         bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
-        bookingResponse.setServiceName(serviceName);
+        bookingResponse.setServiceId(serviceId);
 
         bookingResponse.setStylistName(account.getFullname());
         if(booking.getVoucher() != null){
@@ -535,17 +553,18 @@ public class BookingService {
         return allShift;
     }
     private List<Slot> getSlotsExperiedTime(LocalTime time,List<Shift> shifts){
-        Shift shift = new Shift();
+        Shift shift = shifts.get(0);
         List<Slot> slotsToRemove = new ArrayList<>();
-        for(Shift s : shifts){
-            shift = s;
-            break;
-        }
+
         List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
         for(Slot slot : slots){
             LocalTime totalTime = slot.getSlottime().plusHours(time.getHour())
                     .plusMinutes(time.getMinute());
-            if(totalTime.isAfter(shift.getEndTime())){
+            if (totalTime.isBefore(slot.getSlottime())) {
+                // Thời gian totalTime đã vượt qua ngày mới
+                totalTime = totalTime.plusHours(24); // Chuyển totalTime sang ngày mới
+            }
+            if(totalTime.isAfter(shift.getEndTime()) || totalTime.isBefore(slot.getSlottime())){
                 slotsToRemove.add(slot);
             }
         }
@@ -802,7 +821,7 @@ public class BookingService {
         List<Object[]> objects = bookingRepository.getTotalMoneyByBookingDay(month, salonId);
         List<TotalMoneyByBookingDay> responses = new ArrayList<>();
         for(Object[] object : objects){
-            LocalDate date = ((java.sql.Date) object[0]).toLocalDate();
+            LocalDate date = ((Date) object[0]).toLocalDate();
             double totalMoney = (double) object[1];
             TotalMoneyByBookingDay totalMoneyByBookingDay = new TotalMoneyByBookingDay(date,totalMoney);
             responses.add(totalMoneyByBookingDay);
@@ -813,6 +832,215 @@ public class BookingService {
         double totalMoney = bookingRepository.getTotalMoneyBySalonIdInMonth(month,salonId);
         TotalMoneyByBookingDay responses = new TotalMoneyByBookingDay(null,totalMoney);
         return responses;
+    }
+    public double totalMoneyAllSalonByMonth(int month){
+        return bookingRepository.getTotalMoneyAllSalonIdInMonth(month);
+    }
+    public Long countAllBookingsInMonth(int month){
+        return bookingRepository.countAllBookingsInMonth(month);
+    }
+    public BookingPageResponse getAllBookingsForStylistInBranchByPending(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.PENDING)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
+    public BookingPageResponse getAllBookingsForStylistInBranchByComplete(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.COMPLETED)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
+    public BookingPageResponse getAllBookingsForStylistInBranchByInprocess(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.IN_PROGRESS)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
+    public BookingPageResponse getAllBookingsForStylistInBranchByCancel(int page, int size, Long branchId, LocalDate date) {
+        // Check if the branch exists
+        SalonBranch branch = salonBranchRepository.findById(branchId)
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+        // Get all stylists in the branch
+        List<Account> stylists = accountRepository.getStylistsBySalonId(branchId, Role.STYLIST);
+
+        // Retrieve and filter bookings with PENDING status for each stylist in the branch
+        List<BookingResponse> bookingResponses = stylists.stream()
+                .flatMap(account -> bookingRepository.findAllByAccountInAndSalonBranch(account.getAccountid(), date).stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.CANCELLED)
+                .map(booking -> {
+                    Set<Long> serviceId = serviceRepository.getServiceIdByBooking(booking.getBookingId());
+
+                    BookingResponse bookingResponse = new BookingResponse();
+                    bookingResponse.setId(booking.getBookingId());
+                    bookingResponse.setCustomerId(booking.getAccount().getAccountid());
+                    bookingResponse.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+                    bookingResponse.setTime(booking.getSlot().getSlottime());
+                    bookingResponse.setDate(booking.getBookingDay());
+                    bookingResponse.setSalonName(booking.getSalonBranch().getAddress());
+                    bookingResponse.setServiceId(serviceId);
+                    bookingResponse.setStatus(booking.getStatus());
+                    bookingResponse.setCustomerName(booking.getAccount().getFullname());
+
+                    if (booking.getVoucher() != null) {
+                        bookingResponse.setVoucherCode(booking.getVoucher().getCode());
+                    }
+
+                    return bookingResponse;
+                })
+                .collect(Collectors.toList());
+
+        // Create a Page object for bookings
+        int totalBookings = bookingResponses.size();
+        int start = Math.min(page * size, totalBookings);
+        int end = Math.min(start + size, totalBookings);
+        List<BookingResponse> pagedResponses = bookingResponses.subList(start, end);
+
+        // Build the BookingPageResponse
+        BookingPageResponse bookingPageResponse = new BookingPageResponse();
+        bookingPageResponse.setPageNumber(page);
+        bookingPageResponse.setTotalPages((int) Math.ceil((double) totalBookings / size));
+        bookingPageResponse.setTotalElements(totalBookings);
+        bookingPageResponse.setContent(pagedResponses);
+
+        return bookingPageResponse;
+    }
+    public String checkBookingStatus(long bookingId){
+        Booking booking = bookingRepository.checkBookingStatus(bookingId);
+        if(booking == null){
+            return "false";
+        }
+        return "true";
     }
 
 }

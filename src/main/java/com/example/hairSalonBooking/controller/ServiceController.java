@@ -41,8 +41,8 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/service")
-//@CrossOrigin("http://localhost:3000/")
-@CrossOrigin("https://f-salon.vercel.app/")
+@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 
 public class ServiceController {
@@ -84,9 +84,11 @@ public class ServiceController {
 
 
     @DeleteMapping("/delete/{serviceId}")
-    String deleteUser(@PathVariable long serviceId) {
-        hairSalonServiceService.deleteService(serviceId);
-        return "service deleted";
+    ApiResponse<String> deleteUser(@PathVariable long serviceId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(hairSalonServiceService.deleteService(serviceId));
+        return apiResponse;
+
     }
     @PutMapping("/update/{serviceId}")
     public ServiceResponse updateService(@PathVariable long serviceId, @RequestBody ServiceUpdateRequest request) {
@@ -101,10 +103,32 @@ public class ServiceController {
         return response;
 
     }
+    @GetMapping("/active/page")
+    public ApiResponse<ServicePageResponse> getAllActiveServicePage(@RequestParam int page, @RequestParam int size) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(hairSalonServiceService.getAllActiveServicePage(page, size));
+        return response;
+
+    }
     @GetMapping("/all")
     public ResponseEntity getAllService() {
         List<ServiceResponse> services = hairSalonServiceService.getAllServices();
         return ResponseEntity.ok(services);
     }
+    @GetMapping("/newest")
+    public ApiResponse<List<ServiceResponse>> getNewestService() {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(hairSalonServiceService.getNewestService());
+        return response;
+    }
+
+    @PutMapping("/active/{serviceId}")
+    public ApiResponse<String> updateService(@PathVariable long serviceId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(hairSalonServiceService.activeService(serviceId));
+        return apiResponse;
+    }
+
+
 
 }

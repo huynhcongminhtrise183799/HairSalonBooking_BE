@@ -22,8 +22,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 
-//@CrossOrigin("http://localhost:3000/")
-@CrossOrigin("https://f-salon.vercel.app/")
+@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 
 @SecurityRequirement(name = "api")
 public class AuthenticationAPI {

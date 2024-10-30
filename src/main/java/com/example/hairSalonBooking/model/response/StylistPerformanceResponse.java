@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 public class StylistPerformanceResponse {
     private Long stylistId;
     private String stylistName;
+    private String image;
     private Double averageFeedback;
     private Double totalRevenue;
 }

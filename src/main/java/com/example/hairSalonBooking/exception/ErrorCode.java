@@ -50,7 +50,11 @@ public enum ErrorCode {
     SERVICES_ALREADY_BOOKED(1035,"Service already booked"),
     STYLIST_UNAVAILABLE(1036, "Stylist is unavailable"),
 
+    CUSTOMER_DE_ACTIVE(1037, "Account has been blocked"),
+    ACCOUNT_EXIST(1038, "Account already existed"),
 
+    BOOKING_EXIST(1039,"Booking is exist"),
+    STYLIST_SCHEDULE_EXIST(1040,"Stylist already have schedule in this day")
     ;
     int code;
     String message;

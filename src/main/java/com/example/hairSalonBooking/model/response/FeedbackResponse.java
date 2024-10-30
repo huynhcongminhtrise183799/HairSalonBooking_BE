@@ -16,5 +16,7 @@ public class FeedbackResponse {
     String content;
     LocalDate date;
     double score;
+    String customerImage;
+    String customerName;
     long bookingId;
 }

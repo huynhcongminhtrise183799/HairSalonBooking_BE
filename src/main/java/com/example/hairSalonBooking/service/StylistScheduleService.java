@@ -1,15 +1,13 @@
 package com.example.hairSalonBooking.service;
 
-import com.example.hairSalonBooking.entity.Account;
-import com.example.hairSalonBooking.entity.Shift;
-import com.example.hairSalonBooking.entity.StylistSchedule;
+import com.example.hairSalonBooking.entity.*;
+import com.example.hairSalonBooking.exception.AppException;
+import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.AddShiftRequest;
 import com.example.hairSalonBooking.model.request.SpecificStylistScheduleRequest;
 import com.example.hairSalonBooking.model.response.SpecificStylistScheduleResponse;
 import com.example.hairSalonBooking.model.response.StylistScheduleResponse;
-import com.example.hairSalonBooking.repository.AccountRepository;
-import com.example.hairSalonBooking.repository.ShiftRepository;
-import com.example.hairSalonBooking.repository.StylistScheduleRepository;
+import com.example.hairSalonBooking.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,22 +26,28 @@ public class StylistScheduleService {
     private AccountRepository accountRepository;
     @Autowired
     private ShiftRepository shiftRepository;
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private SlotRepository slotRepository;
 
+    List<Booking> bookingByShiftNotWorking = new ArrayList<>();
     public SpecificStylistScheduleRequest createStylistSchedule(SpecificStylistScheduleRequest list){
-
-
-
-            Set<Shift> shiftSet = new HashSet<>();
-            for(Long id: list.getShiftId()){
-                Shift shift = shiftRepository.findByShiftId(id);
-                shiftSet.add(shift);
-            }
-            Account account = accountRepository.findAccountByAccountid(list.getStylistId());
-            StylistSchedule stylistSchedule = new StylistSchedule();
-            stylistSchedule.setAccount(account);
-            stylistSchedule.setWorkingDay(list.getWorkingDate());
-            stylistSchedule.setShifts(shiftSet);
-            stylistScheduleRepository.save(stylistSchedule);
+        StylistSchedule schedule = stylistScheduleRepository.getScheduleId(list.getStylistId(), list.getWorkingDate());
+        if(schedule != null){
+            throw  new AppException(ErrorCode.STYLIST_SCHEDULE_EXIST);
+        }
+        Set<Shift> shiftSet = new HashSet<>();
+        for(Long id: list.getShiftId()){
+            Shift shift = shiftRepository.findByShiftId(id);
+            shiftSet.add(shift);
+        }
+        Account account = accountRepository.findAccountByAccountid(list.getStylistId());
+        StylistSchedule stylistSchedule = new StylistSchedule();
+        stylistSchedule.setAccount(account);
+        stylistSchedule.setWorkingDay(list.getWorkingDate());
+        stylistSchedule.setShifts(shiftSet);
+        stylistScheduleRepository.save(stylistSchedule);
 
 
 
@@ -66,13 +70,23 @@ public class StylistScheduleService {
     }
 
     public SpecificStylistScheduleResponse updateStylistSchedule(long id, SpecificStylistScheduleRequest request){
+        bookingByShiftNotWorking = new ArrayList<>();
         StylistSchedule schedule = stylistScheduleRepository.findByStylistScheduleId(id);
-        stylistScheduleRepository.deleteSpecificSchedule(schedule.getStylistScheduleId());
         Set<Shift> shifts = new HashSet<>();
         for(Long shiftId : request.getShiftId()){
             Shift shift = shiftRepository.findByShiftId(shiftId);
             shifts.add(shift);
         }
+        Set<Shift> allShifts = shiftRepository.getAllShifts();
+        allShifts.removeAll(shifts);
+        for(Shift shift : allShifts){
+            List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
+            for(Slot slot : slots){
+                List<Booking> bookings = bookingRepository.getBookingsByStylistScheduleAndShiftId(schedule.getStylistScheduleId(), slot.getSlotid());
+                bookingByShiftNotWorking.addAll(bookings);
+            }
+        }
+        stylistScheduleRepository.deleteSpecificSchedule(schedule.getStylistScheduleId());
         Account account  = accountRepository.findAccountByAccountid(request.getStylistId());
         schedule.setShifts(shifts);
         schedule.setAccount(account);
@@ -101,6 +115,13 @@ public class StylistScheduleService {
     public StylistScheduleResponse deleteStylistSchedule(long id){
         StylistSchedule schedule = stylistScheduleRepository.findByStylistScheduleId(id);
         Set<Long> shiftsId = shiftRepository.getShiftIdByStylistSchedule(id);
+        for(Long shiftId : shiftsId){
+            List<Slot> slots = slotRepository.getSlotsInShift(shiftId);
+            for(Slot slot : slots){
+                List<Booking> bookings = bookingRepository.getBookingsByStylistScheduleAndShiftId(schedule.getStylistScheduleId(), slot.getSlotid());
+                bookingByShiftNotWorking.addAll(bookings);
+            }
+        }
         StylistScheduleResponse response = new StylistScheduleResponse();
         response.setId(schedule.getStylistScheduleId());
         response.setStylistName(schedule.getAccount().getFullname());

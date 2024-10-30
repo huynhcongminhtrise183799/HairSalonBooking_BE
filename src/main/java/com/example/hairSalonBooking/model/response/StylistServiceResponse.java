@@ -14,7 +14,7 @@ public class StylistServiceResponse {
 
     long serviceId;
     String serviceName;
-    @JsonIgnore
+    double price;
     boolean isDeleted = false;
 
 }

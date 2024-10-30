@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.controller;
 
 
+import com.example.hairSalonBooking.model.request.SalaryRecordRequest;
 import com.example.hairSalonBooking.model.request.StylistRequest;
 import com.example.hairSalonBooking.model.request.UpdateStylistRequest;
 
@@ -18,8 +19,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/stylist")
-//@CrossOrigin(origins = "http://localhost:3000")
-@CrossOrigin("https://f-salon.vercel.app/")
+@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class StylistController {
 
@@ -59,18 +60,18 @@ public class StylistController {
     }
     @GetMapping("/page/{salonId}")
     public ApiResponse<StylistPageResponse> getAllAccountStylist(@RequestParam int page, @RequestParam int size, @PathVariable long salonId) {
-    ApiResponse response = new ApiResponse<>();
-    response.setResult(stylistService.getAllAccountStylist(page, size,salonId));
-    return response;
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.getAllAccountStylist(page, size,salonId));
+        return response;
     }
-    
+
     @GetMapping("/status")
-    public ResponseEntity getStylistByStatus() {        
+    public ResponseEntity getStylistByStatus() {
         List<StylistResponse> StylistStatus = stylistService.getStylistByStatus();
         return ResponseEntity.ok(StylistStatus);
     }
 
-    
+
     @PutMapping("{accountid}") // Đảm bảo có dấu "/"
     public ApiResponse<StylistResponse> updateStylist(
             @PathVariable long accountid, // Sửa tên tham số thành stylistId
@@ -87,9 +88,9 @@ public class StylistController {
         return response;// Trả về StylistResponse
     }
     @GetMapping("/service/{accountId}")
-    public ApiResponse<List<StylistServiceResponse>> getAllServiceByStylistId(@RequestParam long accountid) {
+    public ApiResponse<List<StylistServiceResponse>> getAllServiceByStylistId(@PathVariable long accountId) {
         ApiResponse apiResponse = new ApiResponse<>();
-        apiResponse.setResult(stylistService.getAllServiceByStylistId(accountid));
+        apiResponse.setResult(stylistService.getAllServiceByStylistId(accountId));
         return apiResponse;
     }
     @GetMapping("/stylists/feedback-revenue")
@@ -98,29 +99,50 @@ public class StylistController {
         ApiResponse<List<StylistPerformanceResponse>> apiResponse = new ApiResponse<>();
         // Truyền yearAndMonth trực tiếp vào phương thức service
         List<StylistPerformanceResponse> stylists = stylistService.getStylistsWithFeedbackAndRevenue(yearAndMonth);
-
-
         apiResponse.setResult(stylists);
         return apiResponse;
     }
-
-
-
-
-
-    @GetMapping("/stylists/{accountId}/revenue")
-    public ApiResponse<StylistRevenueResponse> getStylistsRevenue(@PathVariable long accountId,
-                                                                  @RequestParam String yearAndMonth) {
-        ApiResponse<StylistRevenueResponse> apiResponse = new ApiResponse<>();
-            // Tính tổng doanh thu cho stylist
-        StylistRevenueResponse totalRevenue = stylistService.getStylistRevenue(accountId, yearAndMonth);
-            // Tạo đối tượng StylistRevenueResponse để trả về
-            apiResponse.setResult(totalRevenue);
-            return apiResponse;
+    @GetMapping("/salaries/{salonId}/{yearAndMonth}")
+    public ApiResponse<SalaryResponse> getSalaries(
+            @PathVariable Long salonId,
+            @PathVariable String yearAndMonth) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.calculateTotalSalary(salonId, yearAndMonth));
+        return response;
     }
-    @GetMapping("/stylists/{accountId}/feedBack")
+    @GetMapping("/salaries/{salonId}/{yearAndMonth}/{stylistId}")
+    public ApiResponse<SalaryResponse> getSalaries(
+            @PathVariable Long salonId,
+            @PathVariable String yearAndMonth,
+            @PathVariable Long stylistId) { // Make stylistId optional
+        ApiResponse<SalaryResponse> response = new ApiResponse<>();
+        response.setResult(stylistService.calculateTotalSalaryByOneStylist(salonId, yearAndMonth, stylistId));
+        return response;
+    }
+    @PostMapping("/salaryRecords/save")
+    public ApiResponse<SalaryRecordRequest> saveSalaryRecords(@RequestBody List<SalaryRecordRequest> salaryRecordRequests) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.saveSalaryRecords(salaryRecordRequests));
+        return response;
+    }
+
+
+
+
+
+    @GetMapping("/stylists/{accountId}/revenue/{yearAndMonth}")
+    public ApiResponse<StylistRevenueResponse> getStylistsRevenue(@PathVariable long accountId,
+                                                                  @PathVariable String yearAndMonth) {
+        ApiResponse<StylistRevenueResponse> apiResponse = new ApiResponse<>();
+        // Tính tổng doanh thu cho stylist
+        StylistRevenueResponse totalRevenue = stylistService.getStylistRevenue(accountId, yearAndMonth);
+        // Tạo đối tượng StylistRevenueResponse để trả về
+        apiResponse.setResult(totalRevenue);
+        return apiResponse;
+    }
+    @GetMapping("/stylists/{accountId}/feedBack/{yearAndMonth}")
     public ApiResponse<StylistFeedBackResponse> getStylistsFeedback(@PathVariable long accountId,
-                                                                  @RequestParam String yearAndMonth) {
+                                                                    @PathVariable String yearAndMonth) {
         ApiResponse<StylistFeedBackResponse> apiResponse = new ApiResponse<>();
         // Tính tổng doanh thu cho stylist
         StylistFeedBackResponse AvgFeedback = stylistService.getStylistFeedback(accountId, yearAndMonth);
@@ -129,4 +151,13 @@ public class StylistController {
         return apiResponse;
     }
 
+
+    @GetMapping("/salaryRecords/{salonId}/{yearAndMonth}")
+    public ApiResponse<SalaryRecordRequest> getSalaryRecords(
+            @PathVariable Long salonId,
+            @PathVariable String yearAndMonth) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.getSalaryRecords(salonId, yearAndMonth));
+        return response;
+    }
 }

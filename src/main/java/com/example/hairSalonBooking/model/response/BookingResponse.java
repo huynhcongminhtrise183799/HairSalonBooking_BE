@@ -18,7 +18,7 @@ public class BookingResponse {
     long id;
     long customerId;
     String customerName;
-
+    String customerPhone;
     String salonName;
     String stylistName;
     LocalDate date;
@@ -28,7 +28,7 @@ public class BookingResponse {
     String voucherCode;
 
 
-    Set<String> serviceName;
+    Set<Long> serviceId;
 
     BookingStatus status;
 }

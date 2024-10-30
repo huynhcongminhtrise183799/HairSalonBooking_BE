@@ -2,7 +2,6 @@ package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Booking;
 
-
 import com.example.hairSalonBooking.enums.BookingStatus;
 
 import com.example.hairSalonBooking.model.request.MailBody;

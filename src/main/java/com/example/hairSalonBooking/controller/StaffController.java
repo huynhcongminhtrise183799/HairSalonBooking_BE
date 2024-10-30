@@ -1,13 +1,9 @@
 package com.example.hairSalonBooking.controller;
 
 import com.example.hairSalonBooking.entity.Booking;
-import com.example.hairSalonBooking.model.request.CreateStaffRequest;
+import com.example.hairSalonBooking.model.request.*;
 
 
-import com.example.hairSalonBooking.model.request.FindBookingByPhoneRequest;
-
-import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
-import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.StaffResponse;
 import com.example.hairSalonBooking.service.StaffService;
@@ -20,8 +16,8 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/")
-//@CrossOrigin("http://localhost:3000/")
-@CrossOrigin("https://f-salon.vercel.app/")
+@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class StaffController {
     @Autowired
@@ -79,6 +75,13 @@ public class StaffController {
     public ApiResponse<StaffResponse> deleteStaff(@PathVariable long id){
         ApiResponse response = new ApiResponse<>();
         response.setResult(staffService.deleteStaff(id));
+        return response;
+    }
+
+    @PostMapping("staff/customer")
+    public ApiResponse<StaffCreateCustomerRequest> staffCreateCustomer(@Valid @RequestBody StaffCreateCustomerRequest request){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(staffService.staffCreateCustomer(request));
         return response;
     }
 }

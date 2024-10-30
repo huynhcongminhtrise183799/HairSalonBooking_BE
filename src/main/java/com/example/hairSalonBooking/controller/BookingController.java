@@ -23,8 +23,8 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
-//@CrossOrigin("http://localhost:3000/")
-@CrossOrigin("https://f-salon.vercel.app/")
+@CrossOrigin("http://localhost:3000/")
+//@CrossOrigin("https://f-salon.vercel.app/")
 @SecurityRequirement(name = "api")
 public class BookingController {
     @Autowired
@@ -62,7 +62,7 @@ public class BookingController {
 
 
     @GetMapping("/booking/{bookingId}")
-    public ApiResponse<BookingResponse> createBooking(@PathVariable long bookingId){
+    public ApiResponse<BookingResponse> getBookingById(@PathVariable long bookingId){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.getBookingById(bookingId));
         return apiResponse;
@@ -75,7 +75,7 @@ public class BookingController {
         return apiResponse;
     }
     @DeleteMapping("/booking/{bookingId}")
-    public ApiResponse createBooking(@PathVariable Long bookingId){
+    public ApiResponse deleteBooking(@PathVariable Long bookingId){
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.deleteBooking(bookingId));
         return apiResponse;
@@ -97,9 +97,9 @@ public class BookingController {
     // controller checkin
     @PutMapping("/{bookingId}/checkin")
     public ApiResponse<String> checkIn(@PathVariable Long bookingId) {
-         ApiResponse apiResponse = new ApiResponse<>();
-         apiResponse.setResult(bookingService.checkIn(bookingId));
-         return apiResponse;
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.checkIn(bookingId));
+        return apiResponse;
     }
 
     @PutMapping("/checkout")
@@ -153,6 +153,13 @@ public class BookingController {
     public ApiResponse<TotalMoneyByBookingDay> totalMoneyBySalonInMonth(@PathVariable int month, @PathVariable long salonId ) {
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.totalMoneyBySalonInMonth(month,salonId));
+        return apiResponse;
+    }
+
+    @GetMapping("/booking/status/{bookingId}")
+    public ApiResponse<String> checkBookingStatus(@PathVariable long bookingId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(bookingService.checkBookingStatus(bookingId));
         return apiResponse;
     }
 

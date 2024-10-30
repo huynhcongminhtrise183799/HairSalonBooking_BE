@@ -5,17 +5,16 @@ import com.example.hairSalonBooking.entity.Skill;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalTime;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ServiceResponse {
 
@@ -26,6 +25,7 @@ public class ServiceResponse {
     LocalTime duration;
     String image;
     String skillName;
+    Set<String> collectionsImage;
     boolean isDelete;
 
 }
