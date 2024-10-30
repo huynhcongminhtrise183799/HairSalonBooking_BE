@@ -450,35 +450,6 @@ public class StylistService {
         return totalPayment;
     }
 
-    private double calculateBonus(double totalPayment, double baseSalary, long levelId) {
-        double bonus = 0.0;
-
-
-        if (levelId == 1) { // Level 1
-            if (totalPayment > 3000000 && totalPayment <= 5000000) {
-                bonus = baseSalary * 0.10; // 10% bonus
-            } else if (totalPayment > 5000000 && totalPayment <= 10000000) {
-                bonus = baseSalary * 0.20; // 20% bonus
-            } else if (totalPayment > 10000000 && totalPayment <= 15000000) {
-                bonus = baseSalary * 0.25; // 25% bonus
-            } else if (totalPayment > 15000000) {
-                bonus = baseSalary * 0.30; // 30% bonus
-            }
-        } else if (levelId == 2) { // Level 2
-            if (totalPayment > 5000000 && totalPayment <= 10000000) {
-                bonus = baseSalary * 0.10; // 10% bonus
-            } else if (totalPayment > 10000000 && totalPayment <= 20000000) {
-                bonus = baseSalary * 0.20; // 20% bonus
-            } else if (totalPayment > 20000000 && totalPayment <= 30000000) {
-                bonus = baseSalary * 0.25; // 25% bonus
-            } else if (totalPayment > 30000000) {
-                bonus = baseSalary * 0.30; // 30% bonus
-            }
-        }
-
-        log.info("Bonus calculated: {}", bonus);
-        return bonus;
-    }
 
     public List<SalaryResponse> calculateTotalSalary(Long salonId, String yearAndMonth) {
         List<Account> stylists = accountRepository.getAccountsBySalonAndRole(salonId, Role.STYLIST);
@@ -490,12 +461,12 @@ public class StylistService {
 
             double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
             double baseSalary = stylist.getLevel().getSalary(); // Get the stylist's base salary
-            log.info("Total Revenue for {}: {}, Base Salary: {}", stylist.getFullname(), totalRevenue, baseSalary);
-
-            double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+            Optional<Double> optionalBonusPercentage = kpiRepository.findBonusPercentageByRevenueAndLevel(levelId, totalRevenue);
+            double bonusPercentage = optionalBonusPercentage.orElse(0.0); // mặc định 0%
+            double bonus = baseSalary * bonusPercentage;
             double totalSalary = baseSalary + bonus;
 
-            log.info("Bonus for Stylist {}: {}, Total Salary: {}", stylist.getFullname(), bonus, totalSalary);
+
 
             SalaryResponse response = new SalaryResponse();
             response.setStylistName(stylist.getFullname());
@@ -519,7 +490,9 @@ public class StylistService {
         Long levelId = stylist.getLevel().getLevelid();
         double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
         double baseSalary = stylist.getLevel().getSalary();
-        double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+        Optional<Double> optionalBonusPercentage = kpiRepository.findBonusPercentageByRevenueAndLevel(levelId, totalRevenue);
+        double bonusPercentage = optionalBonusPercentage.orElse(0.0); // Default to 0% if no match
+        double bonus = baseSalary * bonusPercentage;
         double totalSalary = baseSalary + bonus;
 
         SalaryResponse response = new SalaryResponse();
@@ -556,6 +529,25 @@ public class StylistService {
         }
 
         return savedRecords;
+    }
+
+    public List<SalaryRecordRequest> getSalaryRecords(Long salonId, String monthAndYear) {
+        // Fetch SalaryRecords for the salon
+        List<SalaryRecord> salaryRecords = salaryRecordRepository.findSalaryRecordsBySalonIdAndYearMonth(salonId, monthAndYear);
+
+        // Map the SalaryRecords to SalaryRecordRequest
+        List<SalaryRecordRequest> responses = salaryRecords.stream()
+                .map(record -> {
+                    SalaryRecordRequest response = new SalaryRecordRequest();
+                    response.setBonusSalary(record.getBonusSalary());
+                    response.setTotalSalary(record.getTotalSalary());
+                    response.setMonthAndYear(record.getMonthAndYear());
+                    response.setStylistId(record.getAccount().getAccountid());
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        return responses;
     }
 }
 
