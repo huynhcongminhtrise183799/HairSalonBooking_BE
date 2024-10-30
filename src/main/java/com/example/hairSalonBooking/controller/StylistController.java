@@ -112,5 +112,12 @@ public class StylistController {
         response.setResult(stylistService.saveSalaryRecords(salaryRecordRequests));
         return response;
     }
-
+@GetMapping("/salaryRecords/{salonId}/{yearAndMonth}")
+    public ApiResponse<SalaryRecordRequest> getSalaryRecords(
+            @PathVariable Long salonId,
+            @PathVariable String yearAndMonth) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(stylistService.getSalaryRecords(salonId, yearAndMonth));
+        return response;
+    }
 }
