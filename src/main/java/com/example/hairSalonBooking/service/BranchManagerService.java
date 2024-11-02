@@ -10,10 +10,7 @@ import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateManagerRequest;
 import com.example.hairSalonBooking.model.request.UpdateManagerRequest;
-import com.example.hairSalonBooking.model.response.BookingPageResponse;
-import com.example.hairSalonBooking.model.response.BookingResponse;
-import com.example.hairSalonBooking.model.response.ManagerResponse;
-import com.example.hairSalonBooking.model.response.ProfileResponse;
+import com.example.hairSalonBooking.model.response.*;
 import com.example.hairSalonBooking.repository.AccountRepository;
 import com.example.hairSalonBooking.repository.BookingRepository;
 import com.example.hairSalonBooking.repository.SalonBranchRepository;
@@ -409,5 +406,21 @@ public class BranchManagerService {
         bookingPageResponse.setContent(pagedResponses);
 
         return bookingPageResponse;
+    }
+
+    public List<ManagerChartCricleResponse> chart(long salonId){
+        long totalStylistInSalon = accountRepository.totalEmployeeByRoleInSalon(salonId, Role.STYLIST.name());
+        long totalStaffInSalon = accountRepository.totalEmployeeByRoleInSalon(salonId, Role.STAFF.name());
+        List<ManagerChartCricleResponse> responses = new ArrayList<>();
+        ManagerChartCricleResponse response = new ManagerChartCricleResponse();
+        response.setName("stylist");
+        response.setValue(Long.toString(totalStylistInSalon));
+        responses.add(response);
+        ManagerChartCricleResponse response1 = new ManagerChartCricleResponse();
+        response1.setName("staff");
+        response1.setValue(Long.toString(totalStaffInSalon));
+        responses.add(response1);
+        return responses;
+
     }
 }

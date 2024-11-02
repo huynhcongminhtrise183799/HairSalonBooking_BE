@@ -50,6 +50,9 @@ public enum ErrorCode {
     SERVICES_ALREADY_BOOKED(1035,"Service already booked"),
     STYLIST_UNAVAILABLE(1036, "Stylist is unavailable"),
 
+    CUSTOMER_DE_ACTIVE(1037, "Account has been blocked"),
+    ACCOUNT_EXIST(1038, "Account already existed")
+
 
     ;
     int code;

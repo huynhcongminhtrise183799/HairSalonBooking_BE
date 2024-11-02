@@ -15,7 +15,8 @@ public class Collections {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long collectionId;
     String collectionImage;
+
     @ManyToOne
-    @JoinColumn(name = "account_id")
-    Account account;
+    @JoinColumn(name = "service_id")
+    SalonService service;
 }

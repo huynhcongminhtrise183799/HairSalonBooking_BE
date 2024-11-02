@@ -18,10 +18,9 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
     @Query(value = "select * from slot",nativeQuery = true)
     Set<Slot> getAllSlot();
 
-    @Query(value = "select * from slot where slot.slottime > ?1\n" +
-            "order by slottime asc\n" +
-            "limit ?2 ",nativeQuery = true)
-    List<Slot> getSlotToRemove(LocalTime time, int limit);
+    @Query(value = "select * from slot where slot.slottime >= ?1 and slot.slottime <= ?2 and slot.deleted = false\n" +
+            "order by slottime asc ",nativeQuery = true)
+    List<Slot> getSlotToRemove(LocalTime time, LocalTime timeFinishBooking);
     @Query(value = "SELECT DISTINCT s.*\n" +
             "FROM slot s\n" +
             "JOIN specific_stylist_schedule sss ON sss.shift_id = ?1\n" +

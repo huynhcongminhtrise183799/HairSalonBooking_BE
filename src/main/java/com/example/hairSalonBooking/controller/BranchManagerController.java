@@ -108,4 +108,11 @@ public class BranchManagerController {
         response.setResult(branchManagerService.getAllBookingsForStylistInBranchByCancel(page, size, branchId, date));
         return response;
     }
+
+    @GetMapping("/manager/chart/{salonId}")
+    public ApiResponse<ManagerChartCricleResponse> getAllBookingsForStylistInBranchByCancel(@PathVariable long salonId) {
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(branchManagerService.chart(salonId));
+        return response;
+    }
 }

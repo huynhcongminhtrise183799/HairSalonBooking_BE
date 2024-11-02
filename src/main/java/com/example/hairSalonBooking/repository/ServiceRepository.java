@@ -41,7 +41,7 @@ public interface ServiceRepository extends JpaRepository<SalonService,Long> {
     Optional<SalonService> findByServiceId(long serviceId);
 
     List<SalonService> findByIsDeleteFalse();
-    List<SalonService> findByServiceNameContaining(String name);
+    List<SalonService> findByServiceNameContainingAndIsDeleteFalse(String name);
     @Query(value = "select ss.* from salon_service ss\n" +
             "inner join booking_detail bd\n" +
             "on ss.service_id = bd.service_id\n" +

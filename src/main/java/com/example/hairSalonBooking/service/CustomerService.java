@@ -60,4 +60,22 @@ public class CustomerService {
         return profileResponse;
     }
 
+    public String deActiveUser(long accountId){
+        Account account  = customerRepository.findAccountByAccountid(accountId);
+        if(account == null){
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
+        }
+        account.setDeleted(true);
+        customerRepository.save(account);
+        return "Delete successfully";
+    }
+    public String activeUser(long accountId){
+        Account account  = customerRepository.findAccountByAccountid(accountId);
+        if(account == null){
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
+        }
+        account.setDeleted(false);
+        customerRepository.save(account);
+        return "Active successfully";
+    }
 }

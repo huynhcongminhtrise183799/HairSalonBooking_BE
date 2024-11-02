@@ -160,7 +160,7 @@ public class BookingService {
                 // lấy ra list các slot booking ko hợp lệ
                 // vd: 8:00:00 bắt đầu và thời gian hoàn thành là 9:30:00 thì
                 // slot bắt đầu 9:00:00 là ko hợp lệ sẽ bị add vào list slotToRemove
-                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
+                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),TimeFinishBooking);
                     slotToRemove.addAll(list); // 9
 
             }
@@ -171,7 +171,7 @@ public class BookingService {
             LocalTime minimunTimeToBooking = slot.getSlottime().minusHours(totalTimeServiceNewBooking.getHour())
                     .minusMinutes(totalTimeServiceNewBooking.getMinute());
             // tìm ra list chứa các slot ko thỏa và add vào list slotToRemove
-            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,totalTimeServiceNewBooking.getHour());
+            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,TimeFinishBooking);
             slotToRemove.addAll(list);
             slotToRemove.add(slot);// 10 11
             // tìm ra list ca làm mà cái booking đó thuộc về
@@ -258,13 +258,15 @@ public class BookingService {
                 // lấy ra list các slot booking ko hợp lệ
                 // vd: 8:00:00 bắt đầu và thời gian hoàn thành là 9:30:00 thì
                 // slot bắt đầu 9:00:00 là ko hợp lệ sẽ bị add vào list slotToRemove
-                if(totalTimeServiceForBooking.getMinute() == 0 ){
-                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour() - 1 );
-                    slotToRemove.addAll(list); // 9
-                }else{
-                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
-                    slotToRemove.addAll(list); // 9
-                }
+//                if(totalTimeServiceForBooking.getMinute() == 0 ){
+//                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour() - 1 );
+//                    slotToRemove.addAll(list); // 9
+//                }else{
+//                    List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),totalTimeServiceForBooking.getHour());
+//                    slotToRemove.addAll(list); // 9
+//                }
+                List<Slot> list = slotRepository.getSlotToRemove(slot.getSlottime(),TimeFinishBooking );
+                slotToRemove.addAll(list);
             }
             // tính ra thời gian
             // vd: slot 10h có ng đặt r, tổng thời gian service cho booking mới là 1h30p
@@ -273,7 +275,7 @@ public class BookingService {
             LocalTime minimunTimeToBooking = slot.getSlottime().minusHours(totalTimeServiceNewBooking.getHour())
                     .minusMinutes(totalTimeServiceNewBooking.getMinute());
             // tìm ra list chứa các slot ko thỏa và add vào list slotToRemove
-            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,totalTimeServiceNewBooking.getHour());
+            List<Slot> list = slotRepository.getSlotToRemove(minimunTimeToBooking,TimeFinishBooking);
             slotToRemove.addAll(list);
             slotToRemove.add(slot);// 10 11
             // tìm ra list ca làm mà cái booking đó thuộc về
@@ -537,17 +539,18 @@ public class BookingService {
         return allShift;
     }
     private List<Slot> getSlotsExperiedTime(LocalTime time,List<Shift> shifts){
-        Shift shift = new Shift();
+        Shift shift = shifts.get(0);
         List<Slot> slotsToRemove = new ArrayList<>();
-        for(Shift s : shifts){
-            shift = s;
-            break;
-        }
+
         List<Slot> slots = slotRepository.getSlotsInShift(shift.getShiftId());
         for(Slot slot : slots){
             LocalTime totalTime = slot.getSlottime().plusHours(time.getHour())
                     .plusMinutes(time.getMinute());
-            if(totalTime.isAfter(shift.getEndTime())){
+            if (totalTime.isBefore(slot.getSlottime())) {
+                // Thời gian totalTime đã vượt qua ngày mới
+                totalTime = totalTime.plusHours(24); // Chuyển totalTime sang ngày mới
+            }
+            if(totalTime.isAfter(shift.getEndTime()) || totalTime.isBefore(slot.getSlottime())){
                 slotsToRemove.add(slot);
             }
         }

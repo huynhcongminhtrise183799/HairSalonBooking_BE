@@ -31,6 +31,10 @@ public class SalonService {
     @JoinColumn(name = "skill_id")
     Skill skill;
 
+    @OneToMany(mappedBy = "service")
+    @JsonIgnore
+    Set<Collections> collections;
+
     @ManyToMany(mappedBy = "services")
     Set<Booking> bookings;
     boolean isDelete = false;

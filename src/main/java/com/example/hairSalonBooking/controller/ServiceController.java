@@ -84,9 +84,11 @@ public class ServiceController {
 
 
     @DeleteMapping("/delete/{serviceId}")
-    String deleteUser(@PathVariable long serviceId) {
-        hairSalonServiceService.deleteService(serviceId);
-        return "service deleted";
+    ApiResponse<String> deleteUser(@PathVariable long serviceId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(hairSalonServiceService.deleteService(serviceId));
+        return apiResponse;
+
     }
     @PutMapping("/update/{serviceId}")
     public ServiceResponse updateService(@PathVariable long serviceId, @RequestBody ServiceUpdateRequest request) {
@@ -112,4 +114,12 @@ public class ServiceController {
         response.setResult(hairSalonServiceService.getNewestService());
         return response;
     }
+
+    @PutMapping("/active/{serviceId}")
+    public ApiResponse<String> updateService(@PathVariable long serviceId) {
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setResult(hairSalonServiceService.activeService(serviceId));
+        return apiResponse;
+    }
+
 }

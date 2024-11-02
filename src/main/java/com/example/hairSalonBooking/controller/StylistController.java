@@ -130,9 +130,9 @@ public class StylistController {
 
 
 
-    @GetMapping("/stylists/{accountId}/revenue")
+    @GetMapping("/stylists/{accountId}/revenue/{yearAndMonth}")
     public ApiResponse<StylistRevenueResponse> getStylistsRevenue(@PathVariable long accountId,
-                                                                  @RequestParam String yearAndMonth) {
+                                                                  @PathVariable String yearAndMonth) {
         ApiResponse<StylistRevenueResponse> apiResponse = new ApiResponse<>();
             // Tính tổng doanh thu cho stylist
         StylistRevenueResponse totalRevenue = stylistService.getStylistRevenue(accountId, yearAndMonth);
@@ -140,9 +140,9 @@ public class StylistController {
             apiResponse.setResult(totalRevenue);
             return apiResponse;
     }
-    @GetMapping("/stylists/{accountId}/feedBack")
+    @GetMapping("/stylists/{accountId}/feedBack/{yearAndMonth}")
     public ApiResponse<StylistFeedBackResponse> getStylistsFeedback(@PathVariable long accountId,
-                                                                  @RequestParam String yearAndMonth) {
+                                                                  @PathVariable String yearAndMonth) {
         ApiResponse<StylistFeedBackResponse> apiResponse = new ApiResponse<>();
         // Tính tổng doanh thu cho stylist
         StylistFeedBackResponse AvgFeedback = stylistService.getStylistFeedback(accountId, yearAndMonth);

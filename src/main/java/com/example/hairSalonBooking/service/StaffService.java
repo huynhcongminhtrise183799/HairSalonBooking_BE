@@ -7,6 +7,7 @@ import com.example.hairSalonBooking.exception.AppException;
 import com.example.hairSalonBooking.exception.ErrorCode;
 import com.example.hairSalonBooking.model.request.CreateStaffRequest;
 import com.example.hairSalonBooking.model.request.StaffCreateBookingRequest;
+import com.example.hairSalonBooking.model.request.StaffCreateCustomerRequest;
 import com.example.hairSalonBooking.model.request.UpdateStaffRequest;
 import com.example.hairSalonBooking.model.response.BookingResponse;
 import com.example.hairSalonBooking.model.response.StaffResponse;
@@ -213,4 +214,20 @@ public class StaffService {
         return responses;
     }
 
+
+    public StaffCreateCustomerRequest staffCreateCustomer(StaffCreateCustomerRequest request){
+        Account account = accountRepository.findByPhone(request.getPhone());
+        if(account != null){
+            throw new AppException(ErrorCode.ACCOUNT_EXIST);
+        }
+        Account newAccount = new Account();
+        newAccount.setPhone(request.getPhone());
+        newAccount.setFullname(request.getFullName());
+        newAccount.setUsername(request.getPhone());
+        newAccount.setPassword(passwordEncoder.encode(request.getPhone()));
+        newAccount.setRole(Role.CUSTOMER);
+        accountRepository.save(newAccount);
+        return request;
+
+    }
 }

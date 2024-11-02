@@ -32,6 +32,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     //ORM  : object realationship mapping
 
     Account findAccountByUsername(String username);
+    Account findAccountByUsernameAndIsDeletedFalse(String username);
     Account findAccountByEmail(String email);
     Account findAccountByAccountid(Long accountid);
     Account findByPhone(String phone);
@@ -95,5 +96,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByIdAndSalonIdAndRole(@Param("stylistId") Long stylistId,
                                                 @Param("salonId") Long salonId,
                                                 @Param("role") Role role);
+
+    @Query(value = "select count(*) from Account a where a.salon_id = ?1 and a.role = ?2",nativeQuery = true)
+    long totalEmployeeByRoleInSalon(long salonId, String role);
+
 }
 

@@ -114,7 +114,7 @@ public List<SlotResponse> updateSlotTime(UpdateSlotRequest request){
             newSlot.setDeleted(false);
             Slot slotAfter = slotRepository.getSlotAfter(newSlot.getSlottime());
             if(slotAfter == null){
-                if(newSlot.getSlottime().isBefore(shift.getEndTime())){
+                if(newSlot.getSlottime().isBefore(shift.getEndTime()) || newSlot.getSlottime().equals(shift.getEndTime())){
                     newListSlot.add(newSlot);
                     LocalTime newEndTime = shift.getEndTime().minusHours(newSlot.getSlottime().getHour()).minusMinutes(newSlot.getSlottime().getMinute());
                     if(request.getTime().isBefore(newEndTime) || request.getTime().equals(newEndTime)){

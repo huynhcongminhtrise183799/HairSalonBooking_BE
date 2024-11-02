@@ -1,6 +1,7 @@
 package com.example.hairSalonBooking.service;
 
 import com.example.hairSalonBooking.entity.Account;
+import com.example.hairSalonBooking.entity.Collections;
 import com.example.hairSalonBooking.entity.SalonService;
 import com.example.hairSalonBooking.entity.Skill;
 import com.example.hairSalonBooking.model.request.CreateServiceRequest;
@@ -12,6 +13,7 @@ import com.example.hairSalonBooking.model.response.ServicePageResponse;
 import com.example.hairSalonBooking.model.response.ServiceResponse;
 import com.example.hairSalonBooking.model.response.StylistForBooking;
 import com.example.hairSalonBooking.repository.AccountRepository;
+import com.example.hairSalonBooking.repository.CollectionsRepository;
 import com.example.hairSalonBooking.repository.ServiceRepository;
 import com.example.hairSalonBooking.repository.SkillRepository;
 import org.modelmapper.ModelMapper;
@@ -36,6 +38,8 @@ public class HairSalonServiceService {
     private SkillRepository skillRepository;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private CollectionsRepository collectionsRepository;
     public ServiceResponse createService(CreateServiceRequest createServiceRequest) {
 
         //SalonService salonService = modelMapper.map(createServiceRequest, SalonService.class);
@@ -47,7 +51,15 @@ public class HairSalonServiceService {
         salonService.setServiceName(createServiceRequest.getServiceName());
         Skill skill = skillRepository.findSkillBySkillId(createServiceRequest.getSkillId());
         salonService.setSkill(skill);
-        serviceRepository.save(salonService);
+        SalonService newService =  serviceRepository.save(salonService);
+        Set<Collections> collections = new HashSet<>();
+        for(String collectionsImage : createServiceRequest.getCollectionsImage()){
+            Collections collections1 = new Collections();
+            collections1.setService(newService);
+            collections1.setCollectionImage(collectionsImage);
+            collections.add(collections1);
+        }
+        collectionsRepository.saveAll(collections);
         ServiceResponse response = new ServiceResponse();
         response.setId(salonService.getServiceId());
         response.setServiceName(salonService.getServiceName());
@@ -75,7 +87,7 @@ public class HairSalonServiceService {
         return responses;
     }
     public List<ServiceResponse> searchServiceByName(SearchServiceNameRequest serviceName) {
-        List<SalonService> services = serviceRepository.findByServiceNameContaining(serviceName.getName());
+        List<SalonService> services = serviceRepository.findByServiceNameContainingAndIsDeleteFalse(serviceName.getName());
         List<ServiceResponse> responses = new ArrayList<>();
         for(SalonService service : services){
             ServiceResponse response = new ServiceResponse();
@@ -91,6 +103,7 @@ public class HairSalonServiceService {
     }
     public ServiceResponse searchServiceId(long serviceId) {
         Optional<SalonService> salonService = serviceRepository.findByServiceId(serviceId);
+        Set<String> collectionsImage = collectionsRepository.getCollectionsImage(salonService.get().getServiceId());
         ServiceResponse response = new ServiceResponse();
         response.setServiceName(salonService.get().getServiceName());
         response.setDescription(salonService.get().getDescription());
@@ -98,23 +111,39 @@ public class HairSalonServiceService {
         response.setDuration(salonService.get().getDuration());
         response.setImage(salonService.get().getImage());
         response.setPrice(salonService.get().getPrice());
+        response.setCollectionsImage(collectionsImage);
         response.setDelete(salonService.get().isDelete());
         return response;
     }
-    public void deleteService(long serviceId) {
+    public String deleteService(long serviceId) {
         SalonService salonService = serviceRepository.getServiceById(serviceId);
         salonService.setDelete(true);
         serviceRepository.save(salonService);
+        return "Delete successfully";
+    }
+    public String activeService(long serviceId) {
+        SalonService salonService = serviceRepository.getServiceById(serviceId);
+        salonService.setDelete(false);
+        serviceRepository.save(salonService);
+        return "Active successfully";
     }
     public ServiceResponse updateService(long ServiceId, ServiceUpdateRequest request){
         SalonService service = serviceRepository.findByServiceId(ServiceId)
                 .orElseThrow(() -> new RuntimeException("Service with ID '" + ServiceId + "' not found"));
+        collectionsRepository.deleteCollectionsService(service.getServiceId());
+        for(String collectionImage : request.getCollectionsImage()){
+            Collections collections = new Collections();
+            collections.setCollectionImage(collectionImage);
+            collections.setService(service);
+            collectionsRepository.save(collections);
+        }
         service.setServiceName(request.getServiceName());
         service.setPrice(request.getPrice());
         service.setDescription(request.getDescription());
         service.setDuration(request.getDuration());
         service.setImage(request.getImage());
         service.setDelete(request.isDelelte());
+
         return modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
     }
 
@@ -123,18 +152,26 @@ public class HairSalonServiceService {
         Page<SalonService> servicePage = serviceRepository.findAll(PageRequest.of(page, size));
 
         Page<ServiceResponse> servicePageResponse = servicePage.map(service ->
-                new ServiceResponse(
-                        service.getServiceId(),
-                        service.getServiceName(),
-                        service.getPrice(),
-                        service.getDescription(),
-                        service.getDuration(),
-                        service.getImage(),
-                        service.getSkill().getSkillName(),
-                        service.isDelete()
-                )
-        );
+                ServiceResponse.builder()
+                        .serviceName(service.getServiceName())
+                        .price(service.getPrice())
+                        .description(service.getDescription())
+                        .duration(service.getDuration())
+                        .image(service.getImage())
+                        .skillName(service.getSkill().getSkillName())
+                        .isDelete(service.isDelete())
+                        .build()
 
+
+        );
+//service.getServiceId(),
+//                        service.getServiceName(),
+//                        service.getPrice(),
+//                        service.getDescription(),
+//                        service.getDuration(),
+//                        service.getImage(),
+//                        service.getSkill().getSkillName(),
+//                        service.isDelete()
         ServicePageResponse servicePageResponseResult = new ServicePageResponse();
         servicePageResponseResult.setPageNumber(servicePageResponse.getNumber());
         servicePageResponseResult.setTotalPages(servicePageResponse.getTotalPages());
