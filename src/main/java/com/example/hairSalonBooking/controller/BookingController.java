@@ -163,4 +163,10 @@ public class BookingController {
         return apiResponse;
     }
 
+    @GetMapping("/booking/count/completed/{yearAndMonth}")
+    public  ApiResponse<Long> countAllBookingsComplete(@PathVariable String yearAndMonth){
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setResult(bookingService.countAllBookingsCompleted(yearAndMonth));
+        return apiResponse;
+    }
 }
