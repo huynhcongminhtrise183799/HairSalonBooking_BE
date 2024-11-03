@@ -1043,4 +1043,11 @@ public class BookingService {
         return "true";
     }
 
+    public Long countAllBookingsCompleted(String yearAndMonth){
+        String arr[] = yearAndMonth.split("-");
+        int year = Integer.parseInt(arr[0]);
+        int month = Integer.parseInt(arr[1]);
+
+        return bookingRepository.countAllBookingsCompleted(year,month);
+    }
 }

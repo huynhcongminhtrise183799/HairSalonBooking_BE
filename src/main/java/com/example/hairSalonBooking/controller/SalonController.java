@@ -62,4 +62,11 @@ public class SalonController {
         response.setResult(salonBranchService.deleteSalon(id));
         return response;
     }
+
+    @PutMapping("/salon/active/{id}")
+    public ApiResponse<SalonResponse> activeSalon(@PathVariable long id){
+        ApiResponse response = new ApiResponse<>();
+        response.setResult(salonBranchService.activeSalon(id));
+        return response;
+    }
 }

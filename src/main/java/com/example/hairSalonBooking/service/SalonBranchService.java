@@ -81,4 +81,14 @@ public class SalonBranchService {
         salonBranchRepository.save(salonBranch);
         return modelMapper.map(salonBranch,SalonResponse.class);
     }
+
+    public SalonResponse activeSalon(long id){
+        SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(id);
+        if(salonBranch == null){
+            throw new AppException(ErrorCode.SALON_NOT_FOUND);
+        }
+        salonBranch.setDelete(false);
+        salonBranchRepository.save(salonBranch);
+        return modelMapper.map(salonBranch,SalonResponse.class);
+    }
 }

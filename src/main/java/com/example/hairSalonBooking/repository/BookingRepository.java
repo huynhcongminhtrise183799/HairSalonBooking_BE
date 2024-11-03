@@ -180,5 +180,9 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     Booking checkBookingStatus(long bookingId);
 
     Booking findBySlotSlotidAndBookingDayAndStylistScheduleStylistScheduleId(long slotId, LocalDate date, long stylistScheduleId);
+
+    @Query(value = "select count(*) from booking b\n" +
+            "where b.status = 'COMPLETED' and year(b.booking_day) = ?1 and month(b.booking_day) =  ?2",nativeQuery = true)
+    long countAllBookingsCompleted(int year, int month);
 }
 
