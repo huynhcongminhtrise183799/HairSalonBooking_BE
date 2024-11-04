@@ -13,4 +13,5 @@ public class StylistRevenueResponse {
     String stylistName;
     int bookingQuantity;
     Double totalRevenue;
+    double bonusPercent;
 }
