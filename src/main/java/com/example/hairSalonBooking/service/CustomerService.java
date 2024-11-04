@@ -82,4 +82,12 @@ public class CustomerService {
     public Long countAllCustomers(){
         return customerRepository.countAllCustomers();
     }
+
+    public String getCustomerByPhoneNumber(String phone){
+        Account account = customerRepository.findByPhone(phone);
+        if(account == null){
+            throw new AppException(ErrorCode.ACCOUNT_Not_Found_Exception);
+        }
+        return account.getFullname();
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.hairSalonBooking.controller;
 
+import com.example.hairSalonBooking.model.request.FindCustomerByPhone;
 import com.example.hairSalonBooking.model.request.UpdateCustomerRequest;
 import com.example.hairSalonBooking.model.response.ApiResponse;
 import com.example.hairSalonBooking.model.response.ProfileResponse;
@@ -36,7 +37,12 @@ public class CustomerController {
         ApiResponse response = new ApiResponse();
         response.setResult(customerService.getProfile());
         return response;
-
+    }
+    @PostMapping("/phone")
+    public ApiResponse<String> getCustomerByPhoneNumber(@RequestBody FindCustomerByPhone findCustomerByPhone){
+        ApiResponse response = new ApiResponse();
+        response.setResult(customerService.getCustomerByPhoneNumber(findCustomerByPhone.getPhone()));
+        return response;
     }
 
     @DeleteMapping("/{accountId}")

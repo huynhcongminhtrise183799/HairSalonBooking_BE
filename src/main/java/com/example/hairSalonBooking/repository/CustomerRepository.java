@@ -10,4 +10,6 @@ public interface CustomerRepository extends JpaRepository<Account,Long> {
 
     @Query(value = "select count(*) from account a where a.role = 'CUSTOMER'",nativeQuery = true)
     long countAllCustomers();
+
+    Account findByPhone(String phone);
 }

@@ -2,7 +2,9 @@ package com.example.hairSalonBooking.repository;
 
 import com.example.hairSalonBooking.entity.Kpi;
 import com.example.hairSalonBooking.entity.Level;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -23,4 +25,10 @@ public interface KpiRepository extends JpaRepository<Kpi, Long> {
     @Query("SELECT MAX(k.revenueFrom) FROM Kpi k JOIN k.level.accounts a WHERE a.accountid = :stylistId AND k.level.levelid = :levelId")
     Double findMaxRevenueByStylistIdAndLevel(@Param("stylistId") Long stylistId, @Param("levelId") Long levelId);
 
+    @Query(value = "delete from kpi where level_id = ?1",nativeQuery = true)
+    @Modifying
+    @Transactional
+    void deleteKpiByLevel(long levelId);
+
+    List<Kpi> findByLevelLevelid(long levelId);
 }
