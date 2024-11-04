@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface KpiRepository extends JpaRepository<Kpi, Long> {
@@ -31,4 +32,15 @@ public interface KpiRepository extends JpaRepository<Kpi, Long> {
     void deleteKpiByLevel(long levelId);
 
     List<Kpi> findByLevelLevelid(long levelId);
+
+    @Query(value = "select k.* from kpi k where k.revenue_from <= ?1 and ?2 <= k.revenue_to " +
+            "and k.level_id = ?3;",nativeQuery = true)
+    Kpi getKpiByRevenueStylistLevel(double revenue, double revenue1, long levelId);
+
+
+    @Query("SELECT k.bonusPercent FROM Kpi k " +
+            "WHERE k.level.levelid = :levelId " +
+            "AND :totalRevenue >= k.revenueFrom " +
+            "AND :totalRevenue <= k.revenueTo")
+    Optional<Double> findBonusPercentageByRevenueAndLevel(long levelId, double totalRevenue);
 }

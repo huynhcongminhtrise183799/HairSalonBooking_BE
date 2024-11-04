@@ -522,14 +522,18 @@ public class StylistService {
         String[] parts = yearAndMonth.split("-");
         int year = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]);
-
+        double bonusPercent = 0 ;
         double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
         int sizeBookings = countBooking(stylistId, yearAndMonth);
-
+        Level stylistLevel = levelRepository.getLevelByStylistId(stylistId);
+        Kpi kpi = kpiRepository.getKpiByRevenueStylistLevel(totalRevenue,totalRevenue,stylistLevel.getLevelid());
         // Lấy thông tin về stylist
         Account name = accountRepository.findAccountByAccountid(stylistId);
         if (name == null) { // Kiểm tra nếu stylist không tồn tại
             throw new AppException(ErrorCode.STYLIST_NOT_FOUND);
+        }
+        if(kpi != null){
+            bonusPercent = kpi.getBonusPercent();
         }
         String stylistName = name.getFullname();
 
@@ -539,6 +543,7 @@ public class StylistService {
                 .stylistName(stylistName)
                 .bookingQuantity(sizeBookings) // Đảm bảo bookingQuantity được định nghĩa trong StylistRevenueResponse
                 .totalRevenue(totalRevenue)
+                .bonusPercent(bonusPercent)
                 .build();
     }
 
@@ -668,14 +673,13 @@ public class StylistService {
             Long stylistId = stylist.getAccountid();
             Long levelId = stylist.getLevel().getLevelid();
 
+            // Calculate total revenue and base salary
             double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
             double baseSalary = stylist.getLevel().getSalary(); // Get the stylist's base salary
-            log.info("Total Revenue for {}: {}, Base Salary: {}", stylist.getFullname(), totalRevenue, baseSalary);
-
-            double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+            Optional<Double> optionalBonusPercentage = kpiRepository.findBonusPercentageByRevenueAndLevel(levelId, totalRevenue);
+            double bonusPercentage = optionalBonusPercentage.orElse(0.0); // mặc định 0%
+            double bonus = baseSalary * bonusPercentage;
             double totalSalary = baseSalary + bonus;
-
-            log.info("Bonus for Stylist {}: {}, Total Salary: {}", stylist.getFullname(), bonus, totalSalary);
 
             SalaryResponse response = new SalaryResponse();
             response.setStylistId(stylist.getAccountid());
@@ -687,30 +691,32 @@ public class StylistService {
 
             salaryResponses.add(response);
         }
-
         return salaryResponses.stream()
                 .sorted(Comparator.comparing(SalaryResponse::getTotalSalary).reversed())
                 .collect(Collectors.toList());
     }
-
     public SalaryResponse calculateTotalSalaryByOneStylist(Long salonId, String yearAndMonth, Long stylistId) {
+        // Fetch the specific stylist by stylist ID and salon ID
         Account stylist = accountRepository.findByIdAndSalonIdAndRole(stylistId, salonId, Role.STYLIST)
-                .orElseThrow(() -> new AppException(ErrorCode.STYLIST_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.STYLIST_NOT_FOUND)); // Handle not found
 
         Long levelId = stylist.getLevel().getLevelid();
         double totalRevenue = calculateTotalRevenue(stylistId, yearAndMonth);
         double baseSalary = stylist.getLevel().getSalary();
-        double bonus = calculateBonus(totalRevenue, baseSalary, levelId);
+        Optional<Double> optionalBonusPercentage = kpiRepository.findBonusPercentageByRevenueAndLevel(levelId, totalRevenue);
+        double bonusPercentage = optionalBonusPercentage.orElse(0.0); // Default to 0% if no match
+        double bonus = baseSalary * bonusPercentage;
         double totalSalary = baseSalary + bonus;
 
         SalaryResponse response = new SalaryResponse();
+        response.setStylistId(stylist.getAccountid());
         response.setStylistName(stylist.getFullname());
         response.setMonth(yearAndMonth);
         response.setSalary(baseSalary);
         response.setBonus(bonus);
         response.setTotalSalary(totalSalary);
 
-        return response;
+        return response; // Return the SalaryResponse for the specific stylist
     }
 
     public List<SalaryRecordRequest> saveSalaryRecords(List<SalaryRecordRequest> salaryRecordRequests) {
