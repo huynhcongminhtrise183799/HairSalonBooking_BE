@@ -54,7 +54,11 @@ public enum ErrorCode {
     ACCOUNT_EXIST(1038, "Account already existed"),
 
     BOOKING_EXIST(1039,"Booking is exist"),
-    STYLIST_SCHEDULE_EXIST(1040,"Stylist already have schedule in this day")
+    STYLIST_SCHEDULE_EXIST(1040,"Stylist already have schedule in this day"),
+    LEVEL_NOT_FOUND(1041, "Level not found"),
+    REVENUE_POSITIVE(1042, "Revenue must greater then 0 "),
+    PERFORMANCE_SCORE_POSITIVE(1042, "Performance score must greater then 0 "),
+    BONUS_POSITIVE(1042, "Bonus percent must greater then 0 ")
     ;
     int code;
     String message;

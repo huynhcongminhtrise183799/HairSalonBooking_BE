@@ -70,7 +70,7 @@ public class StylistScheduleService {
     }
 
     public SpecificStylistScheduleResponse updateStylistSchedule(long id, SpecificStylistScheduleRequest request){
-        bookingByShiftNotWorking = new ArrayList<>();
+
         StylistSchedule schedule = stylistScheduleRepository.findByStylistScheduleId(id);
         Set<Shift> shifts = new HashSet<>();
         for(Long shiftId : request.getShiftId()){
