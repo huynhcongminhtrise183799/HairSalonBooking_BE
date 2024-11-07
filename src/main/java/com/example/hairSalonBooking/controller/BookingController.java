@@ -136,7 +136,7 @@ public class BookingController {
 
 
     @PutMapping("/update/service/{bookingId}")
-    public ApiResponse<Booking> updateService(@PathVariable Long bookingId, @RequestBody BookingRequest request) {
+    public ApiResponse<BookingRequest> updateService(@PathVariable Long bookingId, @RequestBody BookingRequest request) {
         ApiResponse apiResponse = new ApiResponse<>();
         apiResponse.setResult(bookingService.updateBookingWithService(bookingId, request.getServiceId()));
         return apiResponse;
