@@ -158,7 +158,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     List<Booking> findBookingByStylistId(@Param("stylistId") Long stylistId);
     @Query("SELECT b FROM Booking b " +
             "JOIN b.stylistSchedule ss " +
-            "WHERE ss.account.accountid = :stylistId " +
+            "WHERE ss.account.accountid = :stylistId AND b.status = 'COMPLETED'" +
             "AND FUNCTION('YEAR', b.bookingDay) = :year " +
             "AND FUNCTION('MONTH', b.bookingDay) = :month")
     List<Booking> findBookingByStylistIdAndMonthYear(@Param("stylistId") Long stylistId,
@@ -179,7 +179,13 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             "where p.payment_status = 'Completed' and b.booking_id = ?1",nativeQuery = true)
     Booking checkBookingStatus(long bookingId);
 
-    Booking findBySlotSlotidAndBookingDayAndStylistScheduleStylistScheduleId(long slotId, LocalDate date, long stylistScheduleId);
+    @Query(value = "select b.* from booking b\n" +
+            "inner join slot s \n" +
+            "on b.slot_id = s.slotid\n" +
+            "inner join stylist_schedule ss\n" +
+            "on b.stylist_schedule_id = ss.stylist_schedule_id\n" +
+            "where s.slotid = ?1 and b.booking_day = ?2 and ss.stylist_schedule_id = ?3 and b.status != 'CANCELLED'",nativeQuery = true)
+    Booking getBySlotSlotidAndBookingDayAndStylistScheduleStylistScheduleId(long slotId, LocalDate date, long stylistScheduleId);
 
     @Query(value = "select count(*) from booking b\n" +
             "where b.status = 'COMPLETED' and year(b.booking_day) = ?1 and month(b.booking_day) =  ?2",nativeQuery = true)

@@ -4,6 +4,8 @@ import com.example.hairSalonBooking.entity.Booking;
 
 import com.example.hairSalonBooking.enums.BookingStatus;
 
+import com.example.hairSalonBooking.model.request.ChangeStylist;
+import com.example.hairSalonBooking.model.request.CreateNewBookingSuccess;
 import com.example.hairSalonBooking.model.request.MailBody;
 
 import com.example.hairSalonBooking.model.request.ReminderBooking;
@@ -68,6 +70,49 @@ public class EmailService {
             mimeMessageHelper.setTo(reminderBooking.getTo());
             mimeMessageHelper.setText(template,true);
             mimeMessageHelper.setSubject(reminderBooking.getSubject());
+            javaMailSender.send(mimeMessage);
+        }catch (MessagingException exception){
+            System.out.println("Can't not send email");
+
+        }
+    }
+    public void sendMailInformBookingSuccess(CreateNewBookingSuccess createNewBookingSuccess){
+        try {
+            Context context = new Context();
+            context.setVariable("name",createNewBookingSuccess.getTo());
+            context.setVariable("date",createNewBookingSuccess.getDate());
+            context.setVariable("stylistName",createNewBookingSuccess.getStylistName());
+            context.setVariable("time",createNewBookingSuccess.getTime());
+            context.setVariable("address",createNewBookingSuccess.getSalonAddress());
+            String template = templateEngine.process("CreateNewBooking",context);
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+            mimeMessageHelper.setFrom("fsalon391@gmail.com");
+            mimeMessageHelper.setTo(createNewBookingSuccess.getTo());
+            mimeMessageHelper.setText(template,true);
+            mimeMessageHelper.setSubject(createNewBookingSuccess.getSubject());
+            javaMailSender.send(mimeMessage);
+        }catch (MessagingException exception){
+            System.out.println("Can't not send email");
+
+        }
+    }
+
+    public void sendMailChangeStylist(ChangeStylist request){
+        try {
+            Context context = new Context();
+            context.setVariable("name",request.getTo());
+            context.setVariable("date",request.getDate());
+            context.setVariable("stylistName",request.getStylistName());
+            context.setVariable("time",request.getTime());
+            context.setVariable("address",request.getSalonAddress());
+            String template = templateEngine.process("ChangeStylist",context);
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+            mimeMessageHelper.setFrom("fsalon391@gmail.com");
+            mimeMessageHelper.setTo(request.getTo());
+            mimeMessageHelper.setText(template,true);
+            mimeMessageHelper.setSubject(request.getSubject());
             javaMailSender.send(mimeMessage);
         }catch (MessagingException exception){
             System.out.println("Can't not send email");

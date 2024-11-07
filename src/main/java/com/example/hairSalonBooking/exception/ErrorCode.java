@@ -58,7 +58,8 @@ public enum ErrorCode {
     LEVEL_NOT_FOUND(1041, "Level not found"),
     REVENUE_POSITIVE(1042, "Revenue must greater then 0 "),
     PERFORMANCE_SCORE_POSITIVE(1042, "Performance score must greater then 0 "),
-    BONUS_POSITIVE(1042, "Bonus percent must greater then 0 ")
+    BONUS_POSITIVE(1042, "Bonus percent must greater then 0 "),
+    SLOT_NOT_VALID(1043,"Slot is not valid");
     ;
     int code;
     String message;

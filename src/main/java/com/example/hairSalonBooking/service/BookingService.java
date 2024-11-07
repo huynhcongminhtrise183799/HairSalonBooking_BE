@@ -12,12 +12,15 @@ import com.example.hairSalonBooking.repository.*;
 
 import com.example.hairSalonBooking.model.response.*;
 
+import com.google.firebase.database.core.view.Change;
+import io.grpc.internal.ServiceConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.sql.Update;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -64,6 +67,8 @@ public class BookingService {
     private StylistService stylistService;
     @Autowired
     private StylistScheduleService stylistScheduleService;
+    @Autowired
+    private EmailService emailService;
     public Set<StylistForBooking> getStylistForBooking(BookingStylits bookingStylits){
         // tao 1 danh sach skills rong
         Set<Skill> skills = new HashSet<>();
@@ -398,13 +403,29 @@ public class BookingService {
             services.add(service);
         }
         Slot slot = slotRepository.findSlotBySlotid(request.getSlotId());
+        BookingSlots bookingSlots = new BookingSlots();
+        bookingSlots.setServiceId(request.getServiceId());
+        bookingSlots.setDate(request.getBookingDate());
+        bookingSlots.setSalonId(request.getSalonId());
+        bookingSlots.setAccountId(request.getStylistId());
+        List<Slot> slotAvailable = getListSlot(bookingSlots);
+        int count = 0 ;
+        for(Slot s : slotAvailable){
+            if(s.getSlotid() == request.getSlotId()){
+                count++;
+            }
+        }
+        if(count == 0){
+            throw new AppException(ErrorCode.SLOT_NOT_VALID);
+
+        }
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         Voucher voucher = voucherRepository.findVoucherByVoucherId(request.getVoucherId());
         if(voucher != null){
             voucher.setQuantity(voucher.getQuantity() - 1 );
         }
         StylistSchedule stylistSchedule = stylistScheduleRepository.getScheduleId(request.getStylistId(), request.getBookingDate());
-        Booking checkBookingExist = bookingRepository.findBySlotSlotidAndBookingDayAndStylistScheduleStylistScheduleId(slot.getSlotid(),request.getBookingDate(),stylistSchedule.getStylistScheduleId());
+        Booking checkBookingExist = bookingRepository.getBySlotSlotidAndBookingDayAndStylistScheduleStylistScheduleId(slot.getSlotid(),request.getBookingDate(),stylistSchedule.getStylistScheduleId());
         if(checkBookingExist != null){
             throw new AppException(ErrorCode.BOOKING_EXIST);
         }
@@ -421,6 +442,18 @@ public class BookingService {
         for(SalonService service : services){
             bookingRepository.updateBookingDetail(service.getPrice(),newBooking.getBookingId(),service.getServiceId());
         }
+        Account currentAccount = currentAccount();
+        if(currentAccount.getRole().equals(Role.CUSTOMER)){
+            CreateNewBookingSuccess success = new CreateNewBookingSuccess();
+            success.setDate(booking.getBookingDay());
+            success.setTime(booking.getSlot().getSlottime());
+            success.setTo(currentAccount().getEmail());
+            success.setSubject("Create booking successfully");
+            success.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+            success.setSalonAddress(booking.getSalonBranch().getAddress());
+
+            emailService.sendMailInformBookingSuccess(success);
+        }
         return request;
     }
     public BookingRequest updateBooking(long bookingId,BookingRequest request){
@@ -433,6 +466,22 @@ public class BookingService {
             services.add(service);
         }
         Slot slot = slotRepository.findSlotBySlotid(request.getSlotId());
+        BookingSlots bookingSlots = new BookingSlots();
+        bookingSlots.setServiceId(request.getServiceId());
+        bookingSlots.setDate(request.getBookingDate());
+        bookingSlots.setSalonId(request.getSalonId());
+        bookingSlots.setAccountId(request.getStylistId());
+        List<Slot> slotAvailable = getListSlot(bookingSlots);
+        int count = 0 ;
+        for(Slot s : slotAvailable){
+            if(s.getSlotid() == request.getSlotId()){
+                count++;
+            }
+        }
+        if(count == 0){
+            throw new AppException(ErrorCode.SLOT_NOT_VALID);
+
+        }
         SalonBranch salonBranch = salonBranchRepository.findSalonBranchBySalonId(request.getSalonId());
         if(booking.getVoucher() != null){
             Voucher oldVoucher = voucherRepository.findVoucherByVoucherId(booking.getVoucher().getVoucherId());
@@ -455,12 +504,27 @@ public class BookingService {
         for(SalonService service : services){
             bookingRepository.updateBookingDetail(service.getPrice(),booking.getBookingId(),service.getServiceId());
         }
+        Booking bookingToRemove = new Booking();
         if(!stylistScheduleService.bookingByShiftNotWorking.isEmpty()){
             for(Booking booking1 : stylistScheduleService.bookingByShiftNotWorking){
                 if(booking.getBookingId() == booking1.getBookingId()){
-                    stylistScheduleService.bookingByShiftNotWorking.remove(booking1);
+                    bookingToRemove = booking1;
+                    break;
                 }
             }
+        }
+        stylistScheduleService.bookingByShiftNotWorking.remove(bookingToRemove);
+        Account currentAccount = currentAccount();
+        if(currentAccount.getRole().equals(Role.BRANCH_MANAGER)){
+            ChangeStylist success = new ChangeStylist();
+            success.setDate(booking.getBookingDay());
+            success.setTime(booking.getSlot().getSlottime());
+            success.setTo(booking.getAccount().getEmail());
+            success.setSubject("Change Stylist");
+            success.setStylistName(booking.getStylistSchedule().getAccount().getFullname());
+            success.setSalonAddress(booking.getSalonBranch().getAddress());
+            emailService.sendMailChangeStylist(success);
+            System.out.println("Send thanh cong o service");
         }
         return request;
     }
@@ -1049,5 +1113,11 @@ public class BookingService {
         int month = Integer.parseInt(arr[1]);
 
         return bookingRepository.countAllBookingsCompleted(year,month);
+    }
+
+    private Account currentAccount(){
+        var context = SecurityContextHolder.getContext();
+        Account account = (Account) context.getAuthentication().getPrincipal();
+        return account;
     }
 }
